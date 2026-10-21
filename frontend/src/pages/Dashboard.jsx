@@ -22,6 +22,7 @@ const RECOVERY_MONITOR_URL = `${RECOVERY_MONITOR_BASE_URL}/api/recovery`;
 const navigation = [
   { label: "Overview", icon: LayoutDashboard, href: "#overview" },
   { label: "Service Health", icon: Server, href: "#service-health" },
+  { label: "Dependency Map", icon: Workflow, href: "#dependency-map" },
   { label: "Incidents", icon: AlertTriangle, href: "#incidents" },
   { label: "Recovery Analytics", icon: Activity, href: "#recovery-analytics" },
   { label: "Recovery Metrics", icon: Workflow, href: "#recovery-metrics" },
