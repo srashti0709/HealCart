@@ -74,25 +74,61 @@ export default function Checkout() {
                 })),
             });
 
-            if (!response.data.success || !response.data.order?._id) {
+            const backendData = response.data || {};
+            const isPendingPayment =
+                backendData.paymentStatus === "unknown" ||
+                backendData.paymentStatus === "pending" ||
+                /verify.*payment|Do not retry checkout|being verified|uncertain/i.test(
+                    backendData.message || ""
+                );
+
+            if (backendData.success === false && isPendingPayment) {
+                setOrderResult({
+                    orderId: backendData.orderId || backendData.order?._id || null,
+                    message: backendData.message || "Payment is being verified. Do not retry checkout or pay again yet.",
+                    pending: true,
+                });
+                setError("");
+                return;
+            }
+
+            if (!backendData.success || !backendData.order?._id) {
                 throw new Error("The server did not confirm your order.");
             }
 
             localStorage.removeItem("shcomCart");
 
-            setRecoveryResult(response.data.recovery || null);
+            setRecoveryResult(backendData.recovery || null);
 
             setOrderResult({
-                orderId: response.data.order._id,
-                transactionId: response.data.payment?.transactionId,
-                message: response.data.message,
+                orderId: backendData.order._id,
+                transactionId: backendData.payment?.transactionId,
+                message: backendData.message,
+                pending: false,
             });
         } catch (err) {
-            setError(
+            const backendMessage =
                 err.response?.data?.message ||
                 err.message ||
-                "Checkout failed. Please check your order status before retrying."
-            );
+                "Checkout failed. Please check your order status before retrying.";
+
+            const paymentIsUnknown =
+                err.response?.data?.paymentStatus === "unknown" ||
+                /verify.*payment|Do not retry checkout|being verified|uncertain/i.test(
+                    backendMessage
+                );
+
+            if (paymentIsUnknown) {
+                setOrderResult({
+                    orderId: err.response?.data?.orderId || null,
+                    message: backendMessage,
+                    pending: true,
+                });
+                setError("");
+                return;
+            }
+
+            setError(backendMessage);
         } finally {
             setProcessing(false);
         }
@@ -236,23 +272,51 @@ export default function Checkout() {
                         </p>
                     )}
                     {orderResult && (
-                        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-900">
-                            <h3 className="font-bold">Order placed successfully!</h3>
+                        <div
+                            className={`rounded-xl border p-4 ${orderResult.pending
+                                ? "border-amber-200 bg-amber-50 text-amber-900"
+                                : "border-emerald-200 bg-emerald-50 text-emerald-900"
+                            }`}
+                        >
+                            <h3 className="font-bold">
+                                {orderResult.pending
+                                    ? "Payment verification in progress"
+                                    : "Order placed successfully!"}
+                            </h3>
                             <p className="mt-2 text-sm">{orderResult.message}</p>
-                            <p className="mt-2 break-all text-sm">
-                                Order ID: {orderResult.orderId}
-                            </p>
+                            {orderResult.orderId && (
+                                <p className="mt-2 break-all text-sm">
+                                    Order ID: {orderResult.orderId}
+                                </p>
+                            )}
                             {orderResult.transactionId && (
                                 <p className="mt-1 break-all text-sm">
                                     Transaction ID: {orderResult.transactionId}
                                 </p>
                             )}
-                            <Link
-                                to="/"
-                                className="mt-4 inline-flex font-semibold underline"
-                            >
-                                Continue shopping
-                            </Link>
+                            {orderResult.pending ? (
+                                <div className="mt-4 flex flex-wrap gap-3">
+                                    <Link
+                                        to="/orders"
+                                        className="inline-flex font-semibold underline"
+                                    >
+                                        Check existing order
+                                    </Link>
+                                    <Link
+                                        to="/"
+                                        className="inline-flex font-semibold underline"
+                                    >
+                                        Continue shopping
+                                    </Link>
+                                </div>
+                            ) : (
+                                <Link
+                                    to="/"
+                                    className="mt-4 inline-flex font-semibold underline"
+                                >
+                                    Continue shopping
+                                </Link>
+                            )}
                         </div>
                     )}
                     {recoveryResult && (
@@ -314,7 +378,9 @@ export default function Checkout() {
                         <CreditCard size={18} />
                         {processing
                             ? "Processing payment..."
-                            : "Place order & pay"}
+                            : orderResult?.pending
+                                ? "Check order status"
+                                : "Place order & pay"}
                     </button>
                 </form>
             </main>
