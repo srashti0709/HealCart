@@ -1,7 +1,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { API_BASE_URL } from "../config/api";
+import { API_BASE_URL, RECOVERY_MONITOR_URL as RECOVERY_MONITOR_BASE_URL, CHAOS_CONTROLLER_URL } from "../config/api";
+import ServiceDependencyMap from "../components/ServiceDependencyMap";
 import { Link } from "react-router-dom";
 import {
   Activity,
@@ -15,8 +16,7 @@ import {
   Workflow,
 } from "lucide-react";
 
-const RECOVERY_MONITOR_URL = "http://localhost:5002/api/recovery";
-const CHAOS_CONTROLLER_URL = "http://localhost:5003";
+const RECOVERY_MONITOR_URL = `${RECOVERY_MONITOR_BASE_URL}/api/recovery`;
 
 
 const navigation = [
@@ -821,6 +821,12 @@ function Dashboard() {
             </div>
           </section>
 
+
+          <ServiceDependencyMap
+            incidents={incidents}
+            experimentHistory={experimentHistory}
+            recoveryInfo={recoveryInfo}
+          />
 
           <section
             id="incidents"
