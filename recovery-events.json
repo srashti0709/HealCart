@@ -1,0 +1,152 @@
+[
+  {
+    "type": "recovered",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-21T08:39:20.705Z"
+  },
+  {
+    "type": "recovered",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-21T08:39:15.000Z"
+  },
+  {
+    "type": "crash",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-21T08:39:14.000Z"
+  },
+  {
+    "type": "database-recovered",
+    "message": "MongoDB connection restored successfully.",
+    "timestamp": "2026-10-21T08:34:47.919Z"
+  },
+  {
+    "type": "database-disconnected",
+    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "timestamp": "2026-10-21T08:34:47.918Z"
+  },
+  {
+    "type": "database-recovered",
+    "message": "MongoDB connection restored successfully.",
+    "timestamp": "2026-10-21T08:34:47.913Z"
+  },
+  {
+    "type": "database-disconnected",
+    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "timestamp": "2026-10-21T08:34:47.853Z"
+  },
+  {
+    "type": "database-recovered",
+    "message": "MongoDB connection restored successfully.",
+    "timestamp": "2026-10-21T08:34:47.319Z"
+  },
+  {
+    "type": "database-disconnected",
+    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "timestamp": "2026-10-21T08:34:47.290Z"
+  },
+  {
+    "type": "database-recovered",
+    "message": "MongoDB connection restored successfully.",
+    "timestamp": "2026-10-21T08:34:40.722Z"
+  },
+  {
+    "type": "database-disconnected",
+    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "timestamp": "2026-10-21T08:34:37.103Z"
+  },
+  {
+    "type": "database-recovered",
+    "message": "MongoDB connection restored successfully.",
+    "timestamp": "2026-10-21T08:34:37.092Z"
+  },
+  {
+    "type": "database-disconnected",
+    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "timestamp": "2026-10-21T08:34:37.038Z"
+  },
+  {
+    "type": "database-recovered",
+    "message": "MongoDB connection restored successfully.",
+    "timestamp": "2026-10-21T08:34:37.015Z"
+  },
+  {
+    "type": "database-disconnected",
+    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "timestamp": "2026-10-21T08:34:37.013Z"
+  },
+  {
+    "type": "database-recovered",
+    "message": "MongoDB connection restored successfully.",
+    "timestamp": "2026-10-21T08:18:25.545Z"
+  },
+  {
+    "type": "database-disconnected",
+    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "timestamp": "2026-10-21T08:18:20.953Z"
+  },
+  {
+    "type": "recovered",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-21T08:00:08.131Z"
+  },
+  {
+    "type": "recovered",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-21T08:00:02.000Z"
+  },
+  {
+    "type": "crash",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-21T08:00:01.000Z"
+  },
+  {
+    "type": "recovered",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-21T07:10:16.660Z"
+  },
+  {
+    "type": "recovered",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-21T07:10:12.000Z"
+  },
+  {
+    "type": "crash",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-21T07:10:11.000Z"
+  },
+  {
+    "type": "recovered",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-21T05:36:39.770Z"
+  },
+  {
+    "type": "recovered",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-21T05:36:34.000Z"
+  },
+  {
+    "type": "crash",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-21T05:36:33.000Z"
+  },
+  {
+    "type": "recovered",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-21T05:36:24.153Z"
+  },
+  {
+    "type": "recovered",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-21T05:36:18.000Z"
+  },
+  {
+    "type": "crash",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-21T05:36:18.000Z"
+  },
+  {
+    "type": "recovered",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-21T05:36:01.615Z"
+  }
+]

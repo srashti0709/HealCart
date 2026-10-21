@@ -1,0 +1,1292 @@
+[
+  {
+    "id": "exp-1792480362504",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T07:12:42.504Z"
+  },
+  {
+    "id": "exp-1792498097391",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T12:08:17.391Z"
+  },
+  {
+    "id": "exp-1792498202237",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T12:10:02.237Z"
+  },
+  {
+    "id": "exp-1792502854872",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T13:27:34.872Z"
+  },
+  {
+    "id": "exp-1792503609891",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T13:40:09.892Z"
+  },
+  {
+    "id": "exp-1792505761345",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T14:16:01.345Z"
+  },
+  {
+    "id": "exp-1792512201754",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T16:03:21.754Z"
+  },
+  {
+    "id": "exp-1792512287840",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T16:04:47.840Z"
+  },
+  {
+    "id": "exp-1792513103427",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T16:18:23.427Z"
+  },
+  {
+    "id": "exp-1792513288965",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T16:21:28.966Z"
+  },
+  {
+    "id": "exp-1792513373354",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T16:22:53.354Z"
+  },
+  {
+    "id": "exp-1792513451050",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 0,
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-20T16:24:11.050Z"
+  },
+  {
+    "id": "exp-1792513524751",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 0,
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-20T16:25:24.751Z"
+  },
+  {
+    "id": "exp-1792513535345",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 0,
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-20T16:25:35.345Z"
+  },
+  {
+    "id": "exp-1792514206553",
+    "scenario": "database-recovery",
+    "status": "passed",
+    "message": "Database recovered successfully and a database-backed read succeeded.",
+    "recovery": {
+      "success": true,
+      "scenario": "database-recovery",
+      "message": "Database recovered successfully and a database-backed read succeeded.",
+      "recovered": true,
+      "database": "connected",
+      "status": "healthy",
+      "durationMs": 4180,
+      "stages": [
+        {
+          "stage": "started",
+          "status": "pending",
+          "timestamp": "2026-10-20T16:36:42.002Z",
+          "message": "Database recovery experiment started."
+        },
+        {
+          "stage": "disconnect-simulated",
+          "status": "passed",
+          "timestamp": "2026-10-20T16:36:42.372Z",
+          "message": "Database disconnect simulated without deleting or modifying data."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T16:36:42.376Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T16:36:43.412Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T16:36:44.436Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T16:36:45.466Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "verified",
+          "status": "passed",
+          "timestamp": "2026-10-20T16:36:46.552Z",
+          "message": "Database probe succeeded after reconnect."
+        }
+      ],
+      "timestamp": "2026-10-20T16:36:46.552Z"
+    },
+    "stages": [
+      {
+        "stage": "started",
+        "status": "pending",
+        "timestamp": "2026-10-20T16:36:42.002Z",
+        "message": "Database recovery experiment started."
+      },
+      {
+        "stage": "disconnect-simulated",
+        "status": "passed",
+        "timestamp": "2026-10-20T16:36:42.372Z",
+        "message": "Database disconnect simulated without deleting or modifying data."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T16:36:42.376Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T16:36:43.412Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T16:36:44.436Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T16:36:45.466Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "verified",
+        "status": "passed",
+        "timestamp": "2026-10-20T16:36:46.552Z",
+        "message": "Database probe succeeded after reconnect."
+      }
+    ],
+    "completedAt": "2026-10-20T16:36:46.553Z"
+  },
+  {
+    "id": "exp-1792514245729",
+    "scenario": "database-recovery",
+    "status": "passed",
+    "message": "Database recovered successfully and a database-backed read succeeded.",
+    "recovery": {
+      "success": true,
+      "scenario": "database-recovery",
+      "message": "Database recovered successfully and a database-backed read succeeded.",
+      "recovered": true,
+      "database": "connected",
+      "status": "healthy",
+      "durationMs": 4162,
+      "stages": [
+        {
+          "stage": "started",
+          "status": "pending",
+          "timestamp": "2026-10-20T16:37:21.554Z",
+          "message": "Database recovery experiment started."
+        },
+        {
+          "stage": "disconnect-simulated",
+          "status": "passed",
+          "timestamp": "2026-10-20T16:37:21.566Z",
+          "message": "Database disconnect simulated without deleting or modifying data."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T16:37:21.570Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T16:37:22.600Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T16:37:23.629Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T16:37:24.652Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "verified",
+          "status": "passed",
+          "timestamp": "2026-10-20T16:37:25.728Z",
+          "message": "Database probe succeeded after reconnect."
+        }
+      ],
+      "timestamp": "2026-10-20T16:37:25.728Z"
+    },
+    "stages": [
+      {
+        "stage": "started",
+        "status": "pending",
+        "timestamp": "2026-10-20T16:37:21.554Z",
+        "message": "Database recovery experiment started."
+      },
+      {
+        "stage": "disconnect-simulated",
+        "status": "passed",
+        "timestamp": "2026-10-20T16:37:21.566Z",
+        "message": "Database disconnect simulated without deleting or modifying data."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T16:37:21.570Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T16:37:22.600Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T16:37:23.629Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T16:37:24.652Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "verified",
+        "status": "passed",
+        "timestamp": "2026-10-20T16:37:25.728Z",
+        "message": "Database probe succeeded after reconnect."
+      }
+    ],
+    "completedAt": "2026-10-20T16:37:25.729Z"
+  },
+  {
+    "id": "exp-1792514256954",
+    "scenario": "database-recovery",
+    "status": "passed",
+    "message": "Database recovered successfully and a database-backed read succeeded.",
+    "recovery": {
+      "success": true,
+      "scenario": "database-recovery",
+      "message": "Database recovered successfully and a database-backed read succeeded.",
+      "recovered": true,
+      "database": "connected",
+      "status": "healthy",
+      "durationMs": 3125,
+      "stages": [
+        {
+          "stage": "started",
+          "status": "pending",
+          "timestamp": "2026-10-20T16:37:33.811Z",
+          "message": "Database recovery experiment started."
+        },
+        {
+          "stage": "disconnect-simulated",
+          "status": "passed",
+          "timestamp": "2026-10-20T16:37:33.827Z",
+          "message": "Database disconnect simulated without deleting or modifying data."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T16:37:33.830Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T16:37:34.852Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T16:37:35.864Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "verified",
+          "status": "passed",
+          "timestamp": "2026-10-20T16:37:36.952Z",
+          "message": "Database probe succeeded after reconnect."
+        }
+      ],
+      "timestamp": "2026-10-20T16:37:36.952Z"
+    },
+    "stages": [
+      {
+        "stage": "started",
+        "status": "pending",
+        "timestamp": "2026-10-20T16:37:33.811Z",
+        "message": "Database recovery experiment started."
+      },
+      {
+        "stage": "disconnect-simulated",
+        "status": "passed",
+        "timestamp": "2026-10-20T16:37:33.827Z",
+        "message": "Database disconnect simulated without deleting or modifying data."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T16:37:33.830Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T16:37:34.852Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T16:37:35.864Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "verified",
+        "status": "passed",
+        "timestamp": "2026-10-20T16:37:36.952Z",
+        "message": "Database probe succeeded after reconnect."
+      }
+    ],
+    "completedAt": "2026-10-20T16:37:36.954Z"
+  },
+  {
+    "id": "exp-1792516222149",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 0,
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-20T17:10:22.149Z"
+  },
+  {
+    "id": "exp-1792517493519",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 0,
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-20T17:31:33.519Z"
+  },
+  {
+    "id": "exp-1792517812316",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T17:36:52.317Z"
+  },
+  {
+    "id": "exp-1792518193583",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T17:43:13.583Z"
+  },
+  {
+    "id": "exp-1792518290972",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T17:44:50.972Z"
+  },
+  {
+    "id": "exp-1792518306489",
+    "scenario": "database-recovery",
+    "status": "passed",
+    "message": "Database recovered successfully and a database-backed read succeeded.",
+    "recovery": {
+      "success": true,
+      "scenario": "database-recovery",
+      "message": "Database recovered successfully and a database-backed read succeeded.",
+      "recovered": true,
+      "database": "connected",
+      "status": "healthy",
+      "durationMs": 4140,
+      "stages": [
+        {
+          "stage": "started",
+          "status": "pending",
+          "timestamp": "2026-10-20T17:45:02.293Z",
+          "message": "Database recovery experiment started."
+        },
+        {
+          "stage": "disconnect-simulated",
+          "status": "passed",
+          "timestamp": "2026-10-20T17:45:02.347Z",
+          "message": "Database disconnect simulated without deleting or modifying data."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T17:45:02.359Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T17:45:03.378Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T17:45:04.399Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T17:45:05.416Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "verified",
+          "status": "passed",
+          "timestamp": "2026-10-20T17:45:06.487Z",
+          "message": "Database probe succeeded after reconnect."
+        }
+      ],
+      "timestamp": "2026-10-20T17:45:06.488Z"
+    },
+    "stages": [
+      {
+        "stage": "started",
+        "status": "pending",
+        "timestamp": "2026-10-20T17:45:02.293Z",
+        "message": "Database recovery experiment started."
+      },
+      {
+        "stage": "disconnect-simulated",
+        "status": "passed",
+        "timestamp": "2026-10-20T17:45:02.347Z",
+        "message": "Database disconnect simulated without deleting or modifying data."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T17:45:02.359Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T17:45:03.378Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T17:45:04.399Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T17:45:05.416Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "verified",
+        "status": "passed",
+        "timestamp": "2026-10-20T17:45:06.487Z",
+        "message": "Database probe succeeded after reconnect."
+      }
+    ],
+    "completedAt": "2026-10-20T17:45:06.489Z"
+  },
+  {
+    "id": "exp-1792518376652",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T17:46:16.653Z"
+  },
+  {
+    "id": "exp-1792518622641",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T17:50:22.641Z"
+  },
+  {
+    "id": "exp-1792518684649",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T17:51:24.649Z"
+  },
+  {
+    "id": "exp-1792518749932",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-20T17:52:29.932Z"
+  },
+  {
+    "id": "exp-1792518993303",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully and health checks passed.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 1,
+      "startedAt": "2026-10-20T17:56:29.239755746Z",
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-20T17:56:33.303Z"
+  },
+  {
+    "id": "exp-1792519093785",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully and health checks passed.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 2,
+      "startedAt": "2026-10-20T17:58:09.841804473Z",
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-20T17:58:13.785Z"
+  },
+  {
+    "id": "exp-1792519359656",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully and health checks passed.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 3,
+      "startedAt": "2026-10-20T18:02:33.456325852Z",
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-20T18:02:39.656Z"
+  },
+  {
+    "id": "exp-1792519366908",
+    "scenario": "database-recovery",
+    "status": "passed",
+    "message": "Database recovered successfully and a database-backed read succeeded.",
+    "recovery": {
+      "success": true,
+      "scenario": "database-recovery",
+      "message": "Database recovered successfully and a database-backed read succeeded.",
+      "recovered": true,
+      "database": "connected",
+      "status": "healthy",
+      "durationMs": 4275,
+      "stages": [
+        {
+          "stage": "started",
+          "status": "pending",
+          "timestamp": "2026-10-20T18:02:42.586Z",
+          "message": "Database recovery experiment started."
+        },
+        {
+          "stage": "disconnect-simulated",
+          "status": "passed",
+          "timestamp": "2026-10-20T18:02:42.631Z",
+          "message": "Database disconnect simulated without deleting or modifying data."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T18:02:42.637Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T18:02:43.668Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T18:02:44.693Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-20T18:02:45.720Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "verified",
+          "status": "passed",
+          "timestamp": "2026-10-20T18:02:46.906Z",
+          "message": "Database probe succeeded after reconnect."
+        }
+      ],
+      "timestamp": "2026-10-20T18:02:46.906Z"
+    },
+    "stages": [
+      {
+        "stage": "started",
+        "status": "pending",
+        "timestamp": "2026-10-20T18:02:42.586Z",
+        "message": "Database recovery experiment started."
+      },
+      {
+        "stage": "disconnect-simulated",
+        "status": "passed",
+        "timestamp": "2026-10-20T18:02:42.631Z",
+        "message": "Database disconnect simulated without deleting or modifying data."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T18:02:42.637Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T18:02:43.668Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T18:02:44.693Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-20T18:02:45.720Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "verified",
+        "status": "passed",
+        "timestamp": "2026-10-20T18:02:46.906Z",
+        "message": "Database probe succeeded after reconnect."
+      }
+    ],
+    "completedAt": "2026-10-20T18:02:46.908Z"
+  },
+  {
+    "id": "exp-1792558725889",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-21T04:58:45.889Z"
+  },
+  {
+    "id": "exp-1792558974110",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-21T05:02:54.110Z"
+  },
+  {
+    "id": "exp-1792559870714",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully and health checks passed.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 1,
+      "startedAt": "2026-10-21T05:17:44.832243955Z",
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-21T05:17:50.714Z"
+  },
+  {
+    "id": "exp-1792559881895",
+    "scenario": "database-recovery",
+    "status": "passed",
+    "message": "Database recovered successfully and a database-backed read succeeded.",
+    "recovery": {
+      "success": true,
+      "scenario": "database-recovery",
+      "message": "Database recovered successfully and a database-backed read succeeded.",
+      "recovered": true,
+      "database": "connected",
+      "status": "healthy",
+      "durationMs": 5291,
+      "stages": [
+        {
+          "stage": "started",
+          "status": "pending",
+          "timestamp": "2026-10-21T05:17:56.551Z",
+          "message": "Database recovery experiment started."
+        },
+        {
+          "stage": "disconnect-simulated",
+          "status": "passed",
+          "timestamp": "2026-10-21T05:17:56.602Z",
+          "message": "Database disconnect simulated without deleting or modifying data."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-21T05:17:56.614Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-21T05:17:57.647Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-21T05:17:58.677Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-21T05:17:59.704Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-21T05:18:00.738Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "verified",
+          "status": "passed",
+          "timestamp": "2026-10-21T05:18:01.893Z",
+          "message": "Database probe succeeded after reconnect."
+        }
+      ],
+      "timestamp": "2026-10-21T05:18:01.893Z"
+    },
+    "stages": [
+      {
+        "stage": "started",
+        "status": "pending",
+        "timestamp": "2026-10-21T05:17:56.551Z",
+        "message": "Database recovery experiment started."
+      },
+      {
+        "stage": "disconnect-simulated",
+        "status": "passed",
+        "timestamp": "2026-10-21T05:17:56.602Z",
+        "message": "Database disconnect simulated without deleting or modifying data."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-21T05:17:56.614Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-21T05:17:57.647Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-21T05:17:58.677Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-21T05:17:59.704Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-21T05:18:00.738Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "verified",
+        "status": "passed",
+        "timestamp": "2026-10-21T05:18:01.893Z",
+        "message": "Database probe succeeded after reconnect."
+      }
+    ],
+    "completedAt": "2026-10-21T05:18:01.895Z"
+  },
+  {
+    "id": "exp-1792560589273",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully and health checks passed.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 2,
+      "startedAt": "2026-10-21T05:29:43.389056178Z",
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-21T05:29:49.273Z"
+  },
+  {
+    "id": "exp-1792560961949",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully and health checks passed.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 3,
+      "startedAt": "2026-10-21T05:35:55.911777392Z",
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-21T05:36:01.949Z"
+  },
+  {
+    "id": "exp-1792560984446",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully and health checks passed.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 4,
+      "startedAt": "2026-10-21T05:36:18.252360861Z",
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-21T05:36:24.446Z"
+  },
+  {
+    "id": "exp-1792561000019",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully and health checks passed.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 5,
+      "startedAt": "2026-10-21T05:36:33.954461713Z",
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-21T05:36:40.019Z"
+  },
+  {
+    "id": "exp-1792563369308",
+    "scenario": "payment-service-recovery",
+    "status": "failed",
+    "message": "Payment service recovery was not verified within 45 seconds.",
+    "recovery": {
+      "recovered": false,
+      "restartCount": 0,
+      "startedAt": "2026-10-21T05:14:51.1598268Z",
+      "status": "running",
+      "health": {
+        "success": true,
+        "service": "payment-service",
+        "status": "healthy"
+      },
+      "durationMs": 46322
+    },
+    "completedAt": "2026-10-21T06:16:09.308Z"
+  },
+  {
+    "id": "exp-1792563450535",
+    "scenario": "payment-service-recovery",
+    "status": "failed",
+    "message": "Payment service recovery was not verified within 45 seconds.",
+    "recovery": {
+      "recovered": false,
+      "restartCount": 0,
+      "startedAt": "2026-10-21T05:14:51.1598268Z",
+      "status": "running",
+      "health": {
+        "success": true,
+        "service": "payment-service",
+        "status": "healthy"
+      },
+      "durationMs": 45083
+    },
+    "completedAt": "2026-10-21T06:17:30.535Z"
+  },
+  {
+    "id": "exp-1792564122221",
+    "scenario": "payment-service-recovery",
+    "status": "passed",
+    "message": "Payment service restarted and passed its health check.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 1,
+      "startedAt": "2026-10-21T06:28:39.686592458Z",
+      "status": "running",
+      "health": {
+        "success": true,
+        "service": "payment-service",
+        "status": "healthy"
+      },
+      "durationMs": 4643
+    },
+    "completedAt": "2026-10-21T06:28:42.221Z"
+  },
+  {
+    "id": "exp-1792566790243",
+    "scenario": "inventory-integrity",
+    "status": "passed",
+    "message": "Inventory integrity audit passed. No issues were detected.",
+    "recovery": {
+      "success": true,
+      "scenario": "inventory-integrity",
+      "message": "Inventory integrity audit passed. No issues were detected.",
+      "recovered": true,
+      "readOnly": true,
+      "productsChecked": 4,
+      "issueCount": 0,
+      "issues": [],
+      "durationMs": 134,
+      "timestamp": "2026-10-21T07:13:10.242Z"
+    },
+    "completedAt": "2026-10-21T07:13:10.243Z"
+  },
+  {
+    "id": "exp-1792569481832",
+    "scenario": "inventory-integrity",
+    "status": "passed",
+    "message": "Inventory integrity audit passed. No issues were detected.",
+    "recovery": {
+      "success": true,
+      "scenario": "inventory-integrity",
+      "message": "Inventory integrity audit passed. No issues were detected.",
+      "recovered": true,
+      "readOnly": true,
+      "productsChecked": 4,
+      "issueCount": 0,
+      "issues": [],
+      "durationMs": 154,
+      "timestamp": "2026-10-21T07:58:01.829Z"
+    },
+    "completedAt": "2026-10-21T07:58:01.832Z"
+  },
+  {
+    "id": "exp-1792569538836",
+    "scenario": "database-recovery",
+    "status": "passed",
+    "message": "Database recovered successfully and a database-backed read succeeded.",
+    "recovery": {
+      "success": true,
+      "scenario": "database-recovery",
+      "message": "Database recovered successfully and a database-backed read succeeded.",
+      "recovered": true,
+      "database": "connected",
+      "status": "healthy",
+      "durationMs": 7321,
+      "stages": [
+        {
+          "stage": "started",
+          "status": "pending",
+          "timestamp": "2026-10-21T07:58:51.311Z",
+          "message": "Database recovery experiment started."
+        },
+        {
+          "stage": "disconnect-simulated",
+          "status": "passed",
+          "timestamp": "2026-10-21T07:58:51.513Z",
+          "message": "Database disconnect simulated without deleting or modifying data."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-21T07:58:51.527Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-21T07:58:52.568Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-21T07:58:53.593Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-21T07:58:54.613Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-21T07:58:55.642Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-21T07:58:56.670Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "waiting",
+          "status": "pending",
+          "timestamp": "2026-10-21T07:58:57.703Z",
+          "message": "Waiting for database reconnect."
+        },
+        {
+          "stage": "verified",
+          "status": "passed",
+          "timestamp": "2026-10-21T07:58:58.835Z",
+          "message": "Database probe succeeded after reconnect."
+        }
+      ],
+      "timestamp": "2026-10-21T07:58:58.835Z"
+    },
+    "stages": [
+      {
+        "stage": "started",
+        "status": "pending",
+        "timestamp": "2026-10-21T07:58:51.311Z",
+        "message": "Database recovery experiment started."
+      },
+      {
+        "stage": "disconnect-simulated",
+        "status": "passed",
+        "timestamp": "2026-10-21T07:58:51.513Z",
+        "message": "Database disconnect simulated without deleting or modifying data."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-21T07:58:51.527Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-21T07:58:52.568Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-21T07:58:53.593Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-21T07:58:54.613Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-21T07:58:55.642Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-21T07:58:56.670Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "waiting",
+        "status": "pending",
+        "timestamp": "2026-10-21T07:58:57.703Z",
+        "message": "Waiting for database reconnect."
+      },
+      {
+        "stage": "verified",
+        "status": "passed",
+        "timestamp": "2026-10-21T07:58:58.835Z",
+        "message": "Database probe succeeded after reconnect."
+      }
+    ],
+    "completedAt": "2026-10-21T07:58:58.836Z"
+  },
+  {
+    "id": "exp-1792569608033",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully and health checks passed.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 1,
+      "startedAt": "2026-10-21T08:00:02.067658166Z",
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-21T08:00:08.033Z"
+  },
+  {
+    "id": "exp-1792569653875",
+    "scenario": "payment-service-recovery",
+    "status": "passed",
+    "message": "Payment service restarted and passed its health check.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 2,
+      "startedAt": "2026-10-21T08:00:51.131934785Z",
+      "status": "running",
+      "health": {
+        "success": true,
+        "service": "payment-service",
+        "status": "healthy"
+      },
+      "durationMs": 4407
+    },
+    "completedAt": "2026-10-21T08:00:53.875Z"
+  },
+  {
+    "id": "exp-1792571960693",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully and health checks passed.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 2,
+      "startedAt": "2026-10-21T08:39:14.734196136Z",
+      "status": "running",
+      "database": "connected"
+    },
+    "completedAt": "2026-10-21T08:39:20.693Z"
+  }
+]
