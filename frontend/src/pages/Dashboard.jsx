@@ -87,6 +87,9 @@ function Dashboard() {
   const [inventoryRunning, setInventoryRunning] = useState(false);
   const [inventoryResult, setInventoryResult] = useState(null);
   const [inventoryError, setInventoryError] = useState("");
+  const [racePreparing, setRacePreparing] = useState(false);
+  const [raceRun, setRaceRun] = useState(null);
+  const [raceError, setRaceError] = useState("");
   const [runAllRunning, setRunAllRunning] = useState(false);
   const [runAllResults, setRunAllResults] = useState([]);
   const [runAllError, setRunAllError] = useState("");
@@ -595,6 +598,61 @@ function Dashboard() {
       setPaymentResponseLostRunning(false);
     }
   };
+  const createLastItemRace = async () => {
+    if (experimentLockRef.current) return;
+
+    experimentLockRef.current = true;
+    setRacePreparing(true);
+    setRaceError("");
+
+    try {
+      const response = await axios.post(API_ENDPOINTS.lastItemRacePrepare);
+      const data = response.data || {};
+
+      if (!data.success || !data.run?.runId || !data.product?._id) {
+        throw new Error(data.message || "The race-condition test was not prepared.");
+      }
+
+      setRaceRun({
+        ...data.run,
+        product: data.product,
+        storefrontPath: data.storefrontPath,
+      });
+    } catch (error) {
+      setRaceError(
+        error.response?.data?.message ||
+        error.message ||
+        "Could not create the race-condition test."
+      );
+    } finally {
+      experimentLockRef.current = false;
+      setRacePreparing(false);
+    }
+  };
+
+  const refreshLastItemRace = useCallback(async (runId) => {
+    try {
+      const response = await axios.get(API_ENDPOINTS.lastItemRaceStatus(runId));
+      const data = response.data || {};
+      if (!data.success || !data.run) return;
+
+      setRaceRun((current) => current?.runId === runId
+        ? {
+            ...current,
+            ...data.run,
+            product: data.product || current.product,
+            storefrontPath: current.storefrontPath || (data.product?._id ? `/user/products/${data.product._id}` : ""),
+          }
+        : current);
+    } catch (error) {
+      setRaceError(
+        error.response?.data?.message ||
+        error.message ||
+        "Could not refresh race-condition status."
+      );
+    }
+  }, []);
+
   const runInventoryAudit = async () => {
     if (experimentLockRef.current) return;
 
@@ -632,6 +690,16 @@ function Dashboard() {
       setInventoryRunning(false);
     }
   };
+
+  useEffect(() => {
+    if (!raceRun?.runId) return undefined;
+
+    const refresh = () => refreshLastItemRace(raceRun.runId);
+    refresh();
+    const interval = setInterval(refresh, 2000);
+
+    return () => clearInterval(interval);
+  }, [raceRun?.runId, refreshLastItemRace]);
 
   const fetchAdminOrders = async () => {
     setOrdersLoading(true);
@@ -2502,6 +2570,122 @@ function Dashboard() {
                         )
                       )}
                     </ul>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 rounded-xl border border-amber-800/60 bg-[#101827] p-5">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="max-w-2xl">
+                  <h4 className="font-semibold text-white">Last-Item Race Condition</h4>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                    Inject a controlled checkout timing fault and create a dedicated storefront product with exactly one unit. Open it in two browser sessions, add one unit to each cart, and submit both checkouts close together.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={createLastItemRace}
+                  disabled={racePreparing || runAllRunning || paymentRunning || inventoryRunning || chaosRunning || dbCheckRunning || paymentResponseLostRunning}
+                  className="rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {racePreparing ? "Injecting..." : "Create Failure"}
+                </button>
+              </div>
+
+              {raceError && (
+                <p role="alert" className="mt-4 rounded-lg border border-red-900/50 bg-red-950/30 p-3 text-sm text-red-300">
+                  {raceError}
+                </p>
+              )}
+
+              {raceRun && (
+                <div className="mt-4 rounded-xl border border-slate-800 bg-[#0d1320] p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-white">{raceRun.product?.name || "Last-Item Race Test"}</p>
+                      <p className="mt-1 text-xs text-slate-500">Run ID: {raceRun.runId}</p>
+                    </div>
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      raceRun.status === "recovered"
+                        ? "bg-emerald-500/10 text-emerald-300"
+                        : raceRun.status === "failed"
+                          ? "bg-red-500/10 text-red-300"
+                          : raceRun.status === "recovering"
+                            ? "bg-amber-500/10 text-amber-300"
+                            : "bg-cyan-500/10 text-cyan-300"
+                    }`}>
+                      {raceRun.status === "recovered"
+                        ? "Recovery Verified"
+                        : raceRun.status === "failed"
+                          ? "Verification Failed"
+                          : raceRun.status === "recovering"
+                            ? "Conflict Detected · Verifying"
+                            : "Fault Injected · Ready"}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="rounded-lg border border-slate-800 p-3">
+                      <p className="text-xs text-slate-500">Initial stock</p>
+                      <p className="mt-1 text-xl font-semibold text-white">{raceRun.initialStock ?? 1}</p>
+                    </div>
+                    <div className="rounded-lg border border-slate-800 p-3">
+                      <p className="text-xs text-slate-500">Checkout attempts</p>
+                      <p className="mt-1 text-xl font-semibold text-white">{raceRun.attemptCount ?? 0} / 2</p>
+                    </div>
+                    <div className="rounded-lg border border-slate-800 p-3">
+                      <p className="text-xs text-slate-500">Reservations accepted</p>
+                      <p className="mt-1 text-xl font-semibold text-emerald-300">{raceRun.successfulReservations ?? 0}</p>
+                    </div>
+                    <div className="rounded-lg border border-slate-800 p-3">
+                      <p className="text-xs text-slate-500">Competing attempts rejected</p>
+                      <p className="mt-1 text-xl font-semibold text-amber-300">{raceRun.rejectedAttempts ?? 0}</p>
+                    </div>
+                  </div>
+
+                  <p className="mt-4 text-sm text-slate-300">{raceRun.message || "Waiting for two customer checkout attempts."}</p>
+                  <p className="mt-2 text-xs text-slate-500">
+                    Current stock: {raceRun.product?.stock ?? "—"} · Verified final stock: {raceRun.stockAfterRecovery ?? "Not verified"}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <a
+                      href="/user#products"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-lg border border-emerald-700 px-3 py-2 text-sm font-semibold text-emerald-300 hover:bg-emerald-950/40"
+                    >
+                      Open Storefront
+                    </a>
+                    {raceRun.storefrontPath && (
+                      <a
+                        href={raceRun.storefrontPath}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-lg border border-cyan-700 px-3 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-950/40"
+                      >
+                        Open Test Product
+                      </a>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => refreshLastItemRace(raceRun.runId)}
+                      className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800"
+                    >
+                      Refresh Result
+                    </button>
+                  </div>
+
+                  <div className="mt-4 space-y-1 text-xs text-slate-500">
+                    <p>Fault injected: {raceRun.faultInjectedAt ? new Date(raceRun.faultInjectedAt).toLocaleString() : "—"}</p>
+                    <p>First checkout: {raceRun.firstAttemptAt ? new Date(raceRun.firstAttemptAt).toLocaleString() : "Waiting"}</p>
+                    <p>Conflict detected: {raceRun.conflictDetectedAt ? new Date(raceRun.conflictDetectedAt).toLocaleString() : "Waiting"}</p>
+                    <p>Recovery verified: {raceRun.verifiedAt ? new Date(raceRun.verifiedAt).toLocaleString() : "Not verified"}</p>
+                  </div>
+                  {raceRun.status === "ready" && (
+                    <p className="mt-4 rounded-lg bg-amber-950/30 p-3 text-sm text-amber-200">
+                      Next: open the test product in two separate browser profiles, add one unit to each cart, and submit checkout in both sessions as close together as possible.
+                    </p>
                   )}
                 </div>
               )}
