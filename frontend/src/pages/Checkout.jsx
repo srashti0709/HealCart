@@ -60,7 +60,51 @@ export default function Checkout() {
     };
 
     useEffect(() => {
+        let alive = true;
+        const checkConnectivity = async () => {
+            const forced = localStorage.getItem("shcomCheckoutFault") === "on";
+            let reachable = false;
+            if (!forced && navigator.onLine) {
+                try {
+                    const response = await fetch(API_ENDPOINTS.health, { cache: "no-store", signal: AbortSignal.timeout(1800) });
+                    reachable = response.ok;
+                } catch {}
+            }
+            if (!alive) return;
+            const unavailable = forced || !navigator.onLine || !reachable;
+            setConnectionLost(unavailable);
+            if (unavailable) {
+                wasUnavailableRef.current = true;
+                try {
+                    const cart = JSON.parse(localStorage.getItem("shcomCart") || "[]");
+                    await saveCheckoutDraft(customer, cart);
+                    setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
+                } catch {}
+            } else if (wasUnavailableRef.current) {
+                wasUnavailableRef.current = false;
+                try {
+                    const draft = await readCheckoutDraft();
+                    if (draft && (Object.values(draft.customer || {}).some(Boolean) || draft.cart?.length)) {
+                        setRecoveryPrompt(true);
+                        setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
+                    }
+                } catch {}
+            }
+        };
+        const onConnectivity = () => checkConnectivity();
+        const onStorage = (event) => { if (event.key === "shcomCheckoutFault") checkConnectivity(); };
+        checkConnectivity();
+        const interval = setInterval(checkConnectivity, 2500);
+        window.addEventListener("online", onConnectivity);
+        window.addEventListener("offline", onConnectivity);
+        window.addEventListener("storage", onStorage);
         return () => {
+            alive = false;
+            clearInterval(interval);
+            clearTimeout(saveTimerRef.current);
+            window.removeEventListener("online", onConnectivity);
+            window.removeEventListener("offline", onConnectivity);
+            window.removeEventListener("storage", onStorage);
             pollerRef.current?.stop();
         };
     }, []);
