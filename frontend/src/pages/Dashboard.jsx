@@ -609,9 +609,6 @@ function Dashboard() {
       const response = await axios.post(API_ENDPOINTS.lastItemRacePrepare);
       const data = response.data || {};
 
-      if (!response.ok && !data.success) {
-        throw new Error(data.message || "Could not inject the race-condition fault.");
-      }
       if (!data.success || !data.run?.runId || !data.product?._id) {
         throw new Error(data.message || "The race-condition test was not prepared.");
       }
