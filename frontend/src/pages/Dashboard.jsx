@@ -99,6 +99,31 @@ function Dashboard() {
   const [paymentChaosLoading, setPaymentChaosLoading] = useState(false);
   const [paymentChaosMessage, setPaymentChaosMessage] = useState("");
   const [offlineCheckoutFault, setOfflineCheckoutFault] = useState(() => localStorage.getItem("shcomCheckoutFault") === "on");
+  const [checkoutRecoveryEvidence, setCheckoutRecoveryEvidence] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "null"); }
+    catch { return null; }
+  });
+  const [checkoutDraftMeta, setCheckoutDraftMeta] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"); }
+    catch { return null; }
+  });
+
+  useEffect(() => {
+    const refreshCheckoutEvidence = () => {
+      try {
+        setCheckoutRecoveryEvidence(JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "null"));
+        setCheckoutDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
+        setOfflineCheckoutFault(localStorage.getItem("shcomCheckoutFault") === "on");
+      } catch {}
+    };
+    refreshCheckoutEvidence();
+    const interval = setInterval(refreshCheckoutEvidence, 1000);
+    window.addEventListener("storage", refreshCheckoutEvidence);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("storage", refreshCheckoutEvidence);
+    };
+  }, []);
   const [paymentRecovery, setPaymentRecovery] = useState({
     running: false,
     startedAt: null,
@@ -1157,19 +1182,40 @@ function Dashboard() {
         <section className="mx-6 mt-6 rounded-2xl border border-cyan-900 bg-[#101827] p-5 lg:mx-10">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="font-semibold text-white">Checkout Data Recovery After Connection Loss</h2>
-              <p className="mt-1 text-sm text-slate-400">Controlled checkout-only fault. It does not stop the backend or MongoDB.</p>
-              <p className="mt-2 text-sm text-slate-300">Status: {offlineCheckoutFault ? "Failure Triggered — open checkout in another tab" : "Ready"} · Draft metadata: {localStorage.getItem("shcomCheckoutDraftMeta") ? "Available on this browser" : "No saved draft metadata"}</p>
+              <h2 className="font-semibold text-white">Offline Checkout Recovery Experiment</h2>
+              <p className="mt-1 text-sm text-slate-400">Controlled browser-side checkout fault. The storefront and backend services stay running; checkout submission is blocked while the fault is active.</p>
+              <p className="mt-2 text-sm text-slate-300">Status: {offlineCheckoutFault ? "Failure triggered — checkout connection blocked" : checkoutRecoveryEvidence?.status === "data-restored" ? "Data restored — awaiting customer checkout" : checkoutRecoveryEvidence?.status === "connection-restored" ? "Connection restored — awaiting customer choice" : checkoutRecoveryEvidence?.status === "failure-detected" ? "Failure detected" : checkoutRecoveryEvidence?.status === "checkout-completed" ? "Checkout completed" : checkoutRecoveryEvidence?.status === "draft-discarded" ? "Draft discarded" : "Ready"} · Draft: {checkoutDraftMeta ? `${checkoutDraftMeta.fields || 0} fields, ${checkoutDraftMeta.items || 0} cart lines` : "No saved draft metadata"}</p>
             </div>
             <button type="button" onClick={() => {
               const next = !offlineCheckoutFault;
               localStorage.setItem("shcomCheckoutFault", next ? "on" : "off");
+              if (next) {
+                const current = (() => { try { return JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "{}"); } catch { return {}; } })();
+                localStorage.setItem("shcomCheckoutRecoveryEvidence", JSON.stringify({ ...current, status: "fault-triggered", faultTriggeredAt: new Date().toISOString() }));
+              }
               setOfflineCheckoutFault(next);
-            }} className="rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950">
-              {offlineCheckoutFault ? "Restore Checkout Connection" : "Trigger Checkout Connection Loss"}
+              try { setCheckoutRecoveryEvidence(JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "null")); } catch {}
+            }} className={`rounded-xl px-4 py-3 text-sm font-semibold ${offlineCheckoutFault ? "bg-emerald-400 text-slate-950" : "bg-amber-500 text-slate-950"}`}>
+              {offlineCheckoutFault ? "Restore Checkout Connection" : "Trigger Offline Failure"}
             </button>
           </div>
-          <p className="mt-3 text-xs text-slate-500">Keep this dashboard tab open and use a second tab for /user/checkout. The checkout page polls backend health and shares this test toggle across tabs.</p>
+          <p className="mt-3 text-xs text-slate-500">Keep this dashboard tab open and open /user/checkout in another tab. The checkout tab saves progress locally and detects the fault. This controlled test blocks checkout in the browser; it does not physically disconnect the computer or stop the whole backend.</p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ["Failure detected", checkoutRecoveryEvidence?.failureDetectedAt],
+              ["Connection restored", checkoutRecoveryEvidence?.connectionRestoredAt],
+              ["Data restored", checkoutRecoveryEvidence?.restoredAt],
+              ["Last draft saved", checkoutDraftMeta?.savedAt],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
+                <p className="text-xs text-slate-400">{label}</p>
+                <p className="mt-1 text-sm font-medium text-slate-200">{value ? new Date(value).toLocaleTimeString() : "Not recorded yet"}</p>
+              </div>
+            ))}
+          </div>
+          {checkoutRecoveryEvidence?.fieldsRestored != null && (
+            <p className="mt-3 text-sm text-emerald-300">Recovery verified: {checkoutRecoveryEvidence.fieldsRestored} checkout fields and {checkoutRecoveryEvidence.cartLinesRestored || 0} cart lines restored.</p>
+          )}
         </section>
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 px-6 py-5 lg:px-10">
           <div>
