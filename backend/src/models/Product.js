@@ -31,6 +31,19 @@ const productSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    isRaceTestProduct: {
+      type: Boolean,
+      default: false,
+    },
+    raceTestRunId: {
+      type: String,
+      default: "",
+      index: true,
+    },
+    raceFaultActive: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
