@@ -1288,5 +1288,22 @@
       "database": "connected"
     },
     "completedAt": "2026-10-21T08:39:20.693Z"
+  },
+  {
+    "id": "exp-1792742670847",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Command failed: docker inspect --format {{json .State}} shcom-backend\nfailed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: The system cannot find the file specified.\n",
+    "completedAt": "2026-10-23T08:04:30.847Z"
+  },
+  {
+    "id": "exp-1792742760316",
+    "scenario": "backend-crash",
+    "status": "failed",
+    "message": "Restart was not verified within the recovery timeout.",
+    "recovery": {
+      "recovered": false
+    },
+    "completedAt": "2026-10-23T08:06:00.316Z"
   }
 ]

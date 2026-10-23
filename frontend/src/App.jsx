@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import ProductDetails from "./pages/ProductDetails";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Cart from "./pages/Cart";
 import OrderHistory from "./pages/OrderHistory";
 import Checkout from "./pages/Checkout";
@@ -15,7 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import { API_ENDPOINTS } from "./config/api";
+import { API_ENDPOINTS, API_BASE_URL } from "./config/api";
 
 function Storefront() {
   const [products, setProducts] = useState([]);
@@ -25,6 +25,9 @@ function Storefront() {
 
   const [backendStatus, setBackendStatus] = useState("Checking");
   const [lastChecked, setLastChecked] = useState(null);
+
+  const [serviceNotice, setServiceNotice] = useState(null);
+  const previousBackendStatus = useRef("Checking");
 
   const [recoveryInfo, setRecoveryInfo] = useState(null);
   const [recoveryError, setRecoveryError] = useState("");
@@ -45,13 +48,11 @@ function Storefront() {
     }
   };
 
-
   const checkBackendHealth = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:5000/api/health",
-        { timeout: 3000 }
-      );
+      const response = await axios.get(`${API_BASE_URL}/api/health`, {
+        timeout: 3000,
+      });
 
       setBackendStatus(
         response.data.status === "healthy" ? "Healthy" : "Unhealthy"
@@ -63,6 +64,28 @@ function Storefront() {
     }
   };
 
+  useEffect(() => {
+    if (backendStatus === "Unavailable" || backendStatus === "Unhealthy") {
+      setServiceNotice({
+        type: "error",
+        message:
+          "Service is currently down. SHCom is detecting the failure and waiting for automatic recovery.",
+      });
+    } else if (
+      backendStatus === "Healthy" &&
+      (previousBackendStatus.current === "Unavailable" ||
+        previousBackendStatus.current === "Unhealthy")
+    ) {
+      setServiceNotice({
+        type: "success",
+        message:
+          "Service recovered successfully! The SHCom backend is healthy again.",
+      });
+    }
+
+    previousBackendStatus.current = backendStatus;
+  }, [backendStatus]);
+
   const [cart, setCart] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("shcomCart") || "[]");
@@ -70,6 +93,7 @@ function Storefront() {
       return [];
     }
   });
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -143,11 +167,11 @@ function Storefront() {
     }
   };
 
-
   useEffect(() => {
     fetchProducts();
     fetchRestocks();
   }, []);
+
   useEffect(() => {
     localStorage.setItem("shcomCart", JSON.stringify(cart));
   }, [cart]);
@@ -167,10 +191,6 @@ function Storefront() {
 
     return () => clearInterval(intervalId);
   }, []);
-  
-
-
-
 
   const addToCart = (product) => {
     setCart((currentCart) => {
@@ -181,9 +201,7 @@ function Storefront() {
       const currentQuantity = existing?.quantity || 0;
 
       if (currentQuantity + 1 > product.stock) {
-        alert(
-          `Only ${product.stock} items are available in stock.`
-        );
+        alert(`Only ${product.stock} items are available in stock.`);
         return currentCart;
       }
 
@@ -207,7 +225,6 @@ function Storefront() {
       ];
     });
   };
-
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -235,9 +252,17 @@ function Storefront() {
             >
               Dashboard
             </Link>
+
             <div className="hidden items-center gap-2 rounded-full bg-emerald-50 px-3 py-2 text-sm text-emerald-700 sm:flex">
               <Activity size={16} />
-              <span>Store Online</span>
+              <span>
+                {backendStatus === "Healthy"
+                  ? "Store Online"
+                  : backendStatus === "Unavailable" ||
+                      backendStatus === "Unhealthy"
+                    ? "Store Disrupted"
+                    : "Checking Store"}
+              </span>
             </div>
 
             <Link
@@ -255,6 +280,34 @@ function Storefront() {
       </header>
 
       <main className="mx-auto max-w-7xl px-6 py-10">
+        {serviceNotice && (
+          <div
+            role="status"
+            className={`mb-6 flex items-start justify-between gap-4 rounded-xl border p-4 ${
+              serviceNotice.type === "error"
+                ? "border-red-200 bg-red-50 text-red-800"
+                : "border-emerald-200 bg-emerald-50 text-emerald-800"
+            }`}
+          >
+            <div>
+              <p className="font-semibold">
+                {serviceNotice.type === "error"
+                  ? "Backend outage detected"
+                  : "Automatic recovery complete"}
+              </p>
+              <p className="mt-1 text-sm">{serviceNotice.message}</p>
+            </div>
+
+            <button
+              onClick={() => setServiceNotice(null)}
+              className="text-sm font-semibold"
+              aria-label="Dismiss notification"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
         <section className="relative overflow-hidden rounded-3xl bg-emerald-950 px-7 py-12 text-white sm:px-12 sm:py-16">
           <div className="relative z-[1] max-w-2xl">
             <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-emerald-100">
@@ -287,7 +340,6 @@ function Storefront() {
         </section>
 
         <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-
           <StatusCard
             icon={<Activity size={20} />}
             title="Backend API"
@@ -299,14 +351,12 @@ function Storefront() {
             status={backendStatus}
           />
 
-
           <StatusCard
             icon={<Package size={20} />}
             title="Inventory"
             description="Stock-aware shopping"
             status="Enabled"
           />
-
 
           <StatusCard
             icon={<RefreshCw size={20} />}
@@ -326,7 +376,6 @@ function Storefront() {
                   : "Checking"
             }
           />
-
         </section>
 
         <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
@@ -360,7 +409,9 @@ function Storefront() {
               <div className="mt-5 grid gap-4 sm:grid-cols-3">
                 <div className="rounded-xl bg-slate-50 p-4">
                   <p className="text-sm text-slate-500">Container</p>
-                  <p className="mt-1 font-semibold">{recoveryInfo.container}</p>
+                  <p className="mt-1 font-semibold">
+                    {recoveryInfo.container}
+                  </p>
                 </div>
 
                 <div className="rounded-xl bg-slate-50 p-4">
@@ -374,7 +425,9 @@ function Storefront() {
                 </div>
 
                 <div className="rounded-xl bg-slate-50 p-4">
-                  <p className="text-sm text-slate-500">Docker restart count</p>
+                  <p className="text-sm text-slate-500">
+                    Docker restart count
+                  </p>
                   <p className="mt-1 text-2xl font-bold">
                     {recoveryInfo.restartCount ?? "Unavailable"}
                   </p>
@@ -388,8 +441,9 @@ function Storefront() {
 
                 {!recoveryInfo.events?.length ? (
                   <p className="mt-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
-                    No crash or recovery events have been captured since the monitor
-                    started. The restart count above comes directly from Docker.
+                    No crash or recovery events have been captured since the
+                    monitor started. The restart count above comes directly
+                    from Docker.
                   </p>
                 ) : (
                   <div className="mt-3 space-y-3">
@@ -428,8 +482,6 @@ function Storefront() {
           )}
         </section>
 
-
-
         <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -467,8 +519,8 @@ function Storefront() {
 
           {restocks.length === 0 ? (
             <div className="mt-5 rounded-xl bg-slate-50 p-5 text-sm text-slate-600">
-              No restock requests currently. SHCom will create a request when a
-              successful order leaves a product with 2 or fewer units.
+              No restock requests currently. SHCom will create a request when
+              a successful order leaves a product with 2 or fewer units.
             </div>
           ) : (
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -498,17 +550,19 @@ function Storefront() {
                           Requested quantity: {restock.requestedQuantity}
                         </p>
                         <p className="mt-1 text-sm text-slate-500">
-                          Current stock: {restock.product?.stock ?? "Unavailable"}
+                          Current stock:{" "}
+                          {restock.product?.stock ?? "Unavailable"}
                         </p>
                       </div>
 
                       <span
-                        className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${restock.status === "delivered"
-                          ? "bg-emerald-100 text-emerald-800"
-                          : restock.status === "requested"
-                            ? "bg-amber-100 text-amber-800"
-                            : "bg-slate-100 text-slate-600"
-                          }`}
+                        className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
+                          restock.status === "delivered"
+                            ? "bg-emerald-100 text-emerald-800"
+                            : restock.status === "requested"
+                              ? "bg-amber-100 text-amber-800"
+                              : "bg-slate-100 text-slate-600"
+                        }`}
                       >
                         {restock.status === "requested"
                           ? "Awaiting delivery"
@@ -521,7 +575,9 @@ function Storefront() {
                     {restock.status === "requested" && (
                       <div className="mt-4 flex flex-wrap gap-2">
                         <button
-                          onClick={() => confirmRestockDelivery(restock._id)}
+                          onClick={() =>
+                            confirmRestockDelivery(restock._id)
+                          }
                           disabled={Boolean(restockActionId)}
                           className="flex-1 rounded-xl bg-emerald-700 px-3 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
                         >
@@ -590,9 +646,7 @@ function Storefront() {
           ) : products.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
               <Package className="mx-auto text-slate-400" size={40} />
-              <h3 className="mt-4 text-lg font-semibold">
-                No products yet
-              </h3>
+              <h3 className="mt-4 text-lg font-semibold">No products yet</h3>
               <p className="mt-2 text-sm text-slate-500">
                 Add a product through the API to see it here.
               </p>
@@ -636,15 +690,15 @@ function Storefront() {
                         ₹{product.price.toLocaleString("en-IN")}
                       </span>
 
-
                       <div className="flex flex-col items-end gap-1">
                         <span
-                          className={`text-xs font-semibold ${product.stock === 0
-                            ? "text-red-600"
-                            : product.stock <= 2
-                              ? "text-amber-600"
-                              : "text-slate-500"
-                            }`}
+                          className={`text-xs font-semibold ${
+                            product.stock === 0
+                              ? "text-red-600"
+                              : product.stock <= 2
+                                ? "text-amber-600"
+                                : "text-slate-500"
+                          }`}
                         >
                           {product.stock === 0
                             ? "Out of stock"
@@ -659,14 +713,15 @@ function Storefront() {
                           </span>
                         )}
                       </div>
-
                     </div>
+
                     <Link
                       to={`/products/${product._id}`}
                       className="mt-3 flex w-full items-center justify-center rounded-xl border border-emerald-800 px-4 py-3 font-semibold text-emerald-800 transition hover:bg-emerald-50"
                     >
                       View Details
                     </Link>
+
                     <button
                       onClick={() => addToCart(product)}
                       disabled={product.stock < 1}
