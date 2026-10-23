@@ -31,16 +31,32 @@ export default function Checkout() {
     const [recoveryResult, setRecoveryResult] = useState(null);
     const [verification, setVerification] = useState(null);
     const [checkingStatus, setCheckingStatus] = useState(false);
+    const [connectionLost, setConnectionLost] = useState(false);
+    const [recoveryPrompt, setRecoveryPrompt] = useState(false);
+    const [draftMessage, setDraftMessage] = useState("");
+    const [draftMeta, setDraftMeta] = useState(null);
+    const saveTimerRef = useRef(null);
+    const wasUnavailableRef = useRef(false);
     const checkoutAttemptRef = useRef(null);
     const pollerRef = useRef(null);
 
     const handleChange = (event) => {
         const { name, value } = event.target;
 
-        setCustomer((current) => ({
-            ...current,
-            [name]: value,
-        }));
+        setCustomer((current) => {
+            const next = { ...current, [name]: value };
+            clearTimeout(saveTimerRef.current);
+            saveTimerRef.current = setTimeout(async () => {
+                try {
+                    const cart = JSON.parse(localStorage.getItem("shcomCart") || "[]");
+                    await saveCheckoutDraft(next, cart);
+                    setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
+                } catch {
+                    setDraftMessage("Could not save the offline draft on this device.");
+                }
+            }, 150);
+            return next;
+        });
     };
 
     useEffect(() => {
