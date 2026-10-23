@@ -630,7 +630,7 @@ function Dashboard() {
     }
   };
 
-  const refreshLastItemRace = async (runId) => {
+  const refreshLastItemRace = useCallback(async (runId) => {
     try {
       const response = await axios.get(API_ENDPOINTS.lastItemRaceStatus(runId));
       const data = response.data || {};
@@ -651,7 +651,7 @@ function Dashboard() {
         "Could not refresh race-condition status."
       );
     }
-  };
+  }, []);
 
   const runInventoryAudit = async () => {
     if (experimentLockRef.current) return;
@@ -699,7 +699,7 @@ function Dashboard() {
     const interval = setInterval(refresh, 2000);
 
     return () => clearInterval(interval);
-  }, [raceRun?.runId]);
+  }, [raceRun?.runId, refreshLastItemRace]);
 
   const fetchAdminOrders = async () => {
     setOrdersLoading(true);
