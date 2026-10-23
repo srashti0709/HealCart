@@ -98,6 +98,7 @@ function Dashboard() {
   const recoveryLoadedRef = useRef(false);
   const [paymentChaosLoading, setPaymentChaosLoading] = useState(false);
   const [paymentChaosMessage, setPaymentChaosMessage] = useState("");
+  const [offlineCheckoutFault, setOfflineCheckoutFault] = useState(() => localStorage.getItem("shcomCheckoutFault") === "on");
   const [paymentRecovery, setPaymentRecovery] = useState({
     running: false,
     startedAt: null,
@@ -1153,6 +1154,23 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-[#090d16] text-slate-100">
       <main className="min-w-0 flex-1">
+        <section className="mx-6 mt-6 rounded-2xl border border-cyan-900 bg-[#101827] p-5 lg:mx-10">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="font-semibold text-white">Checkout Data Recovery After Connection Loss</h2>
+              <p className="mt-1 text-sm text-slate-400">Controlled checkout-only fault. It does not stop the backend or MongoDB.</p>
+              <p className="mt-2 text-sm text-slate-300">Status: {offlineCheckoutFault ? "Failure Triggered — open checkout in another tab" : "Ready"} · Draft metadata: {localStorage.getItem("shcomCheckoutDraftMeta") ? "Available on this browser" : "No saved draft metadata"}</p>
+            </div>
+            <button type="button" onClick={() => {
+              const next = !offlineCheckoutFault;
+              localStorage.setItem("shcomCheckoutFault", next ? "on" : "off");
+              setOfflineCheckoutFault(next);
+            }} className="rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950">
+              {offlineCheckoutFault ? "Restore Checkout Connection" : "Trigger Checkout Connection Loss"}
+            </button>
+          </div>
+          <p className="mt-3 text-xs text-slate-500">Keep this dashboard tab open and use a second tab for /user/checkout. The checkout page polls backend health and shares this test toggle across tabs.</p>
+        </section>
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 px-6 py-5 lg:px-10">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-cyan-400">
