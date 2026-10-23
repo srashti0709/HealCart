@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ShieldCheck, CreditCard, LoaderCircle, RefreshCw } from "lucide-react";
 import { clearCart } from "../lib/cart";
+import { saveCheckoutDraft, readCheckoutDraft, deleteCheckoutDraft } from "../lib/offlineCheckoutDraft";
 import {
     buildCartFingerprint,
     resolveCheckoutAttempt,
