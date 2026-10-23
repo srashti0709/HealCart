@@ -99,6 +99,8 @@ function Dashboard() {
   const [paymentChaosLoading, setPaymentChaosLoading] = useState(false);
   const [paymentChaosMessage, setPaymentChaosMessage] = useState("");
   const [offlineCheckoutFault, setOfflineCheckoutFault] = useState(() => localStorage.getItem("shcomCheckoutTestArmed") === "on");
+  const [wifiFailureRunning, setWifiFailureRunning] = useState(false);
+  const [wifiFailureMessage, setWifiFailureMessage] = useState("");
   const [checkoutRecoveryEvidence, setCheckoutRecoveryEvidence] = useState(() => {
     try { return JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "null"); }
     catch { return null; }
@@ -1186,21 +1188,46 @@ function Dashboard() {
               <p className="mt-1 text-sm text-slate-400">Arm this experiment, fill checkout details, then turn off your device internet. SHCom saves the draft locally, shows an offline screen, and offers recovery when the backend is reachable again.</p>
               <p className="mt-2 text-sm text-slate-300">Status: {offlineCheckoutFault ? "Test armed — waiting for real connectivity loss" : checkoutRecoveryEvidence?.status === "data-restored" ? "Data restored — awaiting customer checkout" : checkoutRecoveryEvidence?.status === "connection-restored" ? "Connection restored — awaiting customer choice" : checkoutRecoveryEvidence?.status === "failure-detected" ? "Failure detected" : checkoutRecoveryEvidence?.status === "checkout-completed" ? "Checkout completed" : checkoutRecoveryEvidence?.status === "draft-discarded" ? "Draft discarded" : "Ready"} · Draft: {checkoutDraftMeta ? `${checkoutDraftMeta.fields || 0} fields, ${checkoutDraftMeta.items || 0} cart lines` : "No saved draft metadata"}</p>
             </div>
-            <button type="button" onClick={() => {
-              const next = !offlineCheckoutFault;
-              localStorage.setItem("shcomCheckoutTestArmed", next ? "on" : "off");
-              localStorage.setItem("shcomCheckoutFault", "off");
-              if (next) {
-                const current = (() => { try { return JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "{}"); } catch { return {}; } })();
-                localStorage.setItem("shcomCheckoutRecoveryEvidence", JSON.stringify({ ...current, status: "test-armed", testArmedAt: new Date().toISOString() }));
-              }
-              setOfflineCheckoutFault(next);
-              try { setCheckoutRecoveryEvidence(JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "null")); } catch {}
-            }} className={`rounded-xl px-4 py-3 text-sm font-semibold ${offlineCheckoutFault ? "bg-emerald-400 text-slate-950" : "bg-amber-500 text-slate-950"}`}>
-              {offlineCheckoutFault ? "Cancel Offline Test" : "Arm Offline Recovery Test"}
+            <button
+              type="button"
+              disabled={wifiFailureRunning}
+              onClick={async () => {
+                setWifiFailureRunning(true);
+                setWifiFailureMessage("");
+                try {
+                  const response = await fetch("http://127.0.0.1:5004/inject", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ durationSeconds: 5 }),
+                  });
+                  const result = await response.json();
+                  if (!response.ok || !result.success) {
+                    throw new Error(result.message || "Could not inject the Wi-Fi failure.");
+                  }
+                  setWifiFailureMessage("Wi-Fi failure injected. Windows will restore the adapter automatically.");
+                  localStorage.setItem("shcomCheckoutTestArmed", "on");
+                  const current = (() => { try { return JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "{}"); } catch { return {}; } })();
+                  localStorage.setItem("shcomCheckoutRecoveryEvidence", JSON.stringify({
+                    ...current,
+                    status: "failure-injected",
+                    failureInjectedAt: new Date().toISOString(),
+                    failureDetectedAt: new Date().toISOString(),
+                  }));
+                  setOfflineCheckoutFault(true);
+                  setCheckoutRecoveryEvidence(JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "null"));
+                } catch (error) {
+                  setWifiFailureMessage(error.message || "Wi-Fi helper is unavailable. Start it as Administrator, then retry.");
+                } finally {
+                  setWifiFailureRunning(false);
+                }
+              }}
+              className="rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {wifiFailureRunning ? "Injecting Wi-Fi Failure..." : "Inject Offline Failure (5s)"}
             </button>
           </div>
-          <p className="mt-3 text-xs text-slate-500">Arm the test, then open checkout in this browser, fill in test details, and turn off your device internet. Keep the Dashboard open in another tab. When you turn internet back on, the checkout page checks backend health automatically. This test does not stop or crash the backend.</p>
+          <p className="mt-3 text-xs text-slate-500">Open Checkout in another tab and enter test details before clicking Inject Offline Failure. The local Windows helper disables Wi-Fi for at least 5 seconds, then automatically re-enables it. This affects internet for the whole laptop; it does not stop or crash the SHCom backend.</p>
+          {wifiFailureMessage && <p role="status" className="mt-3 text-sm text-cyan-300">{wifiFailureMessage}</p>}
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
               ["Failure detected", checkoutRecoveryEvidence?.failureDetectedAt],
