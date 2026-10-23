@@ -14,7 +14,7 @@ let injectionRunning = false;
 
 function isAdministrator() {
   try {
-    execFileSync("net.exe", ["session"], { stdio: "ignore", windowsHide: true });
+    execFileSync("fltmc.exe", [], { stdio: "ignore", windowsHide: true });
     return true;
   } catch {
     return false;
@@ -34,7 +34,7 @@ function sendJson(response, statusCode, payload, origin) {
         }
       : {}),
   });
-  response.end(JSON.stringify(payload));
+  response.end(statusCode === 204 ? undefined : JSON.stringify(payload));
 }
 
 const server = http.createServer((request, response) => {
@@ -89,7 +89,7 @@ const server = http.createServer((request, response) => {
     "  if ($disabled) { Enable-NetAdapter -Name $adapterName -Confirm:$false -ErrorAction Stop }",
     "}",
     "Write-Output ('Wi-Fi adapter restored: ' + $adapterName)",
-  ].join("; ");
+  ].join("\n");
 
   execFile(
     "powershell.exe",
