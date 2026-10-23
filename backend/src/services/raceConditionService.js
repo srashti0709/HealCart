@@ -113,7 +113,7 @@ const verifyRaceRun = async (runId) => {
     }
   }
 
-  const wasRecovered = run.status === "recovered";
+  const wasTerminal = ["recovered", "failed"].includes(run.status);
   const now = new Date();
   const updated = await RaceConditionRun.findOneAndUpdate(
     { runId },
@@ -122,7 +122,7 @@ const verifyRaceRun = async (runId) => {
         status: consistent ? "recovered" : "failed",
         stockAfterRecovery: product.stock,
         recoveryActionAt: run.recoveryActionAt || now,
-        verifiedAt: consistent ? now : null,
+        verifiedAt: consistent ? (run.verifiedAt || now) : null,
         message: consistent
           ? "Race condition handled: one reservation was accepted, the competing checkout was rejected, and stock/order state is consistent."
           : "Verification failed: stock or order state does not match the expected single-item outcome.",
@@ -148,7 +148,7 @@ const verifyRaceRun = async (runId) => {
     }
   );
 
-  if (!wasRecovered) {
+  if (!wasTerminal) {
     await recordIncident({
       incidentType: "last_item_race_condition",
       service: "inventory-service",
