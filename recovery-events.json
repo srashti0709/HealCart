@@ -1,5 +1,33 @@
 [
   {
+    "id": "evt-recovered-1792763202162-3d85ae",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-23T13:46:42.162Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792758073850-64df91",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-23T12:21:13.849Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
     "id": "evt-recovered-1792691134602-cd3e7d",
     "type": "recovered",
     "description": "Backend container restarted automatically.",
@@ -1071,35 +1099,6 @@
       "container": "shcom-backend",
       "action": "start",
       "state": "running"
-    }
-  },
-  {
-    "id": "evt-crash-1792643596830-ef72be",
-    "type": "crash",
-    "description": "Backend container stopped unexpectedly.",
-    "message": "Backend container stopped unexpectedly.",
-    "timestamp": "2026-10-22T04:33:16.000Z",
-    "source": "Docker observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "container": "shcom-backend",
-      "action": "die",
-      "state": "stopped"
-    }
-  },
-  {
-    "id": "evt-recovered-1792643595536-eb9436",
-    "type": "recovered",
-    "description": "Backend container restarted automatically.",
-    "message": "Backend container restarted automatically.",
-    "timestamp": "2026-10-22T04:33:15.536Z",
-    "source": "Docker observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "recovered": true,
-      "status": "running"
     }
   }
 ]

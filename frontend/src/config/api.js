@@ -29,6 +29,7 @@ export const API_ENDPOINTS = {
   trafficStart: `${CHAOS_CONTROLLER_URL}/api/chaos/traffic/start`,
   trafficStop: `${CHAOS_CONTROLLER_URL}/api/chaos/traffic/stop`,
   trafficStatus: `${CHAOS_CONTROLLER_URL}/api/chaos/traffic/status`,
+  paymentTimeout: `${CHAOS_CONTROLLER_URL}/api/chaos/payment-timeout`,
   trafficRequests: `${CHAOS_CONTROLLER_URL}/api/chaos/traffic/requests`,
   paymentAttemptStatus: (attemptId) =>
     `${API_BASE_URL}/api/payments/attempts/${encodeURIComponent(attemptId)}`,

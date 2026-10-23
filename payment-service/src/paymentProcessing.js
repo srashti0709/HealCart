@@ -129,6 +129,7 @@ const processPaymentRequest = async ({
       body: {
         success: false,
         paymentStatus: "unknown",
+        simulatedTimeout: true,
         orderId,
         amount,
         message: "Simulated timeout after payment processing",

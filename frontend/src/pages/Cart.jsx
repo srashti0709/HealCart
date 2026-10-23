@@ -102,7 +102,7 @@ export default function Cart() {
         <div className="min-h-screen bg-slate-50">
             <header className="border-b border-slate-200 bg-white">
                 <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5">
-                    <Link to="/" className="text-xl font-bold text-emerald-900">
+                    <Link to="/user" className="text-xl font-bold text-emerald-900">
                         SHCom
                     </Link>
 
@@ -114,7 +114,7 @@ export default function Cart() {
 
             <main className="mx-auto max-w-5xl px-5 py-10">
                 <Link
-                    to="/"
+                    to="/user"
                     className="mb-7 inline-flex items-center gap-2 text-sm font-semibold text-emerald-800 hover:text-emerald-950"
                 >
                     <ArrowLeft size={17} />
@@ -150,7 +150,7 @@ export default function Cart() {
                             Find something you love and add it to your cart.
                         </p>
                         <Link
-                            to="/"
+                            to="/user"
                             className="mt-6 inline-flex rounded-xl bg-emerald-800 px-5 py-3 font-semibold text-white hover:bg-emerald-900"
                         >
                             Explore products
@@ -261,7 +261,7 @@ export default function Cart() {
                             </p>
 
                             <Link
-                                to="/checkout"
+                                to="/user/checkout"
                                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-800 px-5 py-3 font-semibold text-white transition hover:bg-emerald-900"
                             >
                                 Proceed to Checkout

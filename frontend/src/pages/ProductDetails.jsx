@@ -85,7 +85,7 @@ export default function ProductDetails() {
       <main className="mx-auto max-w-5xl p-8">
         <p className="mb-4 text-red-600">{error || "Product not found."}</p>
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/user")}
           className="rounded-lg bg-slate-900 px-5 py-3 text-white"
         >
           Back to products

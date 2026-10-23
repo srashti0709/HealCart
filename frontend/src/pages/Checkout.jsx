@@ -275,7 +275,7 @@ export default function Checkout() {
         <div className="min-h-screen bg-slate-50">
             <header className="border-b border-slate-200 bg-white">
                 <div className="mx-auto max-w-3xl px-5 py-5">
-                    <Link to="/" className="text-xl font-bold text-emerald-900">
+                    <Link to="/user" className="text-xl font-bold text-emerald-900">
                         SHCom
                     </Link>
                 </div>
@@ -283,7 +283,7 @@ export default function Checkout() {
 
             <main className="mx-auto max-w-3xl px-5 py-10">
                 <Link
-                    to="/cart"
+                    to="/user/cart"
                     className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-800"
                 >
                     <ArrowLeft size={17} />
@@ -482,13 +482,13 @@ export default function Checkout() {
                             {orderResult.pending ? (
                                 <div className="mt-4 flex flex-wrap gap-3">
                                     <Link
-                                        to="/orders"
+                                        to="/user/orders"
                                         className="inline-flex font-semibold underline"
                                     >
                                         Check existing order
                                     </Link>
                                     <Link
-                                        to="/"
+                                        to="/user"
                                         className="inline-flex font-semibold underline"
                                     >
                                         Continue shopping
@@ -496,7 +496,7 @@ export default function Checkout() {
                                 </div>
                             ) : (
                                 <Link
-                                    to="/"
+                                    to="/user"
                                     className="mt-4 inline-flex font-semibold underline"
                                 >
                                     Continue shopping

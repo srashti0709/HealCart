@@ -96,6 +96,16 @@ function Dashboard() {
   const [timelineLastUpdated, setTimelineLastUpdated] = useState(null);
   const experimentLockRef = useRef(false);
   const recoveryLoadedRef = useRef(false);
+  const [paymentChaosLoading, setPaymentChaosLoading] = useState(false);
+  const [paymentChaosMessage, setPaymentChaosMessage] = useState("");
+  const [paymentRecovery, setPaymentRecovery] = useState({
+    running: false,
+    startedAt: null,
+    resolvedAt: null,
+    status: "idle",
+    message: "",
+    stages: [],
+  });
 
   const {
     chaosRunning,
@@ -157,6 +167,62 @@ function Dashboard() {
       setDbCheckError(error.message || "Database check failed.");
     } finally {
       setDbCheckRunning(false);
+    }
+  };
+
+
+  const injectPaymentChaos = async () => {
+    setPaymentChaosLoading(true);
+    setPaymentChaosMessage("");
+    setPaymentRecovery({
+      running: true,
+      startedAt: Date.now(),
+      resolvedAt: null,
+      status: "verifying",
+      message: "Payment chaos armed. Waiting for a checkout to trigger self-heal...",
+      stages: [
+        { t: Date.now(), status: "armed", message: "Payment chaos armed for the next checkout." },
+      ],
+    });
+
+    try {
+      const response = await fetch(API_ENDPOINTS.paymentTimeout, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: true }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Could not activate Payment Chaos.");
+      }
+
+      setPaymentChaosMessage(
+        "Payment Chaos armed. The next checkout should simulate a lost payment response."
+      );
+
+      setPaymentRecovery((prev) => ({
+        ...prev,
+        stages: [
+          ...prev.stages,
+          { t: Date.now(), status: "verifying", message: "Chaos armed. Awaiting checkout payment to self-heal." },
+        ],
+      }));
+    } catch (error) {
+      setPaymentChaosMessage(error.message);
+      setPaymentRecovery((prev) => ({
+        ...prev,
+        running: false,
+        status: "idle",
+        message: error.message || "Could not activate Payment Chaos.",
+        stages: [
+          ...prev.stages,
+          { t: Date.now(), status: "error", message: error.message || "Could not activate Payment Chaos." },
+        ],
+      }));
+    } finally {
+      setPaymentChaosLoading(false);
     }
   };
 
@@ -483,12 +549,12 @@ function Dashboard() {
         previous.map((s) =>
           s.stage === "checkout"
             ? {
-                ...s,
-                status: "pending",
-                message:
-                  s.message +
-                  " Enter the Attempt ID and Order ID below after creating the checkout.",
-              }
+              ...s,
+              status: "pending",
+              message:
+                s.message +
+                " Enter the Attempt ID and Order ID below after creating the checkout.",
+            }
             : s
         )
       );
@@ -558,8 +624,8 @@ function Dashboard() {
     } catch (error) {
       setOrdersError(
         error.response?.data?.message ||
-          error.message ||
-          "Unable to load orders."
+        error.message ||
+        "Unable to load orders."
       );
     } finally {
       setOrdersLoading(false);
@@ -861,6 +927,46 @@ function Dashboard() {
     };
     loadOrders();
   }, []);
+
+  useEffect(() => {
+    if (!paymentRecovery.running || paymentRecovery.resolvedAt) return;
+
+    const recovery = Array.isArray(incidents)
+      ? incidents.find(
+          (i) =>
+            String(i.incidentType || "").toLowerCase() ===
+              "payment_timeout_recovery" &&
+            i.status === "resolved" &&
+            String(i.recoveryAction || "") ===
+              "Verified the existing payment transaction" &&
+            i.detectedAt &&
+            new Date(i.detectedAt) >= paymentRecovery.startedAt
+        )
+      : null;
+
+    if (recovery) {
+      const duration = Math.round(
+        (new Date(recovery.resolvedAt || recovery.detectedAt) -
+          paymentRecovery.startedAt) /
+          1000
+      );
+      setPaymentRecovery((prev) => ({
+        ...prev,
+        running: false,
+        resolvedAt: recovery.resolvedAt || recovery.detectedAt,
+        status: "recovered",
+        message: `Self-healed in ${duration}s: payment verified and order placed.`,
+        stages: [
+          ...prev.stages,
+          {
+            t: Date.now(),
+            status: "recovered",
+            message: `Self-healed in ${duration}s: payment verified and order placed (₹${Number(recovery?.totalAmount ?? 0).toLocaleString()}).`,
+          },
+        ],
+      }));
+    }
+  }, [incidents, paymentRecovery.running, paymentRecovery.startedAt, paymentRecovery.resolvedAt]);
 
 
   const { backendStatus, databaseStatus } = getBackendHealthStatuses({
@@ -1772,6 +1878,7 @@ function Dashboard() {
                   {chaosRunning ? "Recovering..." : "Run Crash Test"}
                 </button>
               </div>
+
               {chaosRunning && (
                 <p className="mt-4 text-sm text-amber-400">
                   Crash triggered. Waiting for automatic recovery...
@@ -1802,6 +1909,78 @@ function Dashboard() {
                 coordinationRequested={coordinationEnabled}
               />
             </div>
+
+            <div className="mt-6 rounded-xl border border-amber-800 bg-[#101827] p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h4 className="font-semibold text-white">Payment Chaos</h4>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Simulates a payment response timeout after the payment is recorded,
+                    allowing SHCom to verify and reconcile the transaction.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={injectPaymentChaos}
+                  disabled={
+                    runAllRunning ||
+                    chaosRunning ||
+                    dbCheckRunning ||
+                    paymentRunning ||
+                    inventoryRunning ||
+                    paymentChaosLoading
+                  }
+                  className="rounded-lg border border-amber-700 px-4 py-2 text-sm text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {paymentChaosLoading ? "Activating..." : "Inject Payment Chaos"}
+                </button>
+              </div>
+
+              {paymentChaosMessage && (
+                <p className="mt-4 text-sm text-amber-300" role="status">
+                  {paymentChaosMessage}
+                </p>
+              )}
+
+              {paymentRecovery.running || paymentRecovery.status === "recovered" ? (
+                <div className="mt-4 rounded-xl border border-amber-900/30 bg-amber-900/10 p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-amber-400 mb-1">
+                    Payment Chaos Recovery
+                  </p>
+                  <p className="text-xs text-amber-200 mb-2">
+                    {paymentRecovery.message}
+                  </p>
+                  <div className="space-y-1">
+                    {paymentRecovery.stages.map((s, i) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-2 text-[10px]"
+                      >
+                        <span
+                          className={`flex-shrink-0 w-2 h-2 rounded-full mt-1 ${
+                            s.status === "recovered"
+                              ? "bg-emerald-500"
+                              : s.status === "error"
+                                ? "bg-red-500"
+                                : "bg-amber-500"
+                          }`}
+                        />
+                        <span className="text-amber-100">
+                          {new Date(s.t).toLocaleTimeString()} — {s.message}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  {paymentRecovery.status === "recovered" && (
+                    <p className="mt-2 text-xs font-semibold text-emerald-400">
+                      Recovery complete — no duplicate order or payment was created.
+                    </p>
+                  )}
+                </div>
+              ) : null}
+            </div>
+
 
             <div className="mt-6 rounded-xl border border-slate-800 bg-[#101827] p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -2198,11 +2377,10 @@ function Dashboard() {
                 <div className="mt-4 rounded-lg border p-3 text-sm">
                   <div className="mb-2 flex items-center gap-2">
                     <span
-                      className={`rounded-full px-2 py-0.5 ${
-                        paymentResponseLostResult.passed
+                      className={`rounded-full px-2 py-0.5 ${paymentResponseLostResult.passed
                           ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
                           : "border-red-500/30 bg-red-500/10 text-red-400"
-                      }`}
+                        }`}
                     >
                       {paymentResponseLostResult.passed ? "Recovery Verified" : "Recovery Failed"}
                     </span>
@@ -2407,15 +2585,14 @@ function Dashboard() {
                           </td>
                           <td className="py-3 text-xs">
                             <span
-                              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                                orderStatus === "placed"
+                              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${orderStatus === "placed"
                                   ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                                   : orderStatus === "processing"
                                     ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                                     : orderStatus === "completed"
                                       ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                                       : "bg-red-500/10 text-red-400 border border-red-500/20"
-                              }`}
+                                }`}
                             >
                               {orderStatus.charAt(0).toUpperCase() +
                                 orderStatus.slice(1)}
@@ -2423,13 +2600,12 @@ function Dashboard() {
                           </td>
                           <td className="py-3 text-xs">
                             <span
-                              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                                isPaid
+                              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${isPaid
                                   ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                                   : isFailed
                                     ? "bg-red-500/10 text-red-400 border border-red-500/20"
                                     : "bg-slate-500/10 text-slate-400 border border-slate-500/20"
-                              }`}
+                                }`}
                             >
                               {paymentStatus.charAt(0).toUpperCase() +
                                 paymentStatus.slice(1)}
@@ -2489,13 +2665,12 @@ function Dashboard() {
                           .replace(/\b\w/g, (letter) => letter.toUpperCase())}
                       </p>
                       <span
-                        className={`rounded-full px-2 py-1 text-xs ${
-                          experiment.status === "passed"
+                        className={`rounded-full px-2 py-1 text-xs ${experiment.status === "passed"
                             ? "bg-emerald-500/10 text-emerald-400"
                             : experiment.status === "stopped"
                               ? "bg-amber-500/10 text-amber-400"
                               : "bg-red-500/10 text-red-400"
-                        }`}
+                          }`}
                       >
                         {experiment.status || "Unknown"}
                       </span>
@@ -2633,7 +2808,7 @@ function Dashboard() {
             SHCom · Self-Healing Commerce
           </footer>
         </div>
-       </main>
+      </main>
     </div>
   );
 }

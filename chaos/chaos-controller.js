@@ -1205,6 +1205,63 @@ const server = http.createServer(async (req, res) => {
             activeExperiment = null;
         }
     }
+    if (req.method === "POST" && req.url === "/api/chaos/payment-timeout") {
+    let body = {};
+
+    try {
+        body = await readJsonBody(req);
+    } catch (error) {
+        res.writeHead(400);
+        return res.end(JSON.stringify({
+            success: false,
+            message: error.message,
+        }));
+    }
+
+    if (typeof body.enabled !== "boolean") {
+        res.writeHead(400);
+        return res.end(JSON.stringify({
+            success: false,
+            message: "Provide enabled: true or enabled: false.",
+        }));
+    }
+
+    const token = process.env.CHAOS_TEST_TOKEN;
+
+    if (!token) {
+        res.writeHead(503);
+        return res.end(JSON.stringify({
+            success: false,
+            message: "CHAOS_TEST_TOKEN is not configured.",
+        }));
+    }
+
+    try {
+        const response = await fetch(
+            "http://127.0.0.1:5001/internal/chaos/payment-timeout",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-chaos-token": token,
+                },
+                body: JSON.stringify({ enabled: body.enabled }),
+                signal: AbortSignal.timeout(5000),
+            }
+        );
+
+        const payload = await response.json().catch(() => ({}));
+
+        res.writeHead(response.status);
+        return res.end(JSON.stringify(payload));
+    } catch (error) {
+        res.writeHead(502);
+        return res.end(JSON.stringify({
+            success: false,
+            message: error.message || "Could not reach the payment service.",
+        }));
+    }
+}
 
     if (req.method === "POST" && req.url === "/api/chaos/payment-reconcile") {
         if (reconcileInFlight) {

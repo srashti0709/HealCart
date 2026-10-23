@@ -1,3 +1,4 @@
+const Notification = require("../models/Notification");
 const mongoose = require("mongoose");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
@@ -14,7 +15,9 @@ const {
 const PAYMENT_SERVICE_URL =
   process.env.PAYMENT_SERVICE_URL || "http://localhost:5001";
 
-
+// Simulated payment timeouts self-heal in the background after this delay so
+// the customer sees "verifying" before the order reconciles to paid.
+const PAYMENT_RECOVERY_DELAY_MS = 6000;
 
 const verifyPayment = async (orderId, amount) => {
   try {
@@ -51,6 +54,94 @@ const verifyPayment = async (orderId, amount) => {
   } catch {
     return { outcome: "unknown" };
   }
+};
+
+/**
+ * Completes a confirmed paid order: records the paid attempt, deducts stock,
+ * saves the order, creates the purchase notification, and records the
+ * recovery incident. Used both for immediate payments and background
+ * self-healing of simulated timeouts.
+ */
+const completePaidOrder = async (order, paymentResult, checkoutId) => {
+  const attempt = await recordPaymentAttempt({
+    attemptId: buildPaymentAttemptId(order._id),
+    checkoutId,
+    order: order._id,
+    amount: order.totalAmount,
+    status: "paid",
+    transactionId: paymentResult.payment.transactionId,
+  });
+
+  if (attempt.status !== "paid") {
+    return attempt;
+  }
+
+  try {
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        await deductStockForOrder(order, session);
+      });
+    } finally {
+      await session.endSession();
+    }
+
+    order.paymentStatus = attempt.status;
+    order.orderStatus = "placed";
+    await order.save();
+    await requestLowStockRestocks(order.items);
+
+    try {
+      await Notification.updateOne(
+        { orderId: order._id },
+        {
+          $setOnInsert: {
+            type: "purchase",
+            title: "New purchase received",
+            message: `A customer purchased ${order.items.length} product item type(s).`,
+            orderId: order._id,
+            items: order.items.map((item) => ({
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price,
+            })),
+            totalAmount: order.totalAmount,
+          },
+        },
+        { upsert: true }
+      );
+    } catch (notificationError) {
+      console.error("Could not create purchase notification:", notificationError.message);
+    }
+
+    await recordIncident({
+      incidentType: "payment_timeout_recovery",
+      service: "payment-service",
+      severity: "medium",
+      status: "resolved",
+      message: "Payment was verified after an uncertain response.",
+      recoveryAction: "Verified the existing payment transaction",
+      recoveryResult: "Payment confirmed; stock was deducted after confirmation",
+      resolvedAt: new Date(),
+    });
+  } catch (error) {
+    await recordIncident({
+      incidentType: "payment_stock_commit_failure",
+      service: "backend",
+      severity: "critical",
+      status: "failed",
+      message: "Payment was confirmed, but stock allocation failed.",
+      recoveryAction: "Keep the order pending for manual reconciliation",
+      recoveryResult: error.message,
+    });
+
+    order.paymentStatus = "unknown";
+    order.orderStatus = "processing";
+    await order.save().catch(() => {});
+    throw error;
+  }
+
+  return attempt;
 };
 
 const placeOrder = async (req, res) => {
@@ -192,95 +283,48 @@ const placeOrder = async (req, res) => {
       paymentError = payment.message || "Payment failed";
     } else {
       paymentError = payment?.message || "Payment outcome is uncertain";
+
+      paymentResult = {
+        outcome: "unknown",
+        simulatedTimeout: payment?.simulatedTimeout === true,
+      };
     }
   } catch (error) {
     paymentError = error.message || "Payment request timed out";
   }
 
-  if (paymentResult.outcome === "unknown") {
-    paymentResult = await verifyPayment(
+  // Resolve genuine unknowns (non-simulated) by checking the durable ledger.
+  if (paymentResult.outcome === "unknown" && !paymentResult.simulatedTimeout) {
+    const verified = await verifyPayment(
       order._id.toString(),
       order.totalAmount
     );
+
+    paymentResult = {
+      ...verified,
+      simulatedTimeout: false,
+    };
   }
 
   if (paymentResult.outcome === "paid") {
-    const attempt = await recordPaymentAttempt({
-      attemptId: buildPaymentAttemptId(order._id),
-      checkoutId,
-      order: order._id,
-      amount: order.totalAmount,
-      status: "paid",
-      transactionId: paymentResult.payment.transactionId,
+    await completePaidOrder(order, paymentResult, checkoutId);
+
+    return res.status(201).json({
+      success: true,
+      message: "Order placed and payment verified successfully",
+      recovery: {
+        type: "payment_timeout_recovery",
+        detected: true,
+        status: "resolved",
+        action: "Verified the existing payment transaction",
+        result: "Payment confirmed; stock was deducted after confirmation",
+      },
+      order,
+      payment: {
+        transactionId: paymentResult.payment.transactionId,
+        status: "paid",
+      },
     });
-
-    if (attempt.status === "paid") {
-      try {
-        const session = await mongoose.startSession();
-
-        try {
-          await session.withTransaction(async () => {
-            await deductStockForOrder(order, session);
-          });
-        } finally {
-          await session.endSession();
-        }
-
-        order.paymentStatus = attempt.status;
-        order.orderStatus = "placed";
-        await order.save();
-        await requestLowStockRestocks(order.items);
-
-        await recordIncident({
-          incidentType: "payment_timeout_recovery",
-          service: "payment-service",
-          severity: "medium",
-          status: "resolved",
-          message: "Payment was verified after an uncertain response.",
-          recoveryAction: "Verified the existing payment transaction",
-          recoveryResult: "Payment confirmed; stock was deducted after confirmation",
-          resolvedAt: new Date(),
-        });
-
-        return res.status(201).json({
-        success: true,
-        message: "Order placed and payment verified successfully",
-        recovery: {
-          type: "payment_timeout_recovery",
-          detected: true,
-          status: "resolved",
-          action: "Verified the existing payment transaction",
-          result: "Payment confirmed; stock was deducted after confirmation",
-        },
-        order,
-        payment: {
-          transactionId: paymentResult.payment.transactionId,
-          status: "paid",
-        },
-      });
-      } catch (error) {
-        await recordIncident({
-          incidentType: "payment_stock_commit_failure",
-          service: "backend",
-          severity: "critical",
-          status: "failed",
-          message: "Payment was confirmed, but stock allocation failed.",
-          recoveryAction: "Keep the order pending for manual reconciliation",
-          recoveryResult: error.message,
-        });
-
-        order.paymentStatus = "unknown";
-        order.orderStatus = "processing";
-        await order.save().catch(() => {});
-
-        return res.status(409).json({
-          success: false,
-          paymentStatus: "unknown",
-          message: "Payment succeeded, but stock could not be reserved. Please check your order status before retrying.",
-          orderId: order._id,
-        });
-      }
-    }
   }
 
   if (paymentResult.outcome === "failed") {
@@ -325,14 +369,16 @@ const placeOrder = async (req, res) => {
           severity: "medium",
           status: "resolved",
           message: paymentError,
-          recoveryAction: "Cancelled failed order without touching stock that was never confirmed",
+          recoveryAction:
+            "Cancelled failed order without touching stock that was never confirmed",
           recoveryResult: "Payment failure confirmed; no stock was deducted",
           resolvedAt: new Date(),
         });
 
         return res.status(502).json({
           success: false,
-          message: "Payment failed. Please check your order status before retrying.",
+          message:
+            "Payment failed. Please check your order status before retrying.",
           order,
         });
       } catch (error) {
@@ -355,6 +401,8 @@ const placeOrder = async (req, res) => {
     }
   }
 
+  // Unknown outcome: record a pending-unknown attempt and return 202 so the
+  // customer can poll. Simulated timeouts self-heal in the background.
   const unknownAttempt = await recordPaymentAttempt({
     attemptId: buildPaymentAttemptId(order._id),
     checkoutId,
@@ -382,10 +430,37 @@ const placeOrder = async (req, res) => {
     recoveryResult: "Outcome unknown; no stock was deducted while pending",
   });
 
+  if (paymentResult.simulatedTimeout) {
+    setTimeout(async () => {
+      try {
+        const freshOrder = await Order.findById(order._id);
+
+        if (!freshOrder || !["pending", "unknown"].includes(freshOrder.paymentStatus)) {
+          return;
+        }
+
+        const verified = await verifyPayment(
+          order._id.toString(),
+          order.totalAmount
+        );
+
+        if (verified.outcome === "paid") {
+          await completePaidOrder(freshOrder, {
+            ...verified,
+            payment: verified.payment,
+          }, checkoutId);
+        }
+      } catch (error) {
+        console.error("Background payment recovery failed:", error.message);
+      }
+    }, PAYMENT_RECOVERY_DELAY_MS);
+  }
+
   return res.status(202).json({
     success: false,
     paymentStatus: "unknown",
-    message: "Payment is being verified. Do not retry checkout or pay again yet.",
+    message:
+      "Payment is being verified. Do not retry checkout or pay again yet.",
     orderId: order._id,
     order: { _id: order._id },
   });

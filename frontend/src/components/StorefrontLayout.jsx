@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -23,15 +24,9 @@ import {
 function useCart() {
   const [cart, setCart] = useState(() => readCart());
 
-  /**
-   * The persisted cart is the source of truth. Every view that mutates it
-   * announces the change, so the navigation badge stays correct without a
-   * page reload.
-   */
   useEffect(() => {
     const sync = () => {
       const next = readCart();
-
       setCart((current) => (isSameCart(current, next) ? current : next));
     };
 
@@ -55,11 +50,6 @@ function StorefrontShell({ children }) {
   const [paymentStatus, setPaymentStatus] = useState("Checking");
   const [paymentCheckedAt, setPaymentCheckedAt] = useState(null);
 
-  /**
-   * The payment service is tracked on its own. A payment health failure never
-   * changes the backend availability state and never raises the storefront
-   * outage banner.
-   */
   const checkPaymentService = async () => {
     try {
       const response = await axios.get(API_ENDPOINTS.paymentHealth, {
@@ -83,6 +73,7 @@ function StorefrontShell({ children }) {
     }, 0);
 
     const intervalId = setInterval(checkPaymentService, 15000);
+
     return () => {
       window.clearTimeout(timer);
       clearInterval(intervalId);
@@ -97,11 +88,14 @@ function StorefrontShell({ children }) {
   const backendDown =
     status === AVAILABILITY_STATUS.UNAVAILABLE ||
     status === AVAILABILITY_STATUS.RECOVERING;
+
   const backendHealthy =
     status === AVAILABILITY_STATUS.HEALTHY ||
     status === AVAILABILITY_STATUS.RECONNECTED;
 
-  const cartCount = Array.isArray(cart) ? cart.reduce((sum, item) => sum + (item.quantity || 0), 0) : 0;
+  const cartCount = Array.isArray(cart)
+    ? cart.reduce((sum, item) => sum + (item.quantity || 0), 0)
+    : 0;
 
   const statusLabel = backendChecking
     ? "Checking services..."
@@ -126,13 +120,16 @@ function StorefrontShell({ children }) {
       <div className="sticky top-0 z-30">
         <header className="border-b border-slate-200 bg-white">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-            <Link to="/" className="flex items-center gap-3">
+            <Link to="/user" className="flex items-center gap-3">
               <div className="rounded-xl bg-emerald-700 p-2 text-white">
                 <ShieldCheck size={25} />
               </div>
+
               <div>
                 <h1 className="text-xl font-bold text-slate-900">SHCom</h1>
-                <p className="text-xs text-slate-500">Self-Healing Commerce</p>
+                <p className="text-xs text-slate-500">
+                  Self-Healing Commerce
+                </p>
               </div>
             </Link>
 
@@ -153,35 +150,29 @@ function StorefrontShell({ children }) {
                   {statusLabel}
                 </div>
               ) : (
-                <Link
-                  to="/dashboard"
-                  className="hidden items-center gap-2 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-800 transition hover:bg-amber-200 sm:flex"
+                <div
+                  role="status"
+                  className="hidden items-center gap-2 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-800 sm:flex"
                 >
                   <AlertCircle size={14} />
                   {statusLabel}
-                </Link>
+                </div>
               )}
 
               <Link
-                to="/dashboard"
-                className="rounded-xl px-3 py-2 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-50"
-              >
-                Command Center
-              </Link>
-
-              <Link
-                to="/orders"
+                to="/user/orders"
                 className="hidden text-sm font-medium text-slate-700 transition hover:text-emerald-800 sm:inline"
               >
                 Order history
               </Link>
 
               <Link
-                to="/cart"
+                to="/user/cart"
                 aria-label={`Open shopping cart with ${cartCount} items`}
                 className="relative rounded-xl p-2 transition hover:bg-emerald-50"
               >
                 <ShoppingBag size={24} />
+
                 {cartCount > 0 && (
                   <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-700 px-1 text-xs text-white">
                     {cartCount}
@@ -209,19 +200,24 @@ function StorefrontShell({ children }) {
               <p className="font-semibold text-slate-900">SHCom</p>
               <p className="mt-1">Self-Healing Commerce</p>
             </div>
+
             <div className="flex flex-wrap items-center justify-center gap-4 text-slate-500">
               <a href="#products" className="hover:text-emerald-700">
                 Products
               </a>
-              <Link to="/cart" className="hover:text-emerald-700">
+
+              <Link to="/user/cart" className="hover:text-emerald-700">
                 Cart
               </Link>
-              <Link to="/orders" className="hover:text-emerald-700">
+
+              <Link to="/user/orders" className="hover:text-emerald-700">
                 Order history
               </Link>
             </div>
+
             <div className="text-slate-500">
               {footerLabel}
+
               {lastCheckedAt && (
                 <span className="ml-2 text-slate-400">
                   · checked{" "}
@@ -231,6 +227,7 @@ function StorefrontShell({ children }) {
                   })}
                 </span>
               )}
+
               {paymentCheckedAt && !paymentOk && paymentKnown ? (
                 <span className="ml-2 text-slate-400">
                   · payment checked {paymentCheckedAt}

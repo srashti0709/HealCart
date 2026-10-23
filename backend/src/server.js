@@ -12,6 +12,9 @@ const incidentRoutes = require("./routes/incidentRoutes");
 const productRoutes = require("./routes/productRoutes");
 const restockRoutes = require("./routes/restockRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const experimentRoutes = require("./routes/experimentRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
+const authRoutes = require("./routes/authRoutes");
 const PORT = process.env.PORT || 5000;
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 app.use(cors());
@@ -199,13 +202,15 @@ app.get("/api/chaos/inventory-audit", async (req, res) => {
   }
 });
 
-
+app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/incidents", incidentRoutes);
 app.use("/api/restocks", restockRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/experiments", experimentRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 const startServer = async () => {
   await connectDB();

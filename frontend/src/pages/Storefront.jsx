@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import {
   ShoppingBag,
@@ -18,7 +19,10 @@ const formatTime = (value) => {
 
   return Number.isNaN(date.getTime())
     ? ""
-    : date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    : date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
 };
 
 function ProductCardSkeleton() {
@@ -50,6 +54,7 @@ export default function Storefront() {
   const isUnavailable = status === AVAILABILITY_STATUS.UNAVAILABLE;
   const isDisrupted = isRecovering || isUnavailable;
   const hasCatalog = products.length > 0;
+
   const showSkeleton =
     !hasCatalog &&
     (status === AVAILABILITY_STATUS.CHECKING || checking);
@@ -189,18 +194,19 @@ export default function Storefront() {
               disabled={checking}
               className="mt-6 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <RefreshCw size={16} className={checking ? "animate-spin" : ""} />
+              <RefreshCw
+                size={16}
+                className={checking ? "animate-spin" : ""}
+              />
               {checking ? "Checking..." : "Check again"}
             </button>
           </div>
         ) : !hasCatalog ? (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
             <Package className="mx-auto text-slate-400" size={40} />
-            <h3 className="mt-4 text-lg font-semibold">
-              No products yet
-            </h3>
+            <h3 className="mt-4 text-lg font-semibold">No products yet</h3>
             <p className="mt-2 text-sm text-slate-500">
-              Add a product through the API to see it here.
+              Products will appear here when they are available in the catalog.
             </p>
           </div>
         ) : (
@@ -218,8 +224,8 @@ export default function Storefront() {
                     }
                     alt={product.name}
                     className="h-full w-full object-contain p-4"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
+                    onError={(event) => {
+                      event.currentTarget.style.display = "none";
                     }}
                   />
                 </div>
@@ -229,9 +235,7 @@ export default function Storefront() {
                     {product.category}
                   </p>
 
-                  <h3 className="mt-2 text-lg font-bold">
-                    {product.name}
-                  </h3>
+                  <h3 className="mt-2 text-lg font-bold">{product.name}</h3>
 
                   <p className="mt-2 min-h-10 text-sm leading-5 text-slate-500">
                     {product.description || "Explore this product."}
@@ -239,7 +243,7 @@ export default function Storefront() {
 
                   <div className="mt-4 flex items-center justify-between">
                     <span className="text-xl font-bold">
-                      ₹{product.price.toLocaleString("en-IN")}
+                      ₹{Number(product.price).toLocaleString("en-IN")}
                     </span>
 
                     <div className="flex flex-col items-end gap-1">
@@ -268,11 +272,12 @@ export default function Storefront() {
                   </div>
 
                   <Link
-                    to={`/products/${product._id}`}
+                    to={`/user/products/${product._id}`}
                     className="mt-3 flex w-full items-center justify-center rounded-xl border border-emerald-800 px-4 py-3 font-semibold text-emerald-800 transition hover:bg-emerald-50"
                   >
                     View Details
                   </Link>
+
                   <button
                     onClick={() => addToCart(product)}
                     disabled={product.stock < 1}
