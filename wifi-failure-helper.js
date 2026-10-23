@@ -17,7 +17,17 @@ function isAdministrator() {
     execFileSync("fltmc.exe", [], { stdio: "ignore", windowsHide: true });
     return true;
   } catch {
-    return false;
+    // fltmc.exe may not be present on all Windows editions; fall back to
+    // querying a registry key that also requires elevation.
+    try {
+      execFileSync("reg", ["query", "HKU\\S-1-5-19"], {
+        stdio: "ignore",
+        windowsHide: true,
+      });
+      return true;
+    } catch {
+      return false;
+    }
   }
 }
 
@@ -117,7 +127,15 @@ const server = http.createServer((request, response) => {
 
 server.listen(PORT, HOST, () => {
   console.log(`SHCom Wi-Fi Failure Helper listening at http://${HOST}:${PORT}`);
-  console.log("Keep this terminal open while testing. The helper requires Administrator permission.");
+  if (!isAdministrator()) {
+    console.warn(
+      "WARNING: Not running as Administrator. Wi-Fi injection will fail. " +
+        "Restart this terminal as Administrator and run again."
+    );
+  } else {
+    console.log("Running with Administrator permission.");
+  }
+  console.log("Keep this terminal open while testing.");
 });
 
 server.on("error", (error) => {
