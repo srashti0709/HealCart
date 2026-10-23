@@ -231,9 +231,16 @@ export default function Storefront() {
                 </div>
 
                 <div className="p-5">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
-                    {product.category}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                      {product.category}
+                    </p>
+                    {product.isRaceTestProduct && (
+                      <span className="rounded-full bg-amber-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-amber-800">
+                        Chaos test · stock 1
+                      </span>
+                    )}
+                  </div>
 
                   <h3 className="mt-2 text-lg font-bold">{product.name}</h3>
 
