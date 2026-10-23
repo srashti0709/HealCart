@@ -34,4 +34,7 @@ export const API_ENDPOINTS = {
   paymentAttemptStatus: (attemptId) =>
     `${API_BASE_URL}/api/payments/attempts/${encodeURIComponent(attemptId)}`,
   paymentReconcile: `${CHAOS_CONTROLLER_URL}/api/chaos/payment-reconcile`,
+  lastItemRacePrepare: `${API_BASE_URL}/api/experiments/last-item-race/prepare`,
+  lastItemRaceStatus: (runId) =>
+    `${API_BASE_URL}/api/experiments/last-item-race/${encodeURIComponent(runId)}`,
 };

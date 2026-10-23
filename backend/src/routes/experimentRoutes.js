@@ -1,5 +1,9 @@
 const express = require("express");
+const crypto = require("crypto");
 const { authenticate, requireAdmin } = require("../middleware/auth");
+const Product = require("../models/Product");
+const RaceConditionRun = require("../models/RaceConditionRun");
+const { verifyRaceRun } = require("../services/raceConditionService");
 
 const router = express.Router();
 const CHAOS_URL = process.env.CHAOS_CONTROLLER_URL || "http://host.docker.internal:5003";
@@ -28,6 +32,84 @@ const sendForwarded = async (res, path, method, body) => {
 };
 
 router.use(authenticate, requireAdmin);
+
+router.post("/last-item-race/prepare", async (req, res) => {
+  let product;
+  try {
+    const runId = crypto.randomUUID();
+    const faultInjectedAt = new Date();
+    product = await Product.create({
+      name: `Last-Item Race Test ${runId.slice(0, 6)}`,
+      description: "Dedicated SHCom chaos-test item. Stock starts at exactly one. Open this product in two browser sessions and submit checkout close together.",
+      price: 1,
+      category: "Chaos Test",
+      stock: 1,
+      isRaceTestProduct: true,
+      raceTestRunId: runId,
+      raceFaultActive: true,
+    });
+
+    const run = await RaceConditionRun.create({
+      runId,
+      product: product._id,
+      initialStock: 1,
+      status: "ready",
+      faultInjectedAt,
+      message: "Controlled race window is active. Prepare two customer checkouts.",
+    });
+
+    return res.status(201).json({
+      success: true,
+      scenario: "last-item-race",
+      message: "Race-condition fault injected. A dedicated one-stock test product is ready on the storefront.",
+      run,
+      product: {
+        _id: product._id,
+        name: product.name,
+        price: product.price,
+        stock: product.stock,
+        category: product.category,
+      },
+      storefrontPath: `/user/products/${product._id}`,
+    });
+  } catch (error) {
+    if (product?._id) await Product.findByIdAndDelete(product._id).catch(() => {});
+    return res.status(500).json({
+      success: false,
+      scenario: "last-item-race",
+      message: error.message || "Could not prepare the race-condition test.",
+    });
+  }
+});
+
+router.get("/last-item-race/:runId", async (req, res) => {
+  try {
+    const run = await verifyRaceRun(req.params.runId);
+    if (!run) {
+      return res.status(404).json({ success: false, message: "Race-condition run not found." });
+    }
+
+    const product = await Product.findById(run.product || run.productId).lean();
+    return res.json({
+      success: true,
+      scenario: "last-item-race",
+      run,
+      product: product ? {
+        _id: product._id,
+        name: product.name,
+        stock: product.stock,
+        raceFaultActive: product.raceFaultActive,
+      } : null,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      scenario: "last-item-race",
+      message: error.message || "Could not read race-condition status.",
+    });
+  }
+});
+
 router.get("/history", (req, res) => sendForwarded(res, "/api/chaos/experiments/history"));
 router.get("/active", (req, res) => sendForwarded(res, "/api/chaos/experiments/active"));
 router.post("/run/:scenario", (req, res) => {
