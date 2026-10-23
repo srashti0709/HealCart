@@ -97,31 +97,33 @@ export default function Checkout() {
                         restoredAt: null,
                     });
                     try {
-                        const existingDraft = isInitialCheck ? await readCheckoutDraft() : null;
+                        const existingDraft = await readCheckoutDraft();
+                        const currentCart = JSON.parse(localStorage.getItem("shcomCart") || "[]");
+                        const hasCurrentProgress = Object.values(customerRef.current || {}).some(Boolean) || currentCart.length > 0;
                         const hasSavedProgress = existingDraft && (
                             Object.values(existingDraft.customer || {}).some(Boolean) ||
                             existingDraft.cart?.length
                         );
 
-                        if (hasSavedProgress) {
-                            const restoredCustomer = existingDraft.customer || { name: "", email: "", phone: "", address: "", city: "", postalCode: "" };
-                            customerRef.current = restoredCustomer;
-                            setCustomer(restoredCustomer);
-                            if (Array.isArray(existingDraft.cart)) writeCart(existingDraft.cart);
-                            setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
-                            setDraftMessage("Your saved checkout progress was loaded from this device. You can keep editing while offline.");
-                        } else {
-                            const currentCart = JSON.parse(localStorage.getItem("shcomCart") || "[]");
-                            const savedDraft = await saveCheckoutDraft(customerRef.current, currentCart);
-                            setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
-                            if (savedDraft) setDraftMessage("Checkout progress saved locally. No order was submitted.");
+                        if (hasCurrentProgress) {
+                            await saveCheckoutDraft(customerRef.current, currentCart);
+                        } else if (!hasSavedProgress) {
+                            await saveCheckoutDraft(customerRef.current, currentCart);
                         }
+
+                        const emptyCustomer = { name: "", email: "", phone: "", address: "", city: "", postalCode: "" };
+                        customerRef.current = emptyCustomer;
+                        setCustomer(emptyCustomer);
+                        setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
+                        setDraftMessage("Your checkout details and cart are saved on this device. No order was submitted.");
                     } catch {
-                        setDraftMessage("Connection interrupted, but the offline draft could not be loaded or saved.");
+                        setDraftMessage("Connection interrupted. SHCom could not confirm that the checkout draft was saved.");
                     }
                 }
                 wasUnavailableRef.current = true;
-            } else if (wasUnavailableRef.current || isInitialCheck) {
+            } else if (wasUnavailableRef.current || (isInitialCheck && ["failure-detected", "fault-triggered"].includes(
+                (() => { try { return JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "{}").status; } catch { return ""; } })()
+            ))) {
                 const wasUnavailable = wasUnavailableRef.current;
                 wasUnavailableRef.current = false;
                 if (wasUnavailable) {
@@ -133,8 +135,12 @@ export default function Checkout() {
                 try {
                     const draft = await readCheckoutDraft();
                     if (draft && (Object.values(draft.customer || {}).some(Boolean) || draft.cart?.length)) {
+                        const emptyCustomer = { name: "", email: "", phone: "", address: "", city: "", postalCode: "" };
+                        customerRef.current = emptyCustomer;
+                        setCustomer(emptyCustomer);
                         setRecoveryPrompt(true);
                         setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
+                        setDraftMessage("");
                     }
                 } catch {}
             }
@@ -425,6 +431,17 @@ export default function Checkout() {
             </header>
 
             <main className="mx-auto max-w-3xl px-5 py-10">
+                {connectionLost ? (
+                    <section role="status" className="flex min-h-[65vh] flex-col items-center justify-center text-center">
+                        <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+                            <RefreshCw size={36} />
+                        </div>
+                        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">SHCom offline mode</p>
+                        <h1 className="mt-3 text-3xl font-bold text-slate-900">This site is temporarily offline</h1>
+                        <p className="mt-3 max-w-lg text-slate-600">Your checkout details and cart have been saved on this device. Reconnect to the internet to recover your checkout. No order or payment has been submitted.</p>
+                        <p className="mt-4 text-sm text-slate-500">We are checking for your connection automatically.</p>
+                    </section>
+                ) : <>
                 <Link
                     to="/user/cart"
                     className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-800"
@@ -778,6 +795,7 @@ export default function Checkout() {
                                 : "Place order & pay"}
                     </button>
                 </form>
+                </>}
             </main>
         </div>
     );
