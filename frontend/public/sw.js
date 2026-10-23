@@ -20,7 +20,7 @@ self.addEventListener("fetch", (event) => {
     }).catch(async () => (await caches.match("/index.html")) || (await caches.match("/"))));
     return;
   }
-  if (/\\.(js|css|svg|woff2?|png|jpe?g|webp|ico)$/.test(url.pathname)) {
+  if (/\.(js|css|svg|woff2?|png|jpe?g|webp|ico)$/.test(url.pathname)) {
     event.respondWith(caches.match(request).then(async (cached) => {
       const network = fetch(request).then((response) => {
         if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
