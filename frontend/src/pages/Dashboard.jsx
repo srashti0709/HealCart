@@ -1228,22 +1228,37 @@ function Dashboard() {
           </div>
           <p className="mt-3 text-xs text-slate-500">Open Checkout in another tab and enter test details before clicking Inject Offline Failure. The local Windows helper disables Wi-Fi for at least 5 seconds, then automatically re-enables it. This affects internet for the whole laptop; it does not stop or crash the SHCom backend.</p>
           {wifiFailureMessage && <p role="status" className="mt-3 text-sm text-cyan-300">{wifiFailureMessage}</p>}
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              ["Failure detected", checkoutRecoveryEvidence?.failureDetectedAt],
-              ["Connection restored", checkoutRecoveryEvidence?.connectionRestoredAt],
-              ["Data restored", checkoutRecoveryEvidence?.restoredAt],
-              ["Last draft saved", checkoutDraftMeta?.savedAt],
-            ].map(([label, value]) => (
-              <div key={label} className="rounded-lg border border-slate-700 bg-slate-900/60 p-3">
-                <p className="text-xs text-slate-400">{label}</p>
-                <p className="mt-1 text-sm font-medium text-slate-200">{value ? new Date(value).toLocaleTimeString() : "Not recorded yet"}</p>
+          {(() => {
+            const status = checkoutRecoveryEvidence?.status;
+            const event = status === "checkout-completed"
+              ? { title: "Offline recovery completed", message: "Checkout data was recovered and the order was completed.", at: checkoutRecoveryEvidence?.completedAt }
+              : status === "data-restored"
+                ? { title: "Checkout data restored", message: `Recovered ${checkoutRecoveryEvidence.fieldsRestored ?? 0} checkout fields and ${checkoutRecoveryEvidence.cartLinesRestored ?? 0} cart lines. Review the details before placing the order.`, at: checkoutRecoveryEvidence?.restoredAt }
+                : status === "connection-restored"
+                  ? { title: "Connection restored", message: "The saved checkout draft is available. Recover it or discard it on the Checkout page.", at: checkoutRecoveryEvidence?.connectionRestoredAt }
+                  : status === "failure-detected" || status === "fault-triggered" || status === "failure-injected"
+                    ? { title: "Offline failure detected", message: "SHCom is monitoring connectivity. Checkout progress should be saved on this device.", at: checkoutRecoveryEvidence?.failureDetectedAt || checkoutRecoveryEvidence?.failureInjectedAt }
+                    : status === "draft-discarded"
+                      ? { title: "Saved draft discarded", message: "The saved checkout draft was discarded. Your cart and confirmed orders are handled separately.", at: checkoutRecoveryEvidence?.discardedAt }
+                      : null;
+            return (
+              <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900/60 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Latest offline recovery event</p>
+                {event ? (
+                  <>
+                    <p className="mt-2 text-sm font-semibold text-slate-100">{event.title}</p>
+                    <p className="mt-1 text-sm text-slate-300">{event.message}</p>
+                    {event.at && <p className="mt-2 text-xs text-slate-400">Recorded at {new Date(event.at).toLocaleTimeString()}</p>}
+                  </>
+                ) : (
+                  <p className="mt-2 text-sm text-slate-300">No offline recovery event has been recorded in this browser yet.</p>
+                )}
+                {checkoutDraftMeta?.savedAt && status !== "checkout-completed" && (
+                  <p className="mt-2 text-xs text-slate-400">Last local draft save: {new Date(checkoutDraftMeta.savedAt).toLocaleTimeString()}</p>
+                )}
               </div>
-            ))}
-          </div>
-          {checkoutRecoveryEvidence?.fieldsRestored != null && (
-            <p className="mt-3 text-sm text-emerald-300">Recovery verified: {checkoutRecoveryEvidence.fieldsRestored} checkout fields and {checkoutRecoveryEvidence.cartLinesRestored || 0} cart lines restored.</p>
-          )}
+            );
+          })()}
         </section>
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 px-6 py-5 lg:px-10">
           <div>
