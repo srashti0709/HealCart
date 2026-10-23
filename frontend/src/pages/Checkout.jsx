@@ -370,6 +370,39 @@ export default function Checkout() {
                     Back to cart
                 </Link>
 
+                {connectionLost && (
+                    <div role="status" className="mt-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950">
+                        <strong>Connection interrupted.</strong> Your checkout progress is saved on this device. You can keep filling in this form; orders are not submitted while disconnected.
+                        {draftMeta && <p className="mt-1 text-xs">Saved fields: {draftMeta.fields || 0} · Cart lines: {draftMeta.items || 0}</p>}
+                    </div>
+                )}
+                {draftMessage && <p className="mt-2 text-sm text-emerald-800">{draftMessage}</p>}
+                {recoveryPrompt && (
+                    <div role="dialog" aria-modal="true" className="mt-5 rounded-xl border border-emerald-300 bg-emerald-50 p-5 text-emerald-950">
+                        <h2 className="font-bold">Connection restored</h2>
+                        <p className="mt-1 text-sm">Would you like to recover your saved checkout data or discard it?</p>
+                        <div className="mt-4 flex flex-wrap gap-3">
+                            <button type="button" className="rounded-lg bg-emerald-800 px-4 py-2 font-semibold text-white" onClick={async () => {
+                                try {
+                                    const draft = await readCheckoutDraft();
+                                    if (!draft) { setDraftMessage("No saved checkout draft was found."); setRecoveryPrompt(false); return; }
+                                    setCustomer(draft.customer || { name: "", email: "", address: "", city: "", postalCode: "" });
+                                    if (Array.isArray(draft.cart)) localStorage.setItem("shcomCart", JSON.stringify(draft.cart));
+                                    window.dispatchEvent(new Event("shcom-cart-updated"));
+                                    await deleteCheckoutDraft();
+                                    setDraftMeta(null);
+                                    setRecoveryPrompt(false);
+                                    setDraftMessage("Saved checkout data recovered. Review your details and submit checkout when ready.");
+                                } catch { setDraftMessage("Could not recover the saved checkout draft."); }
+                            }}>Recover Data</button>
+                            <button type="button" className="rounded-lg border border-emerald-800 px-4 py-2 font-semibold" onClick={async () => {
+                                if (!window.confirm("Discard the saved checkout draft? Confirmed orders will not be affected.")) return;
+                                try { await deleteCheckoutDraft(); setDraftMeta(null); setRecoveryPrompt(false); setDraftMessage("Saved checkout draft discarded. No order was submitted."); }
+                                catch { setDraftMessage("Could not discard the saved checkout draft."); }
+                            }}>Discard Data</button>
+                        </div>
+                    </div>
+                )}
                 <div className="mt-7">
                     <h1 className="text-3xl font-bold text-slate-900">
                         Checkout
