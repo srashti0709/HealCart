@@ -37,6 +37,7 @@ export default function Checkout() {
     const [draftMessage, setDraftMessage] = useState("");
     const [draftMeta, setDraftMeta] = useState(null);
     const saveTimerRef = useRef(null);
+    const customerRef = useRef(customer);
     const wasUnavailableRef = useRef(false);
     const initialConnectivityCheckRef = useRef(true);
     const checkoutAttemptRef = useRef(null);
@@ -56,20 +57,19 @@ export default function Checkout() {
     const handleChange = (event) => {
         const { name, value } = event.target;
 
-        setCustomer((current) => {
-            const next = { ...current, [name]: value };
-            clearTimeout(saveTimerRef.current);
-            saveTimerRef.current = setTimeout(async () => {
-                try {
-                    const cart = JSON.parse(localStorage.getItem("shcomCart") || "[]");
-                    await saveCheckoutDraft(next, cart);
-                    setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
-                } catch {
-                    setDraftMessage("Could not save the offline draft on this device.");
-                }
-            }, 150);
-            return next;
-        });
+        const next = { ...customerRef.current, [name]: value };
+        customerRef.current = next;
+        setCustomer(next);
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = setTimeout(async () => {
+            try {
+                const cart = JSON.parse(localStorage.getItem("shcomCart") || "[]");
+                await saveCheckoutDraft(next, cart);
+                setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
+            } catch {
+                setDraftMessage("Could not save the offline draft on this device.");
+            }
+        }, 150);
     };
 
     useEffect(() => {
@@ -96,6 +96,14 @@ export default function Checkout() {
                         connectionRestoredAt: null,
                         restoredAt: null,
                     });
+                    try {
+                        const currentCart = JSON.parse(localStorage.getItem("shcomCart") || "[]");
+                        const savedDraft = await saveCheckoutDraft(customerRef.current, currentCart);
+                        setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
+                        if (savedDraft) setDraftMessage("Checkout progress saved locally. No order was submitted.");
+                    } catch {
+                        setDraftMessage("Connection interrupted, but the offline draft could not be saved.");
+                    }
                 }
                 wasUnavailableRef.current = true;
             } else if (wasUnavailableRef.current || isInitialCheck) {
@@ -426,7 +434,9 @@ export default function Checkout() {
                                 try {
                                     const draft = await readCheckoutDraft();
                                     if (!draft) { setDraftMessage("No saved checkout draft was found."); setRecoveryPrompt(false); return; }
-                                    setCustomer(draft.customer || { name: "", email: "", phone: "", address: "", city: "", postalCode: "" });
+                                    const restoredCustomer = draft.customer || { name: "", email: "", phone: "", address: "", city: "", postalCode: "" };
+                                    customerRef.current = restoredCustomer;
+                                    setCustomer(restoredCustomer);
                                     if (Array.isArray(draft.cart)) writeCart(draft.cart);
                                     updateRecoveryEvidence({
                                         status: "data-restored",
