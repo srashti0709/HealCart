@@ -309,10 +309,6 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    if (raceRunId && !raceReservation) {
-      await recordRaceAttempt({ runId: raceRunId, outcome: "rejected" }).catch(() => {});
-    }
-
     return res.status(400).json({
       success: false,
       message: error.message,
