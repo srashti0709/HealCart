@@ -97,12 +97,27 @@ export default function Checkout() {
                         restoredAt: null,
                     });
                     try {
-                        const currentCart = JSON.parse(localStorage.getItem("shcomCart") || "[]");
-                        const savedDraft = await saveCheckoutDraft(customerRef.current, currentCart);
-                        setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
-                        if (savedDraft) setDraftMessage("Checkout progress saved locally. No order was submitted.");
+                        const existingDraft = isInitialCheck ? await readCheckoutDraft() : null;
+                        const hasSavedProgress = existingDraft && (
+                            Object.values(existingDraft.customer || {}).some(Boolean) ||
+                            existingDraft.cart?.length
+                        );
+
+                        if (hasSavedProgress) {
+                            const restoredCustomer = existingDraft.customer || { name: "", email: "", phone: "", address: "", city: "", postalCode: "" };
+                            customerRef.current = restoredCustomer;
+                            setCustomer(restoredCustomer);
+                            if (Array.isArray(existingDraft.cart)) writeCart(existingDraft.cart);
+                            setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
+                            setDraftMessage("Your saved checkout progress was loaded from this device. You can keep editing while offline.");
+                        } else {
+                            const currentCart = JSON.parse(localStorage.getItem("shcomCart") || "[]");
+                            const savedDraft = await saveCheckoutDraft(customerRef.current, currentCart);
+                            setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
+                            if (savedDraft) setDraftMessage("Checkout progress saved locally. No order was submitted.");
+                        }
                     } catch {
-                        setDraftMessage("Connection interrupted, but the offline draft could not be saved.");
+                        setDraftMessage("Connection interrupted, but the offline draft could not be loaded or saved.");
                     }
                 }
                 wasUnavailableRef.current = true;
