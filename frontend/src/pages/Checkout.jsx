@@ -469,10 +469,13 @@ export default function Checkout() {
                                 if (!window.confirm("Discard the saved checkout draft? Confirmed orders will not be affected.")) return;
                                 try {
                                     await deleteCheckoutDraft();
+                                    const emptyCustomer = { name: "", email: "", phone: "", address: "", city: "", postalCode: "" };
+                                    customerRef.current = emptyCustomer;
+                                    setCustomer(emptyCustomer);
                                     updateRecoveryEvidence({ status: "draft-discarded", discardedAt: new Date().toISOString() });
                                     setDraftMeta(null);
                                     setRecoveryPrompt(false);
-                                    setDraftMessage("Saved checkout draft discarded. No order was submitted.");
+                                    setDraftMessage("Saved checkout details discarded. Your cart remains available so you can start checkout again.");
                                 }
                                 catch { setDraftMessage("Could not discard the saved checkout draft."); }
                             }}>Discard Data</button>
