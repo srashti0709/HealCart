@@ -237,6 +237,16 @@ export default function Checkout() {
             return;
         }
 
+        if (localStorage.getItem("shcomCheckoutFault") === "on" || !navigator.onLine) {
+            try {
+                await saveCheckoutDraft(customer, cart);
+                setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
+            } catch {}
+            setConnectionLost(true);
+            setError("Connection interrupted. Your checkout progress is saved on this device. No order was submitted.");
+            return;
+        }
+
         setProcessing(true);
 
         try {
@@ -325,7 +335,16 @@ export default function Checkout() {
                 return;
             }
 
-            setError(backendMessage);
+            if (!err.response || err.code === "ERR_NETWORK" || err.code === "ECONNABORTED") {
+                try {
+                    await saveCheckoutDraft(customer, cart);
+                    setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
+                } catch {}
+                setConnectionLost(true);
+                setError("Connection interrupted. Your checkout progress is saved on this device. No order was confirmed.");
+            } else {
+                setError(backendMessage);
+            }
         } finally {
             setProcessing(false);
         }
