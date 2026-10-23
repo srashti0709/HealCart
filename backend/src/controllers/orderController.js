@@ -11,6 +11,10 @@ const {
   buildPaymentAttemptId,
   recordPaymentAttempt,
 } = require("../services/paymentAttemptService");
+const {
+  recordRaceAttempt,
+  verifyRaceRun,
+} = require("../services/raceConditionService");
 
 const PAYMENT_SERVICE_URL =
   process.env.PAYMENT_SERVICE_URL || "http://localhost:5001";
@@ -80,7 +84,9 @@ const completePaidOrder = async (order, paymentResult, checkoutId) => {
     const session = await mongoose.startSession();
     try {
       await session.withTransaction(async () => {
-        await deductStockForOrder(order, session);
+        if (!order.inventoryReserved) {
+          await deductStockForOrder(order, session);
+        }
       });
     } finally {
       await session.endSession();
@@ -88,7 +94,16 @@ const completePaidOrder = async (order, paymentResult, checkoutId) => {
 
     order.paymentStatus = attempt.status;
     order.orderStatus = "placed";
+    order.inventoryReserved = false;
     await order.save();
+
+    for (const item of order.items) {
+      const testProduct = await Product.findById(item.product).select("isRaceTestProduct raceTestRunId");
+      if (testProduct?.isRaceTestProduct && testProduct.raceTestRunId) {
+        await verifyRaceRun(testProduct.raceTestRunId);
+      }
+    }
+
     await requestLowStockRestocks(order.items);
 
     try {
@@ -162,6 +177,8 @@ const placeOrder = async (req, res) => {
   }
 
   let order;
+  let raceRunId = null;
+  let raceReservation = false;
 
   try {
     const existingOrder = await Order.findOne({ checkoutId });
@@ -198,7 +215,39 @@ const placeOrder = async (req, res) => {
             throw new Error(`Product not found: ${item.productId}`);
           }
 
-          if (product.stock < quantity) {
+          if (product.isRaceTestProduct) {
+            raceRunId = product.raceTestRunId;
+
+            if (items.length !== 1 || quantity !== 1) {
+              throw new Error("The last-item race test accepts one test item per checkout.");
+            }
+
+            if (product.raceFaultActive) {
+              await new Promise((resolve) => setTimeout(resolve, 450));
+            }
+
+            const reservedProduct = await Product.findOneAndUpdate(
+              {
+                _id: product._id,
+                raceTestRunId: product.raceTestRunId,
+                isRaceTestProduct: true,
+                stock: { $gte: quantity },
+              },
+              { $inc: { stock: -quantity } },
+              { new: true, session }
+            );
+
+            if (!reservedProduct) {
+              const conflict = new Error(
+                "Sorry, this item was just purchased by another customer. Please update your cart."
+              );
+              conflict.code = "LAST_ITEM_RACE_CONFLICT";
+              conflict.raceRunId = raceRunId;
+              throw conflict;
+            }
+
+            raceReservation = true;
+          } else if (product.stock < quantity) {
             throw new Error(
               `Product unavailable or insufficient stock: ${item.productId}`
             );
@@ -220,6 +269,7 @@ const placeOrder = async (req, res) => {
               checkoutId,
               items: orderItems,
               totalAmount,
+              inventoryReserved: raceReservation,
               paymentStatus: "pending",
               orderStatus: "processing",
             },
@@ -244,9 +294,34 @@ const placeOrder = async (req, res) => {
   } catch (error) {
     console.error("Order creation failed:", error.message);
 
+    if (error.code === "LAST_ITEM_RACE_CONFLICT" && error.raceRunId) {
+      await recordRaceAttempt({
+        runId: error.raceRunId,
+        outcome: "rejected",
+      }).catch((recordError) => {
+        console.error("Could not record race-condition rejection:", recordError.message);
+      });
+
+      return res.status(409).json({
+        success: false,
+        scenario: "last-item-race",
+        message: "Sorry, this item was just purchased by another customer. Please update your cart.",
+      });
+    }
+
+    if (raceRunId && !raceReservation) {
+      await recordRaceAttempt({ runId: raceRunId, outcome: "rejected" }).catch(() => {});
+    }
+
     return res.status(400).json({
       success: false,
       message: error.message,
+    });
+  }
+
+  if (raceRunId && raceReservation) {
+    await recordRaceAttempt({ runId: raceRunId, outcome: "reserved" }).catch((error) => {
+      console.error("Could not record race-condition reservation:", error.message);
     });
   }
 
@@ -343,7 +418,7 @@ const placeOrder = async (req, res) => {
 
         try {
           await session.withTransaction(async () => {
-            await Order.findOneAndUpdate(
+            const failedOrder = await Order.findOneAndUpdate(
               {
                 _id: order._id,
                 paymentStatus: "pending",
@@ -352,16 +427,34 @@ const placeOrder = async (req, res) => {
                 $set: {
                   paymentStatus: "failed",
                   orderStatus: "cancelled",
+                  inventoryReserved: false,
                 },
               },
-              { new: true, session }
+              { session }
             );
+
+            if (failedOrder?.inventoryReserved) {
+              for (const item of failedOrder.items) {
+                await Product.updateOne(
+                  { _id: item.product },
+                  { $inc: { stock: item.quantity } },
+                  { session }
+                );
+              }
+            }
           });
         } finally {
           await session.endSession();
         }
 
         order = await Order.findById(order._id);
+
+        for (const item of order?.items || []) {
+          const testProduct = await Product.findById(item.product).select("isRaceTestProduct raceTestRunId");
+          if (testProduct?.isRaceTestProduct && testProduct.raceTestRunId) {
+            await verifyRaceRun(testProduct.raceTestRunId);
+          }
+        }
 
         await recordIncident({
           incidentType: "payment_failure_recovery",
