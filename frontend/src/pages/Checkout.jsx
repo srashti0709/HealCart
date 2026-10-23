@@ -75,7 +75,7 @@ export default function Checkout() {
     useEffect(() => {
         let alive = true;
         const checkConnectivity = async () => {
-            const forced = localStorage.getItem("shcomCheckoutFault") === "on";
+            const forced = false;
             let reachable = false;
             if (!forced && navigator.onLine) {
                 try {
@@ -294,7 +294,7 @@ export default function Checkout() {
         }
 
         let backendReachable = false;
-        if (localStorage.getItem("shcomCheckoutFault") !== "on" && navigator.onLine) {
+        if (navigator.onLine) {
             try {
                 const healthResponse = await fetch(API_ENDPOINTS.health, {
                     cache: "no-store",
@@ -304,7 +304,7 @@ export default function Checkout() {
             } catch {}
         }
 
-        if (localStorage.getItem("shcomCheckoutFault") === "on" || !navigator.onLine || connectionLost || !backendReachable) {
+        if (!navigator.onLine || connectionLost || !backendReachable) {
             try {
                 await saveCheckoutDraft(customer, cart);
                 setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
