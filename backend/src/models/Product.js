@@ -44,6 +44,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    raceReservationClaimed: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
