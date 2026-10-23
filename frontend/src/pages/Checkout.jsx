@@ -135,6 +135,8 @@ export default function Checkout() {
 
         if (result.state === PAYMENT_ATTEMPT_STATE.PAID) {
             clearCart();
+        deleteCheckoutDraft().catch(() => {});
+            deleteCheckoutDraft().catch(() => {});
 
             setOrderResult((current) => ({
                 ...(current || {}),
@@ -295,6 +297,8 @@ export default function Checkout() {
             }
 
             clearCart();
+        deleteCheckoutDraft().catch(() => {});
+            deleteCheckoutDraft().catch(() => {});
 
             setRecoveryResult(backendData.recovery || null);
 
