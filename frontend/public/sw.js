@@ -15,9 +15,18 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET" || url.origin !== self.location.origin || url.pathname.startsWith("/api/")) return;
   if (request.mode === "navigate") {
     event.respondWith(fetch(request).then((response) => {
-      const copy = response.clone();
-      caches.open(CACHE_NAME).then((cache) => cache.put("/index.html", copy));
+      if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put("/index.html", response.clone()));
       return response;
     }).catch(async () => (await caches.match("/index.html")) || (await caches.match("/"))));
+    return;
+  }
+  if (/\\.(js|css|svg|woff2?|png|jpe?g|webp|ico)$/.test(url.pathname)) {
+    event.respondWith(caches.match(request).then(async (cached) => {
+      const network = fetch(request).then((response) => {
+        if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
+        return response;
+      });
+      return cached || network;
+    }));
   }
 });
