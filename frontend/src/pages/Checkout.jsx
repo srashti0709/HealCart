@@ -3,7 +3,7 @@ import { API_ENDPOINTS } from "../config/api";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ShieldCheck, CreditCard, LoaderCircle, RefreshCw } from "lucide-react";
-import { clearCart } from "../lib/cart";
+import { clearCart, writeCart } from "../lib/cart";
 import { saveCheckoutDraft, readCheckoutDraft, deleteCheckoutDraft } from "../lib/offlineCheckoutDraft";
 import {
     buildCartFingerprint,
@@ -20,6 +20,7 @@ export default function Checkout() {
     const [customer, setCustomer] = useState({
         name: "",
         email: "",
+        phone: "",
         address: "",
         city: "",
         postalCode: "",
@@ -40,6 +41,17 @@ export default function Checkout() {
     const initialConnectivityCheckRef = useRef(true);
     const checkoutAttemptRef = useRef(null);
     const pollerRef = useRef(null);
+
+    const updateRecoveryEvidence = (patch) => {
+        try {
+            const current = JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "{}");
+            const next = { ...current, ...patch, updatedAt: new Date().toISOString() };
+            localStorage.setItem("shcomCheckoutRecoveryEvidence", JSON.stringify(next));
+            return next;
+        } catch {
+            return null;
+        }
+    };
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -77,9 +89,24 @@ export default function Checkout() {
             initialConnectivityCheckRef.current = false;
             setConnectionLost(unavailable);
             if (unavailable) {
+                if (!wasUnavailableRef.current) {
+                    updateRecoveryEvidence({
+                        status: "failure-detected",
+                        failureDetectedAt: new Date().toISOString(),
+                        connectionRestoredAt: null,
+                        restoredAt: null,
+                    });
+                }
                 wasUnavailableRef.current = true;
             } else if (wasUnavailableRef.current || isInitialCheck) {
+                const wasUnavailable = wasUnavailableRef.current;
                 wasUnavailableRef.current = false;
+                if (wasUnavailable) {
+                    updateRecoveryEvidence({
+                        status: "connection-restored",
+                        connectionRestoredAt: new Date().toISOString(),
+                    });
+                }
                 try {
                     const draft = await readCheckoutDraft();
                     if (draft && (Object.values(draft.customer || {}).some(Boolean) || draft.cart?.length)) {
@@ -135,8 +162,8 @@ export default function Checkout() {
 
         if (result.state === PAYMENT_ATTEMPT_STATE.PAID) {
             clearCart();
-        deleteCheckoutDraft().catch(() => {});
             deleteCheckoutDraft().catch(() => {});
+            updateRecoveryEvidence({ status: "checkout-completed", completedAt: new Date().toISOString() });
 
             setOrderResult((current) => ({
                 ...(current || {}),
@@ -237,7 +264,18 @@ export default function Checkout() {
             return;
         }
 
-        if (localStorage.getItem("shcomCheckoutFault") === "on" || !navigator.onLine) {
+        let backendReachable = false;
+        if (localStorage.getItem("shcomCheckoutFault") !== "on" && navigator.onLine) {
+            try {
+                const healthResponse = await fetch(API_ENDPOINTS.health, {
+                    cache: "no-store",
+                    signal: AbortSignal.timeout(1800),
+                });
+                backendReachable = healthResponse.ok;
+            } catch {}
+        }
+
+        if (localStorage.getItem("shcomCheckoutFault") === "on" || !navigator.onLine || connectionLost || !backendReachable) {
             try {
                 await saveCheckoutDraft(customer, cart);
                 setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
@@ -297,8 +335,8 @@ export default function Checkout() {
             }
 
             clearCart();
-        deleteCheckoutDraft().catch(() => {});
             deleteCheckoutDraft().catch(() => {});
+            updateRecoveryEvidence({ status: "checkout-completed", completedAt: new Date().toISOString() });
 
             setRecoveryResult(backendData.recovery || null);
 
@@ -388,18 +426,29 @@ export default function Checkout() {
                                 try {
                                     const draft = await readCheckoutDraft();
                                     if (!draft) { setDraftMessage("No saved checkout draft was found."); setRecoveryPrompt(false); return; }
-                                    setCustomer(draft.customer || { name: "", email: "", address: "", city: "", postalCode: "" });
-                                    if (Array.isArray(draft.cart)) localStorage.setItem("shcomCart", JSON.stringify(draft.cart));
-                                    window.dispatchEvent(new Event("shcom-cart-updated"));
-                                    await deleteCheckoutDraft();
-                                    setDraftMeta(null);
+                                    setCustomer(draft.customer || { name: "", email: "", phone: "", address: "", city: "", postalCode: "" });
+                                    if (Array.isArray(draft.cart)) writeCart(draft.cart);
+                                    updateRecoveryEvidence({
+                                        status: "data-restored",
+                                        restoredAt: new Date().toISOString(),
+                                        fieldsRestored: Object.values(draft.customer || {}).filter(Boolean).length,
+                                        cartLinesRestored: Array.isArray(draft.cart) ? draft.cart.length : 0,
+                                    });
+                                    setConnectionLost(false);
+                                    setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
                                     setRecoveryPrompt(false);
                                     setDraftMessage("Saved checkout data recovered. Review your details and submit checkout when ready.");
                                 } catch { setDraftMessage("Could not recover the saved checkout draft."); }
                             }}>Recover Data</button>
                             <button type="button" className="rounded-lg border border-emerald-800 px-4 py-2 font-semibold" onClick={async () => {
                                 if (!window.confirm("Discard the saved checkout draft? Confirmed orders will not be affected.")) return;
-                                try { await deleteCheckoutDraft(); setDraftMeta(null); setRecoveryPrompt(false); setDraftMessage("Saved checkout draft discarded. No order was submitted."); }
+                                try {
+                                    await deleteCheckoutDraft();
+                                    updateRecoveryEvidence({ status: "draft-discarded", discardedAt: new Date().toISOString() });
+                                    setDraftMeta(null);
+                                    setRecoveryPrompt(false);
+                                    setDraftMessage("Saved checkout draft discarded. No order was submitted.");
+                                }
                                 catch { setDraftMessage("Could not discard the saved checkout draft."); }
                             }}>Discard Data</button>
                         </div>
@@ -460,6 +509,24 @@ export default function Checkout() {
                             autoComplete="email"
                             className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
                             placeholder="you@example.com"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="mb-2 block text-sm font-medium" htmlFor="phone">
+                            Phone number
+                        </label>
+                        <input
+                            id="phone"
+                            name="phone"
+                            type="tel"
+                            value={customer.phone}
+                            onChange={handleChange}
+                            required
+                            autoComplete="tel"
+                            inputMode="tel"
+                            className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none focus:border-emerald-700 focus:ring-2 focus:ring-emerald-100"
+                            placeholder="Enter your phone number"
                         />
                     </div>
 
