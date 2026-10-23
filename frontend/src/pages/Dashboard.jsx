@@ -98,7 +98,7 @@ function Dashboard() {
   const recoveryLoadedRef = useRef(false);
   const [paymentChaosLoading, setPaymentChaosLoading] = useState(false);
   const [paymentChaosMessage, setPaymentChaosMessage] = useState("");
-  const [offlineCheckoutFault, setOfflineCheckoutFault] = useState(() => localStorage.getItem("shcomCheckoutFault") === "on");
+  const [offlineCheckoutFault, setOfflineCheckoutFault] = useState(() => localStorage.getItem("shcomCheckoutTestArmed") === "on");
   const [checkoutRecoveryEvidence, setCheckoutRecoveryEvidence] = useState(() => {
     try { return JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "null"); }
     catch { return null; }
@@ -113,7 +113,7 @@ function Dashboard() {
       try {
         setCheckoutRecoveryEvidence(JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "null"));
         setCheckoutDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
-        setOfflineCheckoutFault(localStorage.getItem("shcomCheckoutFault") === "on");
+        setOfflineCheckoutFault(localStorage.getItem("shcomCheckoutTestArmed") === "on");
       } catch {}
     };
     refreshCheckoutEvidence();
@@ -1183,23 +1183,24 @@ function Dashboard() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="font-semibold text-white">Offline Checkout Recovery Experiment</h2>
-              <p className="mt-1 text-sm text-slate-400">Controlled browser-side checkout fault. The storefront and backend services stay running; checkout submission is blocked while the fault is active.</p>
-              <p className="mt-2 text-sm text-slate-300">Status: {offlineCheckoutFault ? "Failure triggered — checkout connection blocked" : checkoutRecoveryEvidence?.status === "data-restored" ? "Data restored — awaiting customer checkout" : checkoutRecoveryEvidence?.status === "connection-restored" ? "Connection restored — awaiting customer choice" : checkoutRecoveryEvidence?.status === "failure-detected" ? "Failure detected" : checkoutRecoveryEvidence?.status === "checkout-completed" ? "Checkout completed" : checkoutRecoveryEvidence?.status === "draft-discarded" ? "Draft discarded" : "Ready"} · Draft: {checkoutDraftMeta ? `${checkoutDraftMeta.fields || 0} fields, ${checkoutDraftMeta.items || 0} cart lines` : "No saved draft metadata"}</p>
+              <p className="mt-1 text-sm text-slate-400">Arm this experiment, fill checkout details, then turn off your device internet. SHCom saves the draft locally, shows an offline screen, and offers recovery when the backend is reachable again.</p>
+              <p className="mt-2 text-sm text-slate-300">Status: {offlineCheckoutFault ? "Test armed — waiting for real connectivity loss" : checkoutRecoveryEvidence?.status === "data-restored" ? "Data restored — awaiting customer checkout" : checkoutRecoveryEvidence?.status === "connection-restored" ? "Connection restored — awaiting customer choice" : checkoutRecoveryEvidence?.status === "failure-detected" ? "Failure detected" : checkoutRecoveryEvidence?.status === "checkout-completed" ? "Checkout completed" : checkoutRecoveryEvidence?.status === "draft-discarded" ? "Draft discarded" : "Ready"} · Draft: {checkoutDraftMeta ? `${checkoutDraftMeta.fields || 0} fields, ${checkoutDraftMeta.items || 0} cart lines` : "No saved draft metadata"}</p>
             </div>
             <button type="button" onClick={() => {
               const next = !offlineCheckoutFault;
-              localStorage.setItem("shcomCheckoutFault", next ? "on" : "off");
+              localStorage.setItem("shcomCheckoutTestArmed", next ? "on" : "off");
+              localStorage.setItem("shcomCheckoutFault", "off");
               if (next) {
                 const current = (() => { try { return JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "{}"); } catch { return {}; } })();
-                localStorage.setItem("shcomCheckoutRecoveryEvidence", JSON.stringify({ ...current, status: "fault-triggered", faultTriggeredAt: new Date().toISOString() }));
+                localStorage.setItem("shcomCheckoutRecoveryEvidence", JSON.stringify({ ...current, status: "test-armed", testArmedAt: new Date().toISOString() }));
               }
               setOfflineCheckoutFault(next);
               try { setCheckoutRecoveryEvidence(JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "null")); } catch {}
             }} className={`rounded-xl px-4 py-3 text-sm font-semibold ${offlineCheckoutFault ? "bg-emerald-400 text-slate-950" : "bg-amber-500 text-slate-950"}`}>
-              {offlineCheckoutFault ? "Restore Checkout Connection" : "Trigger Offline Failure"}
+              {offlineCheckoutFault ? "Cancel Offline Test" : "Arm Offline Recovery Test"}
             </button>
           </div>
-          <p className="mt-3 text-xs text-slate-500">Keep this dashboard tab open and open /user/checkout in another tab. The checkout tab saves progress locally and detects the fault. This controlled test blocks checkout in the browser; it does not physically disconnect the computer or stop the whole backend.</p>
+          <p className="mt-3 text-xs text-slate-500">Arm the test, then open checkout in this browser, fill in test details, and turn off your device internet. Keep the Dashboard open in another tab. When you turn internet back on, the checkout page checks backend health automatically. This test does not stop or crash the backend.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
               ["Failure detected", checkoutRecoveryEvidence?.failureDetectedAt],
