@@ -37,6 +37,7 @@ export default function Checkout() {
     const [draftMeta, setDraftMeta] = useState(null);
     const saveTimerRef = useRef(null);
     const wasUnavailableRef = useRef(false);
+    const initialConnectivityCheckRef = useRef(true);
     const checkoutAttemptRef = useRef(null);
     const pollerRef = useRef(null);
 
@@ -72,11 +73,13 @@ export default function Checkout() {
             }
             if (!alive) return;
             const unavailable = forced || !navigator.onLine || !reachable;
+            const isInitialCheck = initialConnectivityCheckRef.current;
+            initialConnectivityCheckRef.current = false;
             setConnectionLost(unavailable);
             if (unavailable) {
                 wasUnavailableRef.current = true;
-            } else {
-                if (wasUnavailableRef.current) wasUnavailableRef.current = false;
+            } else if (wasUnavailableRef.current || isInitialCheck) {
+                wasUnavailableRef.current = false;
                 try {
                     const draft = await readCheckoutDraft();
                     if (draft && (Object.values(draft.customer || {}).some(Boolean) || draft.cart?.length)) {
