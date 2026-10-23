@@ -24,7 +24,7 @@ const recordRaceAttempt = async ({ runId, outcome }) => {
         ? { attemptCount: 1, successfulReservations: 1 }
         : { attemptCount: 1, rejectedAttempts: 1 },
       $set: {
-        status: "recovering",
+        status: outcome === "reserved" ? "ready" : "recovering",
         lastAttemptAt: now,
         ...(outcome === "rejected" ? { conflictDetectedAt: now } : {}),
         message: outcome === "reserved"
