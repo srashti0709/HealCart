@@ -75,13 +75,8 @@ export default function Checkout() {
             setConnectionLost(unavailable);
             if (unavailable) {
                 wasUnavailableRef.current = true;
-                try {
-                    const cart = JSON.parse(localStorage.getItem("shcomCart") || "[]");
-                    await saveCheckoutDraft(customer, cart);
-                    setDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
-                } catch {}
-            } else if (wasUnavailableRef.current) {
-                wasUnavailableRef.current = false;
+            } else {
+                if (wasUnavailableRef.current) wasUnavailableRef.current = false;
                 try {
                     const draft = await readCheckoutDraft();
                     if (draft && (Object.values(draft.customer || {}).some(Boolean) || draft.cart?.length)) {
