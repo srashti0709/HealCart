@@ -35,6 +35,10 @@ const orderSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    inventoryReserved: {
+      type: Boolean,
+      default: false,
+    },
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "failed", "unknown"],
