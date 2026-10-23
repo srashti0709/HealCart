@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { ArrowLeft, ShoppingCart, Package, LoaderCircle } from "lucide-react";
 import { API_ENDPOINTS } from "../config/api";
+import { readCart, writeCart } from "../lib/cart";
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -41,9 +42,7 @@ export default function ProductDetails() {
   const addToCart = () => {
     if (!product) return;
 
-    const existingCart = JSON.parse(
-      localStorage.getItem("shcomCart") || "[]"
-    );
+    const existingCart = readCart();
 
     const existingItem = existingCart.find(
       (item) => item.productId === product._id
@@ -68,7 +67,7 @@ export default function ProductDetails() {
       });
     }
 
-    localStorage.setItem("shcomCart", JSON.stringify(existingCart));
+    writeCart(existingCart);
     setMessage("Product added to cart successfully!");
   };
 

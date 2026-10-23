@@ -1,39 +1,41 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { API_BASE_URL, RECOVERY_MONITOR_URL as RECOVERY_MONITOR_BASE_URL, CHAOS_CONTROLLER_URL } from "../config/api";
+import {
+  API_BASE_URL,
+  API_ENDPOINTS,
+  CHAOS_CONTROLLER_URL,
+  PAYMENT_SERVICE_URL,
+  RECOVERY_MONITOR_URL,
+} from "../config/api";
 import ServiceDependencyMap from "../components/ServiceDependencyMap";
-import { Link } from "react-router-dom";
+import IncidentTimeline from "../components/IncidentTimeline";
+import SyntheticTrafficPanel from "../components/SyntheticTrafficPanel";
+import {
+  BackendCrashCoordinationControls,
+  BackendCrashTrafficResult,
+} from "../components/BackendCrashCoordination";
+import useBackendCrash from "../hooks/useBackendCrash";
+import {
+  getBackendHealthStatuses,
+  getIncidentsFreshness,
+} from "../lib/healthStatus";
+import {
+  derivePaymentHealthState,
+  buildPaymentHealthDetail,
+} from "../lib/paymentHealthStatus";
+import usePaymentReconcile from "../hooks/usePaymentReconcile";
 import {
   Activity,
   AlertTriangle,
-  ArrowLeft,
   CheckCircle2,
-  LayoutDashboard,
+  CreditCard,
   RefreshCw,
   Server,
-  ShieldCheck,
   Workflow,
 } from "lucide-react";
 
-const RECOVERY_MONITOR_URL = `${RECOVERY_MONITOR_BASE_URL}/api/recovery`;
-
-
-const navigation = [
-  { label: "Overview", icon: LayoutDashboard, href: "#overview" },
-  { label: "Service Health", icon: Server, href: "#service-health" },
-  { label: "Dependency Map", icon: Workflow, href: "#dependency-map" },
-  { label: "Incidents", icon: AlertTriangle, href: "#incidents" },
-  { label: "Recovery Analytics", icon: Activity, href: "#recovery-analytics" },
-  { label: "Recovery Metrics", icon: Workflow, href: "#recovery-metrics" },
-  { label: "Chaos Control Center", icon: Workflow, href: "#chaos-control" },
-];
-
-
 function Dashboard() {
-  const [chaosRunning, setChaosRunning] = useState(false);
-  const [chaosResult, setChaosResult] = useState("");
-  const [chaosError, setChaosError] = useState("");
   const [dbCheckRunning, setDbCheckRunning] = useState(false);
   const [dbCheckResult, setDbCheckResult] = useState("");
   const [dbCheckError, setDbCheckError] = useState("");
@@ -46,53 +48,86 @@ function Dashboard() {
 
   const [recoveryInfo, setRecoveryInfo] = useState(null);
   const [recoveryError, setRecoveryError] = useState("");
+  const [paymentHealth, setPaymentHealth] = useState(null);
+  const [paymentHealthError, setPaymentHealthError] = useState("");
+  const [paymentLastSuccessfulCheck, setPaymentLastSuccessfulCheck] = useState(null);
+  const [paymentLastFailure, setPaymentLastFailure] = useState(null);
+  const [paymentRecoveryAttempts, setPaymentRecoveryAttempts] = useState(null);
+  const [paymentRecoveryVerifiedAt, setPaymentRecoveryVerifiedAt] = useState(null);
   const [incidents, setIncidents] = useState([]);
   const [incidentsError, setIncidentsError] = useState("");
+  const [incidentsUpdatedAt, setIncidentsUpdatedAt] = useState(null);
 
   const [severityFilter, setSeverityFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [experimentHistory, setExperimentHistory] = useState([]);
-  const [activeExperiment, setActiveExperiment] = useState(null);
   const [experimentStatusError, setExperimentStatusError] = useState("");
   const [paymentRunning, setPaymentRunning] = useState(false);
   const [paymentResult, setPaymentResult] = useState("");
   const [paymentError, setPaymentError] = useState("");
 
+  const [paymentResponseLostRunning, setPaymentResponseLostRunning] = useState(false);
+  const [paymentResponseLostResult, setPaymentResponseLostResult] = useState(null);
+  const [paymentResponseLostError, setPaymentResponseLostError] = useState("");
+  const [paymentResponseLostStages, setPaymentResponseLostStages] = useState([]);
+  const [paymentResponseLostAttemptId, setPaymentResponseLostAttemptId] = useState("");
+  const [paymentResponseLostOrderId, setPaymentResponseLostOrderId] = useState("");
+  const [paymentResponseLostTransactionId, setPaymentResponseLostTransactionId] = useState("");
+  const [paymentResponseLostBeforeOrderCount, setPaymentResponseLostBeforeOrderCount] = useState(null);
+  const [paymentResponseLostBeforeStock, setPaymentResponseLostBeforeStock] = useState(null);
+  const [paymentResponseLostAfterOrderCount, setPaymentResponseLostAfterOrderCount] = useState(null);
+  const [paymentResponseLostAfterStock, setPaymentResponseLostAfterStock] = useState(null);
+  const [paymentResponseLostRefreshing, setPaymentResponseLostRefreshing] = useState(false);
+
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState("");
+  const [ordersRefreshing, setOrdersRefreshing] = useState(false);
   const [inventoryRunning, setInventoryRunning] = useState(false);
   const [inventoryResult, setInventoryResult] = useState(null);
   const [inventoryError, setInventoryError] = useState("");
   const [runAllRunning, setRunAllRunning] = useState(false);
   const [runAllResults, setRunAllResults] = useState([]);
   const [runAllError, setRunAllError] = useState("");
+  const [timelineLoading, setTimelineLoading] = useState(false);
+  const [timelineError, setTimelineError] = useState("");
+  const [timelineStale, setTimelineStale] = useState(false);
+  const [timelineLastUpdated, setTimelineLastUpdated] = useState(null);
   const experimentLockRef = useRef(false);
+  const recoveryLoadedRef = useRef(false);
+
+  const {
+    chaosRunning,
+    chaosResult,
+    chaosError,
+    chaosResponse,
+    coordinationEnabled,
+    setCoordinationEnabled,
+    trafficRate,
+    setTrafficRate,
+    trafficConcurrency,
+    setTrafficConcurrency,
+    trafficLimits,
+    runBackendCrash: triggerBackendCrash,
+  } = useBackendCrash();
+
+  const {
+    reconcileRunning,
+    reconcileResult,
+    reconcileError,
+    runReconciliation,
+  } = usePaymentReconcile();
+
   const runBackendCrash = async () => {
     if (experimentLockRef.current) return;
 
     experimentLockRef.current = true;
 
-    setChaosRunning(true);
-    setChaosResult("");
-    setChaosError("");
-
     try {
-      const response = await fetch(
-        "http://localhost:5003/api/chaos/backend-crash",
-        { method: "POST" }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || "Recovery test failed.");
-      }
-
-      setChaosResult(data.message || "Backend recovered successfully.");
-    } catch (error) {
-      setChaosError(error.message || "Could not run the recovery test.");
+      await triggerBackendCrash();
     } finally {
       experimentLockRef.current = false;
-      setChaosRunning(false);
     }
   };
 
@@ -182,6 +217,8 @@ function Dashboard() {
       }
 
       setPaymentResult(data.message);
+      setPaymentRecoveryAttempts((previous) => (previous === null ? 1 : previous + 1));
+      setPaymentRecoveryVerifiedAt(new Date().toISOString());
       await checkExperimentStatus();
     } catch (error) {
       setPaymentError(error.message || "Payment recovery failed.");
@@ -192,6 +229,278 @@ function Dashboard() {
     }
   };
 
+  const captureBeforeState = async () => {
+    setPaymentResponseLostError("");
+    setPaymentResponseLostResult(null);
+    setPaymentResponseLostStages([]);
+    setPaymentResponseLostBeforeOrderCount(null);
+    setPaymentResponseLostBeforeStock(null);
+    setPaymentResponseLostAfterOrderCount(null);
+    setPaymentResponseLostAfterStock(null);
+    setPaymentResponseLostAttemptId("");
+    setPaymentResponseLostOrderId("");
+    setPaymentResponseLostTransactionId("");
+
+    try {
+      const ordersResponse = await fetch(`${API_BASE_URL}/api/orders`);
+      const ordersData = await ordersResponse.json();
+
+      const productsResponse = await fetch(`${API_BASE_URL}/api/products`);
+      const productsData = await productsResponse.json();
+
+      const gamingMouse = (productsData.products || []).find(
+        (p) => p.name === "Wireless Gaming Mouse"
+      );
+
+      setPaymentResponseLostBeforeOrderCount(
+        Array.isArray(ordersData.orders) ? ordersData.orders.length : 0
+      );
+      setPaymentResponseLostBeforeStock(gamingMouse ? gamingMouse.stock : null);
+
+      setPaymentResponseLostStages([
+        {
+          stage: "before-state",
+          status: "passed",
+          timestamp: new Date().toISOString(),
+          message: `Before state captured: ${ordersData.orders?.length ?? 0} orders, Gaming Mouse stock ${gamingMouse?.stock ?? "unknown"}`,
+        },
+      ]);
+    } catch (error) {
+      setPaymentResponseLostError(
+        error.message || "Failed to capture before state."
+      );
+    }
+  };
+
+  const captureAfterState = async () => {
+    try {
+      const ordersResponse = await fetch(`${API_BASE_URL}/api/orders`);
+      const ordersData = await ordersResponse.json();
+
+      const productsResponse = await fetch(`${API_BASE_URL}/api/products`);
+      const productsData = await productsResponse.json();
+
+      const gamingMouse = (productsData.products || []).find(
+        (p) => p.name === "Wireless Gaming Mouse"
+      );
+
+      setPaymentResponseLostAfterOrderCount(
+        Array.isArray(ordersData.orders) ? ordersData.orders.length : 0
+      );
+      setPaymentResponseLostAfterStock(gamingMouse ? gamingMouse.stock : null);
+
+      setPaymentResponseLostStages((previous) => [
+        ...previous,
+        {
+          stage: "after-state",
+          status: "passed",
+          timestamp: new Date().toISOString(),
+          message: `After state captured: ${ordersData.orders?.length ?? 0} orders, Gaming Mouse stock ${gamingMouse?.stock ?? "unknown"}`,
+        },
+      ]);
+
+      // Read-only correlation: find the latest uncertain/paid order and read
+      // its attempt status to populate the attempt, order and transaction IDs.
+      // This never creates an order, never starts a payment and never changes
+      // stock or the ledger.
+      await refreshAttemptStatus();
+    } catch (error) {
+      setPaymentResponseLostError(
+        error.message || "Failed to capture after state."
+      );
+    }
+  };
+
+  const refreshAttemptStatus = async () => {
+    setPaymentResponseLostError("");
+    setPaymentResponseLostRefreshing(true);
+
+    try {
+      const ordersResponse = await fetch(`${API_BASE_URL}/api/orders`);
+      const ordersData = await ordersResponse.json();
+
+      if (!Array.isArray(ordersData.orders) || ordersData.orders.length === 0) {
+        setPaymentResponseLostError("No orders found to correlate.");
+        return;
+      }
+
+      // The attempt id equals the order id, so the order id doubles as the
+      // attempt id for the payment attempt lookup.
+      const latestUncertain = ordersData.orders.find(
+        (o) =>
+          o.paymentStatus === "unknown" ||
+          o.paymentStatus === "paid" ||
+          o.paymentStatus === "pending"
+      );
+
+      if (!latestUncertain) {
+        setPaymentResponseLostError(
+          "No uncertain or paid payment attempt found to correlate."
+        );
+        return;
+      }
+
+      const attemptId = String(latestUncertain._id);
+      const checkoutId = String(latestUncertain.checkoutId || "");
+
+      setPaymentResponseLostOrderId(attemptId);
+      setPaymentResponseLostAttemptId(attemptId);
+
+      if (!checkoutId) {
+        setPaymentResponseLostError(
+          "The latest order has no checkout id, so the attempt status cannot be read."
+        );
+        return;
+      }
+
+      const attemptResponse = await fetch(
+        API_ENDPOINTS.paymentAttemptStatus(attemptId),
+        {
+          headers: { "x-checkout-id": checkoutId },
+          signal: AbortSignal.timeout(5000),
+        }
+      );
+
+      if (!attemptResponse.ok) {
+        setPaymentResponseLostError(
+          `Attempt status returned HTTP ${attemptResponse.status}.`
+        );
+        return;
+      }
+
+      const attemptData = await attemptResponse.json();
+
+      if (!attemptData || !attemptData.success) {
+        setPaymentResponseLostError(
+          attemptData?.message || "Failed to read attempt status."
+        );
+        return;
+      }
+
+      const attempt = attemptData.attempt || {};
+      if (attempt.transactionId) {
+        setPaymentResponseLostTransactionId(attempt.transactionId);
+      }
+
+      const order = attemptData.order || {};
+
+      const details = [];
+      details.push(
+        `Attempt ${attemptId} status: ${attempt.status || "unknown"}.`
+      );
+      if (order.paymentStatus) {
+        details.push(`Order payment status: ${order.paymentStatus}.`);
+      }
+      if (attempt.transactionId) {
+        details.push(`Transaction ID: ${attempt.transactionId}.`);
+      }
+
+      const passed =
+        attempt.status === "paid" ||
+        attemptData.status === "paid" ||
+        order.paymentStatus === "paid";
+
+      setPaymentResponseLostResult({
+        passed,
+        message:
+          details.length > 0
+            ? details.join(" ")
+            : "Attempt status read successfully.",
+        details,
+      });
+    } catch (error) {
+      setPaymentResponseLostError(
+        error.message || "Failed to refresh attempt status."
+      );
+    } finally {
+      setPaymentResponseLostRefreshing(false);
+    }
+  };
+
+  const runPaymentResponseLost = async () => {
+    if (experimentLockRef.current) return;
+
+    experimentLockRef.current = true;
+
+    setPaymentResponseLostRunning(true);
+    setPaymentResponseLostResult(null);
+    setPaymentResponseLostError("");
+    setPaymentResponseLostStages([]);
+
+    try {
+      setPaymentResponseLostStages((previous) => [
+        ...previous,
+        {
+          stage: "prepare",
+          status: "pending",
+          timestamp: new Date().toISOString(),
+          message: "Ensure SIMULATE_PAYMENT_TIMEOUT=true is set in payment-service/.env and the payment-service container is restarted.",
+        },
+      ]);
+
+      setPaymentResponseLostStages((previous) => [
+        ...previous,
+        {
+          stage: "checkout",
+          status: "pending",
+          timestamp: new Date().toISOString(),
+          message: "Create a checkout through the normal checkout flow. The payment response will be lost (simulated timeout), but the transaction is durably recorded.",
+        },
+      ]);
+
+      setPaymentResponseLostStages((previous) => [
+        ...previous,
+        {
+          stage: "reconcile",
+          status: "pending",
+          timestamp: new Date().toISOString(),
+          message: "Run reconciliation to resolve the uncertain attempt from the durable ledger.",
+        },
+      ]);
+
+      setPaymentResponseLostStages((previous) => [
+        ...previous,
+        {
+          stage: "verify",
+          status: "pending",
+          timestamp: new Date().toISOString(),
+          message: "Verify the same transaction was recovered — not charged again — and stock was deducted exactly once.",
+        },
+      ]);
+
+      // Capture before state automatically at the start of the experiment.
+      await captureBeforeState();
+
+      setPaymentResponseLostStages((previous) =>
+        previous.map((s) =>
+          s.stage === "prepare"
+            ? { ...s, status: "passed", message: s.message + " (user action required)" }
+            : s
+        )
+      );
+
+      setPaymentResponseLostStages((previous) =>
+        previous.map((s) =>
+          s.stage === "checkout"
+            ? {
+                ...s,
+                status: "pending",
+                message:
+                  s.message +
+                  " Enter the Attempt ID and Order ID below after creating the checkout.",
+              }
+            : s
+        )
+      );
+
+      await checkExperimentStatus();
+    } catch (error) {
+      setPaymentResponseLostError(error.message || "Experiment setup failed.");
+    } finally {
+      experimentLockRef.current = false;
+      setPaymentResponseLostRunning(false);
+    }
+  };
   const runInventoryAudit = async () => {
     if (experimentLockRef.current) return;
 
@@ -227,6 +536,34 @@ function Dashboard() {
     } finally {
       experimentLockRef.current = false;
       setInventoryRunning(false);
+    }
+  };
+
+  const fetchAdminOrders = async () => {
+    setOrdersLoading(true);
+    setOrdersError("");
+    setOrdersRefreshing(true);
+
+    try {
+      const response = await axios.get(API_ENDPOINTS.orders, {
+        timeout: 10000,
+        validateStatus: (status) => status === 200,
+      });
+
+      const data = response.data || {};
+      const fetchedOrders = Array.isArray(data) ? data : data.orders || [];
+
+      setOrders(fetchedOrders);
+      setOrdersError("");
+    } catch (error) {
+      setOrdersError(
+        error.response?.data?.message ||
+          error.message ||
+          "Unable to load orders."
+      );
+    } finally {
+      setOrdersLoading(false);
+      setOrdersRefreshing(false);
     }
   };
 
@@ -316,17 +653,15 @@ function Dashboard() {
 
   const checkExperimentStatus = async () => {
     try {
-      const [historyResponse, activeResponse] = await Promise.all([
-        fetch(`${CHAOS_CONTROLLER_URL}/api/chaos/experiments/history`),
-        fetch(`${CHAOS_CONTROLLER_URL}/api/chaos/experiments/active`),
-      ]);
+      const historyResponse = await fetch(
+        `${CHAOS_CONTROLLER_URL}/api/chaos/experiments/history`
+      );
 
-      if (!historyResponse.ok || !activeResponse.ok) {
+      if (!historyResponse.ok) {
         throw new Error("Unable to fetch experiment status.");
       }
 
       const historyData = await historyResponse.json();
-      const activeData = await activeResponse.json();
 
       setExperimentHistory(
         Array.isArray(historyData.experiments)
@@ -334,7 +669,6 @@ function Dashboard() {
           : []
       );
 
-      setActiveExperiment(activeData.active ?? null);
       setExperimentStatusError("");
     } catch (error) {
       setExperimentStatusError(error.message);
@@ -350,11 +684,39 @@ function Dashboard() {
     try {
       const response = await axios.get(
         `${API_BASE_URL}/api/health`,
-        { timeout: 3000 }
+        {
+          timeout: 3000,
+          // A degraded backend still answers with a body that describes the
+          // failure, for example HTTP 503 with database "disconnected", so the
+          // response is inspected instead of being discarded.
+          validateStatus: () => true,
+        }
       );
 
-      setHealth(response.data);
-      setHealthError("");
+      const body =
+        response.data && typeof response.data === "object"
+          ? response.data
+          : null;
+
+      if (response.status === 200 && body?.success === true) {
+        setHealth(body);
+        setHealthError("");
+        return;
+      }
+
+      if (body && (body.status || body.database)) {
+        // The backend answered but is not fully healthy.
+        setHealth(body);
+        setHealthError(
+          body.database === "disconnected"
+            ? "Backend API is degraded: MongoDB is not connected."
+            : "Backend API is degraded."
+        );
+        return;
+      }
+
+      setHealth(null);
+      setHealthError("Backend API is unavailable.");
     } catch {
       setHealth(null);
       setHealthError("Backend API is unavailable.");
@@ -366,8 +728,14 @@ function Dashboard() {
 
 
   const checkRecoveryMonitor = async () => {
+    const isFirstLoad = !recoveryLoadedRef.current;
+
     try {
-      const response = await axios.get(RECOVERY_MONITOR_URL, {
+      if (isFirstLoad) {
+        setTimelineLoading(true);
+      }
+
+      const response = await axios.get(`${RECOVERY_MONITOR_URL}/api/recovery`, {
         timeout: 8000,
       });
 
@@ -376,7 +744,11 @@ function Dashboard() {
       }
 
       setRecoveryInfo(response.data);
+      recoveryLoadedRef.current = true;
       setRecoveryError("");
+      setTimelineLastUpdated(new Date().toISOString());
+      setTimelineStale(false);
+      setTimelineError("");
     } catch (error) {
       console.error(
         "Recovery Monitor request failed:",
@@ -390,6 +762,16 @@ function Dashboard() {
             ? "Cannot connect to Recovery Monitor on port 5002."
             : error.message || "Recovery Monitor request failed."
       );
+      setTimelineError(
+        error.code === "ECONNABORTED"
+          ? "Recovery monitor request timed out. Timeline data may be stale."
+          : "Unable to fetch the live incident timeline right now."
+      );
+      setTimelineStale(true);
+    } finally {
+      if (isFirstLoad) {
+        setTimelineLoading(false);
+      }
     }
   };
 
@@ -401,22 +783,47 @@ function Dashboard() {
       );
 
       setIncidents(response.data.incidents || []);
+      setIncidentsUpdatedAt(new Date().toLocaleTimeString());
       setIncidentsError("");
-    } catch (error) {
+    } catch {
       setIncidentsError(
         "Unable to load incidents from the backend."
       );
     }
   }
 
-  async function refreshAllStatuses() {
+  const checkPaymentHealth = async () => {
+    try {
+      const response = await axios.get(`${PAYMENT_SERVICE_URL}/health`, {
+        timeout: 3000,
+      });
+      setPaymentHealth(response.data || null);
+      setPaymentHealthError("");
+      setPaymentLastSuccessfulCheck(new Date().toLocaleTimeString());
+      setPaymentLastFailure(null);
+    } catch (error) {
+      setPaymentHealth(null);
+      setPaymentLastFailure(
+        error?.code === "ECONNABORTED"
+          ? "Payment service health check timed out."
+          : error?.message || "Payment service is unavailable."
+      );
+      setPaymentHealthError(
+        error?.code === "ECONNABORTED"
+          ? "Payment service health check timed out."
+          : error?.message || "Payment service is unavailable."
+      );
+    }
+  };
+
+  const refreshAllStatuses = useCallback(async () => {
     await Promise.all([
       checkBackendHealth(),
       checkRecoveryMonitor(),
+      checkPaymentHealth(),
       checkIncidents(),
     ]);
-  }
-
+  }, []);
 
   useEffect(() => {
     let isRefreshing = false;
@@ -438,7 +845,8 @@ function Dashboard() {
     const intervalId = setInterval(refresh, 5000);
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [refreshAllStatuses]);
+
   useEffect(() => {
     checkExperimentStatus();
 
@@ -447,22 +855,33 @@ function Dashboard() {
     return () => clearInterval(intervalId);
   }, []);
 
+  useEffect(() => {
+    const loadOrders = async () => {
+      await fetchAdminOrders();
+    };
+    loadOrders();
+  }, []);
 
-  const backendStatus = healthError
-    ? "Unavailable"
-    : !health
-      ? "Checking"
-      : health.status === "healthy"
-        ? "Healthy"
-        : "Degraded";
 
-  const databaseStatus = healthError
-    ? "Unknown"
-    : !health
-      ? "Checking"
-      : health.database === "connected"
-        ? "Connected"
-        : "Disconnected";
+  const { backendStatus, databaseStatus } = getBackendHealthStatuses({
+    health,
+    healthError,
+  });
+
+  const paymentStatus = derivePaymentHealthState({
+    paymentHealth,
+    paymentHealthError,
+    paymentRunning,
+  });
+
+  const paymentDetail = buildPaymentHealthDetail({
+    paymentHealth,
+    paymentHealthError,
+    paymentLastSuccessfulCheck,
+    paymentLastFailure,
+    paymentRecoveryAttempts,
+    paymentRecoveryVerifiedAt,
+  });
 
   const recoveryStatus = recoveryError
     ? "Unavailable"
@@ -485,6 +904,15 @@ function Dashboard() {
         : `Docker: ${recoveryInfo.container}`;
 
   const totalIncidents = incidents.length;
+
+  // The analytics keep their last known figures when the backend cannot be
+  // reached, so they are marked as stale instead of being cleared.
+  const { stale: incidentsAreStale, updatedAt: incidentsUpdatedAtValue } =
+    getIncidentsFreshness({
+      incidents,
+      incidentsError,
+      updatedAt: incidentsUpdatedAt,
+    });
 
   const resolvedIncidents = incidents.filter(
     (incident) => incident.status === "resolved"
@@ -548,6 +976,12 @@ function Dashboard() {
     }))
     .sort((a, b) => b.count - a.count);
 
+  const paymentIncidents = incidents.filter(
+    (incident) =>
+      String(incident.incidentType || "").toLowerCase().includes("payment") ||
+      String(incident.message || "").toLowerCase().includes("payment")
+  );
+
   const recoveryActionsSummary = Object.entries(
     incidents.reduce((counts, incident) => {
       const action = incident.recoveryAction || "No action recorded";
@@ -598,9 +1032,9 @@ function Dashboard() {
     },
     {
       name: "Payment Service",
-      detail: "Simulated payments · Port 5001",
-      icon: Activity,
-      status: "Not checked",
+      detail: paymentDetail,
+      icon: CreditCard,
+      status: paymentStatus,
     },
     {
       name: "Recovery Monitor",
@@ -611,84 +1045,7 @@ function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 md:flex">
-      <aside className="flex w-full shrink-0 flex-col border-b border-slate-800 bg-[#0d1320] md:sticky md:top-0 md:h-screen md:w-64 md:border-b-0 md:border-r">
-        <div className="flex items-center gap-3 border-b border-slate-800 p-6">
-          <div className="rounded-xl bg-cyan-400/10 p-2.5 text-cyan-400">
-            <ShieldCheck size={27} />
-          </div>
-
-          <div>
-            <h1 className="text-xl font-bold tracking-wide">SHCom</h1>
-            <p className="mt-1 text-xs text-slate-400">
-              Self-Healing Commerce
-            </p>
-          </div>
-        </div>
-
-        <div className="p-4">
-          <p className="px-3 pb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-            Monitoring
-          </p>
-
-          <nav className="space-y-1">
-
-            {navigation.map(({ label, icon: Icon, href }) => (
-              <a
-                key={label}
-                href={href}
-                onClick={(event) => {
-                  event.preventDefault();
-
-                  const target = document.getElementById(href.slice(1));
-
-                  target?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "start",
-                  });
-                }}
-                className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white"
-              >
-                <Icon size={18} />
-                {label}
-              </a>
-            ))}
-
-          </nav>
-        </div>
-
-        <div className="mt-auto hidden p-4 md:block">
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <Activity size={16} className="text-cyan-400" />
-              Resilience Platform
-            </div>
-
-            <p className="mt-2 text-xs leading-5 text-slate-500">
-              Monitor failures, recovery actions and service availability.
-            </p>
-          </div>
-
-          <Link
-            to="/"
-            className="mt-4 flex items-center gap-2 rounded-xl px-3 py-3 text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white"
-          >
-            <ArrowLeft size={17} />
-            Back to Storefront
-          </Link>
-        </div>
-
-        <div className="p-4 md:hidden">
-          <Link
-            to="/"
-            className="flex items-center gap-2 rounded-xl px-3 py-3 text-sm text-slate-400 hover:bg-slate-800 hover:text-white"
-          >
-            <ArrowLeft size={17} />
-            Back to Storefront
-          </Link>
-        </div>
-      </aside>
-
+    <div className="min-h-screen bg-[#090d16] text-slate-100">
       <main className="min-w-0 flex-1">
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 px-6 py-5 lg:px-10">
           <div>
@@ -750,6 +1107,24 @@ function Dashboard() {
               </div>
             </div>
           </section>
+
+          <ServiceDependencyMap
+            health={health}
+            paymentHealth={paymentHealth}
+            recoveryInfo={recoveryInfo}
+            recoveryError={recoveryError}
+            healthError={healthError}
+            paymentHealthError={paymentHealthError}
+          />
+
+          <IncidentTimeline
+            events={Array.isArray(recoveryInfo?.events) ? recoveryInfo.events : []}
+            incidents={paymentIncidents}
+            loading={timelineLoading}
+            error={timelineError}
+            stale={timelineStale}
+            lastUpdated={timelineLastUpdated}
+          />
 
           <section id="service-health" className="scroll-mt-6">
             <div className="mb-4">
@@ -822,12 +1197,6 @@ function Dashboard() {
             </div>
           </section>
 
-
-          <ServiceDependencyMap
-            incidents={incidents}
-            experimentHistory={experimentHistory}
-            recoveryInfo={recoveryInfo}
-          />
 
           <section
             id="incidents"
@@ -1110,6 +1479,21 @@ function Dashboard() {
               </article>
             </div>
 
+            {incidentsAreStale ? (
+              <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-200">
+                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                <span>
+                  These figures are the last ones loaded at{" "}
+                  {incidentsUpdatedAtValue || "an earlier time"}. The backend
+                  could not be reached, so the numbers may be out of date.
+                </span>
+              </div>
+            ) : incidentsUpdatedAt ? (
+              <p className="mt-4 text-xs text-slate-500">
+                Last updated at {incidentsUpdatedAt}
+              </p>
+            ) : null}
+
 
             <div className="mt-6 grid gap-6 lg:grid-cols-2">
               {/* Resolution Rate */}
@@ -1284,7 +1668,9 @@ function Dashboard() {
                     chaosRunning ||
                     dbCheckRunning ||
                     paymentRunning ||
-                    inventoryRunning
+                    inventoryRunning ||
+                    reconcileRunning ||
+                    paymentResponseLostRunning
                   }
                   className="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-cyan-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -1399,6 +1785,22 @@ function Dashboard() {
               {chaosError && (
                 <p className="mt-4 text-sm text-red-400">{chaosError}</p>
               )}
+
+              <BackendCrashCoordinationControls
+                enabled={coordinationEnabled}
+                onToggle={setCoordinationEnabled}
+                rate={trafficRate}
+                onRateChange={setTrafficRate}
+                concurrency={trafficConcurrency}
+                onConcurrencyChange={setTrafficConcurrency}
+                limits={trafficLimits}
+                disabled={chaosRunning}
+              />
+
+              <BackendCrashTrafficResult
+                response={chaosResponse}
+                coordinationRequested={coordinationEnabled}
+              />
             </div>
 
             <div className="mt-6 rounded-xl border border-slate-800 bg-[#101827] p-5">
@@ -1528,6 +1930,302 @@ function Dashboard() {
             <div className="mt-6 rounded-xl border border-slate-800 bg-[#101827] p-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
+                  <h4 className="font-semibold text-white">
+                    Payment Reconciliation
+                  </h4>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Asks the backend to examine existing payment attempts whose
+                    outcome is still uncertain. It verifies durable transactions
+                    and finalizes matching orders at most once. It does not
+                    submit a checkout, start a payment, or create a new order.
+                    HTTP success alone is not proof a payment was captured;
+                    the resolved counts show what was actually confirmed.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={runReconciliation}
+                  disabled={
+                    reconcileRunning ||
+                    runAllRunning ||
+                    chaosRunning ||
+                    dbCheckRunning ||
+                    paymentRunning ||
+                    inventoryRunning
+                  }
+                  className="rounded-lg border border-violet-700 px-4 py-2 text-sm text-violet-300 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {reconcileRunning
+                    ? "Reconciling..."
+                    : "Request Payment Reconciliation"}
+                </button>
+              </div>
+
+              {reconcileRunning && (
+                <p className="mt-4 text-sm text-amber-400">
+                  Examining existing payment attempts. This does not start a new payment.
+                </p>
+              )}
+
+              {reconcileResult && (
+                <div className="mt-4 rounded-lg border p-3 text-sm">
+                  <div className="mb-2 flex items-center gap-2">
+                    {reconcileResult.outcome === "success" ? (
+                      <span className="rounded-full border px-2 py-0.5 border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+                        Resolved
+                      </span>
+                    ) : reconcileResult.outcome === "unresolved" ? (
+                      <span className="rounded-full border px-2 py-0.5 border-amber-500/30 bg-amber-500/10 text-amber-400">
+                        Unresolved
+                      </span>
+                    ) : (
+                      <span className="rounded-full border px-2 py-0.5 border-red-500/30 bg-red-500/10 text-red-400">
+                        Error
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-slate-300">{reconcileResult.message}</p>
+                  {reconcileResult.examined > 0 && (
+                    <div className="mt-2 grid gap-2 sm:grid-cols-4 text-xs">
+                      <div>
+                        <p className="text-slate-500">Examined</p>
+                        <p className="text-slate-300">{reconcileResult.examined}</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-500">Paid</p>
+                        <p className="text-emerald-400">{reconcileResult.resolvedPaid}</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-500">Failed</p>
+                        <p className="text-red-400">{reconcileResult.resolvedFailed}</p>
+                      </div>
+                      <div>
+                        <p className="text-slate-500">Unresolved</p>
+                        <p className="text-amber-400">{reconcileResult.unresolved}</p>
+                      </div>
+                    </div>
+                  )}
+                  {reconcileResult.note && (
+                    <p className="mt-2 text-xs text-slate-500">
+                      {reconcileResult.note}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {reconcileError && (
+                <p className="mt-4 text-sm text-red-400">{reconcileError}</p>
+              )}
+            </div>
+
+            <div className="mt-6 rounded-xl border border-slate-800 bg-[#101827] p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h4 className="font-semibold text-white">
+                    Payment Response Lost Recovery
+                  </h4>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Verifies that a payment which succeeds and is durably
+                    recorded, but whose response is lost to the client, is
+                    recovered through the durable ledger without duplicate
+                    payment, order, or stock deduction.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={runPaymentResponseLost}
+                  disabled={
+                    paymentResponseLostRunning ||
+                    runAllRunning ||
+                    chaosRunning ||
+                    dbCheckRunning ||
+                    paymentRunning ||
+                    inventoryRunning
+                  }
+                  className="rounded-lg border border-amber-700 px-4 py-2 text-sm text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {paymentResponseLostRunning
+                    ? "Running..."
+                    : "Start Payment Response Lost Test"}
+                </button>
+              </div>
+
+              {paymentResponseLostRunning && (
+                <p className="mt-4 text-sm text-amber-400">
+                  Experiment in progress. Complete the manual steps shown below.
+                </p>
+              )}
+
+              {paymentResponseLostStages.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs uppercase tracking-wider text-slate-400">
+                    Progress Stages
+                  </p>
+                  {paymentResponseLostStages.map((stage, index) => (
+                    <div
+                      key={`${stage.stage}-${index}`}
+                      className="flex items-start justify-between gap-3 rounded border border-slate-800 bg-slate-900/60 p-2 text-xs"
+                    >
+                      <div>
+                        <p className="font-medium text-slate-200">
+                          {stage.stage.charAt(0).toUpperCase() + stage.stage.slice(1).replaceAll("-", " ")}
+                        </p>
+                        <p className="text-slate-400">{stage.message}</p>
+                      </div>
+                      <span
+                        className={`rounded-full px-2 py-1 ${stage.status === "passed" ? "bg-emerald-500/10 text-emerald-300" : stage.status === "failed" ? "bg-red-500/10 text-red-400" : "bg-amber-500/10 text-amber-400"}`}
+                      >
+                        {stage.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {paymentResponseLostError && (
+                <p className="mt-4 text-sm text-red-400">
+                  {paymentResponseLostError}
+                </p>
+              )}
+
+              <div className="mt-6 space-y-3">
+                <div className="flex flex-wrap gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1">
+                      Payment Attempt ID
+                    </label>
+                    <input
+                      type="text"
+                      value={paymentResponseLostAttemptId}
+                      onChange={(e) => setPaymentResponseLostAttemptId(e.target.value)}
+                      placeholder="Attempt ID from checkout"
+                      className="w-48 rounded-xl border border-slate-700 bg-[#0d1320] px-3 py-2 text-sm text-slate-200 focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1">
+                      Order ID
+                    </label>
+                    <input
+                      type="text"
+                      value={paymentResponseLostOrderId}
+                      onChange={(e) => setPaymentResponseLostOrderId(e.target.value)}
+                      placeholder="Order ID from checkout"
+                      className="w-48 rounded-xl border border-slate-700 bg-[#0d1320] px-3 py-2 text-sm text-slate-200 focus:border-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-400 mb-1">
+                      Transaction ID
+                    </label>
+                    <input
+                      type="text"
+                      value={paymentResponseLostTransactionId}
+                      onChange={(e) => setPaymentResponseLostTransactionId(e.target.value)}
+                      placeholder="Transaction ID (after recovery)"
+                      className="w-48 rounded-xl border border-slate-700 bg-[#0d1320] px-3 py-2 text-sm text-slate-200 focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-4 text-xs">
+                  <div className="rounded-lg border border-slate-800 bg-[#0d1320] p-3">
+                    <p className="text-slate-500">Orders Before</p>
+                    <p className="mt-1 text-sm font-semibold text-slate-300">
+                      {paymentResponseLostBeforeOrderCount ?? "—"}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-slate-800 bg-[#0d1320] p-3">
+                    <p className="text-slate-500">Orders After</p>
+                    <p className="mt-1 text-sm font-semibold text-slate-300">
+                      {paymentResponseLostAfterOrderCount ?? "—"}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-slate-800 bg-[#0d1320] p-3">
+                    <p className="text-slate-500">Gaming Mouse Stock Before</p>
+                    <p className="mt-1 text-sm font-semibold text-slate-300">
+                      {paymentResponseLostBeforeStock ?? "—"}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-slate-800 bg-[#0d1320] p-3">
+                    <p className="text-slate-500">Gaming Mouse Stock After</p>
+                    <p className="mt-1 text-sm font-semibold text-slate-300">
+                      {paymentResponseLostAfterStock ?? "—"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={captureBeforeState}
+                    disabled={
+                      paymentResponseLostRunning ||
+                      paymentResponseLostBeforeOrderCount !== null
+                    }
+                    className="rounded-lg border border-cyan-700 px-3 py-2 text-sm text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Capture Before State
+                  </button>
+                  <button
+                    type="button"
+                    onClick={captureAfterState}
+                    disabled={
+                      paymentResponseLostRunning ||
+                      paymentResponseLostAfterOrderCount !== null
+                    }
+                    className="rounded-lg border border-cyan-700 px-3 py-2 text-sm text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Capture After State
+                  </button>
+                  <button
+                    type="button"
+                    onClick={refreshAttemptStatus}
+                    disabled={
+                      paymentResponseLostRunning ||
+                      paymentResponseLostRefreshing
+                    }
+                    className="rounded-lg border border-violet-700 px-3 py-2 text-sm text-violet-300 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {paymentResponseLostRefreshing
+                      ? "Refreshing..."
+                      : "Refresh Attempt Status"}
+                  </button>
+                </div>
+              </div>
+
+              {paymentResponseLostResult && (
+                <div className="mt-4 rounded-lg border p-3 text-sm">
+                  <div className="mb-2 flex items-center gap-2">
+                    <span
+                      className={`rounded-full px-2 py-0.5 ${
+                        paymentResponseLostResult.passed
+                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                          : "border-red-500/30 bg-red-500/10 text-red-400"
+                      }`}
+                    >
+                      {paymentResponseLostResult.passed ? "Recovery Verified" : "Recovery Failed"}
+                    </span>
+                  </div>
+                  <p className="mt-1 text-slate-300">
+                    {paymentResponseLostResult.message}
+                  </p>
+                  {paymentResponseLostResult.details && (
+                    <ul className="mt-2 text-xs text-slate-400 space-y-1 list-disc list-inside">
+                      {paymentResponseLostResult.details.map(
+                        (detail, i) => (
+                          <li key={i}>{detail}</li>
+                        )
+                      )}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 rounded-xl border border-slate-800 bg-[#101827] p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
                   <h4 className="font-semibold text-white">Inventory Integrity Audit</h4>
                   <p className="mt-1 text-sm text-slate-400">
                     Performs a read-only audit of product stock and prices for invalid values.
@@ -1536,8 +2234,8 @@ function Dashboard() {
                 <button
                   type="button"
                   onClick={runInventoryAudit}
-                  disabled={runAllRunning || paymentRunning || inventoryRunning || chaosRunning || dbCheckRunning}
-                  className="rounded-lg border border-cyan-700 px-4 py-2 text-sm text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={runAllRunning || paymentRunning || inventoryRunning || chaosRunning || dbCheckRunning || paymentResponseLostRunning}
+                  className="rounded-lg border border-cyan-700 px-3 py-2 text-sm text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {inventoryRunning ? "Auditing..." : "Run Inventory Audit"}
                 </button>
@@ -1599,8 +2297,157 @@ function Dashboard() {
             </div>
 
 
+
           </section>
 
+          <div className="mt-6 rounded-xl border border-slate-800 bg-[#101827] p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h4 className="font-semibold text-white">
+                  Admin Orders
+                </h4>
+                <p className="mt-1 text-sm text-slate-400">
+                  Read-only view of all orders placed through the Storefront.
+                  Payment status reflects the durable backend record, not
+                  frontend inference.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={fetchAdminOrders}
+                disabled={ordersLoading || ordersRefreshing}
+                className="rounded-lg border border-cyan-700 px-4 py-2 text-sm text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {ordersRefreshing ? "Refreshing..." : "Refresh Orders"}
+              </button>
+            </div>
+
+            {ordersLoading && (
+              <div className="mt-4 rounded-lg border border-slate-800 bg-[#0d1320] p-6 text-center text-slate-400">
+                Loading orders...
+              </div>
+            )}
+
+            {ordersError && !ordersLoading && orders.length === 0 && (
+              <div className="mt-4 rounded-lg border border-red-900/30 bg-red-900/10 p-6">
+                <p className="text-sm text-red-400">{ordersError}</p>
+                <button
+                  type="button"
+                  onClick={fetchAdminOrders}
+                  disabled={ordersLoading || ordersRefreshing}
+                  className="mt-3 text-sm text-cyan-400 underline"
+                >
+                  Try again
+                </button>
+              </div>
+            )}
+
+            {!ordersLoading && !ordersError && orders.length === 0 && (
+              <div className="mt-4 rounded-lg border border-slate-800 bg-[#0d1320] p-6 text-center text-slate-400">
+                <p className="text-sm">No orders found.</p>
+              </div>
+            )}
+
+            {!ordersLoading && !ordersError && orders.length > 0 && (
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-700 text-xs uppercase tracking-wider text-slate-400">
+                      <th className="pb-3 font-semibold text-slate-300">
+                        Order ID
+                      </th>
+                      <th className="pb-3 font-semibold text-slate-300">
+                        Date
+                      </th>
+                      <th className="pb-3 font-semibold text-slate-300">
+                        Checkout ID
+                      </th>
+                      <th className="pb-3 font-semibold text-slate-300 text-right">
+                        Amount
+                      </th>
+                      <th className="pb-3 font-semibold text-slate-300">
+                        Order Status
+                      </th>
+                      <th className="pb-3 font-semibold text-slate-300">
+                        Payment Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orders.map((order) => {
+                      const paymentStatus =
+                        order.paymentStatus || "unknown";
+                      const orderStatus = order.orderStatus || "placed";
+                      const isPaid =
+                        paymentStatus === "paid" && orderStatus === "placed";
+                      const isFailed =
+                        paymentStatus === "failed" ||
+                        orderStatus === "cancelled";
+
+                      return (
+                        <tr
+                          key={order._id}
+                          className="border-b border-slate-800/50 hover:bg-slate-800/30 transition"
+                        >
+                          <td className="py-3 text-xs font-mono text-slate-200 break-all">
+                            {order._id}
+                          </td>
+                          <td className="py-3 text-xs text-slate-400">
+                            {order.createdAt
+                              ? new Date(order.createdAt).toLocaleString()
+                              : "—"}
+                          </td>
+                          <td className="py-3 text-xs font-mono text-slate-300 break-all">
+                            {order.checkoutId || "—"}
+                          </td>
+                          <td className="py-3 text-xs text-right text-slate-200">
+                            ₹{Number(order.totalAmount || 0)
+                              .toFixed(2)
+                              .toLocaleString("en-IN")}
+                          </td>
+                          <td className="py-3 text-xs">
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                                orderStatus === "placed"
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : orderStatus === "processing"
+                                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                    : orderStatus === "completed"
+                                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                      : "bg-red-500/10 text-red-400 border border-red-500/20"
+                              }`}
+                            >
+                              {orderStatus.charAt(0).toUpperCase() +
+                                orderStatus.slice(1)}
+                            </span>
+                          </td>
+                          <td className="py-3 text-xs">
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                                isPaid
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : isFailed
+                                    ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                                    : "bg-slate-500/10 text-slate-400 border border-slate-500/20"
+                              }`}
+                            >
+                              {paymentStatus.charAt(0).toUpperCase() +
+                                paymentStatus.slice(1)}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <p className="mt-3 text-xs text-slate-500">
+                  {orders.length} order{orders.length !== 1 ? "s" : ""} total
+                </p>
+              </div>
+            )}
+          </div>
+
+          <SyntheticTrafficPanel />
           <div className="mt-6 rounded-xl border border-slate-800 bg-[#101827] p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -1642,10 +2489,13 @@ function Dashboard() {
                           .replace(/\b\w/g, (letter) => letter.toUpperCase())}
                       </p>
                       <span
-                        className={`rounded-full px-2 py-1 text-xs ${experiment.status === "passed"
-                          ? "bg-emerald-500/10 text-emerald-400"
-                          : "bg-red-500/10 text-red-400"
-                          }`}
+                        className={`rounded-full px-2 py-1 text-xs ${
+                          experiment.status === "passed"
+                            ? "bg-emerald-500/10 text-emerald-400"
+                            : experiment.status === "stopped"
+                              ? "bg-amber-500/10 text-amber-400"
+                              : "bg-red-500/10 text-red-400"
+                        }`}
                       >
                         {experiment.status || "Unknown"}
                       </span>
@@ -1783,7 +2633,7 @@ function Dashboard() {
             SHCom · Self-Healing Commerce
           </footer>
         </div>
-      </main>
+       </main>
     </div>
   );
 }

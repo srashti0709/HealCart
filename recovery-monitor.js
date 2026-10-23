@@ -20,22 +20,72 @@ let dbRecoveryPending = false;
 
 const EVENTS_FILE = path.join(__dirname, "recovery-events.json");
 
+function inferEventSource(type) {
+  const normalized = String(type || "").toLowerCase();
+
+  if (normalized.includes("database")) return "Docker log observation";
+  if (normalized.includes("probe") || normalized.includes("health")) return "HTTP health probe";
+  if (normalized.includes("traffic")) return "Synthetic traffic";
+  if (normalized.includes("request")) return "API request";
+  if (normalized.includes("product")) return "Product API verification";
+  if (normalized.includes("crash") || normalized.includes("recovered")) return "Docker observation";
+
+  return "Recovery monitor";
+}
+
+function inferEventOutcome(type) {
+  const normalized = String(type || "").toLowerCase();
+
+  if (["recovered", "database-recovered", "health-verified", "api-verified", "product-api-verified", "healthy", "restored"].some((value) => normalized.includes(value))) {
+    return "success";
+  }
+
+  if (["crash", "database-disconnected", "backend-probe-failed", "request-failed", "failed", "error", "down"].some((value) => normalized.includes(value))) {
+    return "failure";
+  }
+
+  if (["start", "started", "running", "waiting", "traffic-start", "in-progress"].some((value) => normalized.includes(value))) {
+    return "in_progress";
+  }
+
+  return "unverified";
+}
+
+function normalizeEventRecord(rawEvent, fallbackType = "event") {
+  const type = typeof rawEvent?.type === "string" && rawEvent.type.trim()
+    ? rawEvent.type.trim()
+    : fallbackType;
+  const timestamp = typeof rawEvent?.timestamp === "string" && rawEvent.timestamp
+    ? rawEvent.timestamp
+    : new Date().toISOString();
+  const description = rawEvent?.description || rawEvent?.message || "Event observed.";
+
+  return {
+    id: rawEvent?.id || `evt-${type}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+    type,
+    description,
+    message: rawEvent?.message || description,
+    timestamp,
+    source: rawEvent?.source || inferEventSource(type),
+    outcome: rawEvent?.outcome || rawEvent?.status || inferEventOutcome(type),
+    experimentId: rawEvent?.experimentId || rawEvent?.runId || rawEvent?.experiment_id || null,
+    details: rawEvent?.details ?? rawEvent?.evidence ?? rawEvent?.errorSummary ?? rawEvent?.error ?? null,
+  };
+}
+
 function normalizeEvents(items) {
   const uniqueEvents = new Map();
 
-  for (const event of items) {
-    if (
-      !event ||
-      typeof event.type !== "string" ||
-      typeof event.timestamp !== "string"
-    ) {
+  for (const item of items) {
+    if (!item || typeof item !== "object") {
       continue;
     }
 
-    const key = `${event.type}|${event.timestamp}`;
+    const normalized = normalizeEventRecord(item, "event");
+    const key = `${normalized.type}|${normalized.timestamp}|${normalized.id}`;
 
     if (!uniqueEvents.has(key)) {
-      uniqueEvents.set(key, event);
+      uniqueEvents.set(key, normalized);
     }
   }
 
@@ -45,7 +95,7 @@ function normalizeEvents(items) {
         new Date(b.timestamp).getTime() -
         new Date(a.timestamp).getTime()
     )
-    .slice(0, 30);
+    .slice(0, 60);
 }
 
 function loadEvents() {
@@ -82,9 +132,20 @@ if (!fs.existsSync(EVENTS_FILE)) {
   }
 }
 
-function addEvent(type, message, timestamp = new Date().toISOString()) {
+function addEvent(type, message, timestamp = new Date().toISOString(), options = {}) {
+  const entry = normalizeEventRecord({
+    type,
+    message,
+    timestamp,
+    description: message,
+    source: options.source || inferEventSource(type),
+    outcome: options.outcome || inferEventOutcome(type),
+    experimentId: options.experimentId || options.runId || null,
+    details: options.details || options.evidence || options.errorSummary || null,
+  }, type);
+
   events = normalizeEvents([
-    { type, message, timestamp },
+    entry,
     ...events,
   ]);
 
@@ -100,6 +161,55 @@ function addEvent(type, message, timestamp = new Date().toISOString()) {
       error.message
     );
   }
+}
+
+/**
+ * Reads a JSON request body with a hard size limit so a malformed or
+ * oversized client request can never exhaust the monitor.
+ */
+function readJsonBody(req, maxBytes = 16 * 1024) {
+  return new Promise((resolve, reject) => {
+    let raw = "";
+    let size = 0;
+    let settled = false;
+
+    const fail = (error) => {
+      if (settled) return;
+      settled = true;
+      reject(error);
+    };
+
+    req.on("data", (chunk) => {
+      size += chunk.length;
+
+      if (size > maxBytes) {
+        fail(new Error("Request body is too large."));
+        req.destroy();
+        return;
+      }
+
+      raw += chunk.toString("utf8");
+    });
+
+    req.on("end", () => {
+      if (settled) return;
+      settled = true;
+
+      if (!raw.trim()) {
+        resolve({});
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(raw);
+        resolve(parsed && typeof parsed === "object" ? parsed : {});
+      } catch {
+        fail(new Error("Request body must be valid JSON."));
+      }
+    });
+
+    req.on("error", fail);
+  });
 }
 
 function reconcileHistoricalDatabaseEvents() {
@@ -392,7 +502,12 @@ async function recoverBackend(options = {}) {
       addEvent(
         "recovered",
         "Backend container restarted automatically.",
-        new Date().toISOString()
+        new Date().toISOString(),
+        {
+          source: "Docker observation",
+          outcome: "success",
+          details: { recovered: true, status: "running" },
+        }
       );
     }
 
@@ -435,7 +550,12 @@ function startDockerEventListener() {
           addEvent(
             "crash",
             "Backend container stopped unexpectedly.",
-            timestamp
+            timestamp,
+            {
+              source: "Docker observation",
+              outcome: "failure",
+              details: { container: CONTAINER, action, state: "stopped" },
+            }
           );
 
           recoverBackend().catch((error) => {
@@ -451,7 +571,12 @@ function startDockerEventListener() {
           addEvent(
             "recovered",
             "Backend container restarted automatically.",
-            timestamp
+            timestamp,
+            {
+              source: "Docker observation",
+              outcome: "success",
+              details: { container: CONTAINER, action, state: "running" },
+            }
           );
         }
       } catch {
@@ -507,7 +632,12 @@ function startDatabaseEventListener() {
         addEvent(
           "database-disconnected",
           "MongoDB connection dropped. Automatic reconnection is being attempted.",
-          timestamp
+          timestamp,
+          {
+            source: "Docker log observation",
+            outcome: "failure",
+            details: { database: "mongodb", message },
+          }
         );
       }
 
@@ -523,7 +653,12 @@ function startDatabaseEventListener() {
         addEvent(
           "database-recovered",
           "MongoDB connection restored successfully.",
-          timestamp
+          timestamp,
+          {
+            source: "Docker log observation",
+            outcome: "success",
+            details: { database: "mongodb", message },
+          }
         );
 
         dbRecoveryPending = false;
@@ -570,12 +705,47 @@ function startDatabaseEventListener() {
 
 const server = http.createServer(async (req, res) => {
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Content-Type", "application/json");
 
   if (req.method === "OPTIONS") {
     res.writeHead(204);
     return res.end();
+  }
+
+  if (req.method === "POST" && req.url === "/api/recovery/events") {
+    let body;
+
+    try {
+      body = await readJsonBody(req);
+    } catch (error) {
+      res.writeHead(400);
+      return res.end(JSON.stringify({
+        success: false,
+        message: error.message,
+      }));
+    }
+
+    if (!body.type || !body.message) {
+      res.writeHead(400);
+      return res.end(JSON.stringify({
+        success: false,
+        message: "type and message are required.",
+      }));
+    }
+
+    addEvent(body.type, body.message, body.timestamp, {
+      source: body.source,
+      outcome: body.outcome,
+      experimentId: body.experimentId,
+      details: body.details ?? null,
+    });
+
+    res.writeHead(201);
+    return res.end(JSON.stringify({
+      success: true,
+      eventCount: events.length,
+    }));
   }
 
   if (req.method !== "GET" || req.url !== "/api/recovery") {

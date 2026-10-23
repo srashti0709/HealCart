@@ -1,8 +1,19 @@
 import axios from "axios";
 import { API_ENDPOINTS } from "../config/api";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ShieldCheck, CreditCard } from "lucide-react";
+import { ArrowLeft, ShieldCheck, CreditCard, LoaderCircle, RefreshCw } from "lucide-react";
+import { clearCart } from "../lib/cart";
+import {
+    buildCartFingerprint,
+    resolveCheckoutAttempt,
+} from "../lib/checkoutAttempt";
+import {
+    createPaymentPoller,
+    PAYMENT_ATTEMPT_STATE,
+    PAYMENT_POLL_INTERVAL_MS,
+    PAYMENT_POLL_MAX_DURATION_MS,
+} from "../lib/paymentVerification";
 
 export default function Checkout() {
     const [customer, setCustomer] = useState({
@@ -17,13 +28,117 @@ export default function Checkout() {
     const [processing, setProcessing] = useState(false);
     const [orderResult, setOrderResult] = useState(null);
     const [recoveryResult, setRecoveryResult] = useState(null);
+    const [verification, setVerification] = useState(null);
+    const [checkingStatus, setCheckingStatus] = useState(false);
+    const checkoutAttemptRef = useRef(null);
+    const pollerRef = useRef(null);
 
     const handleChange = (event) => {
-        setCustomer({
-            ...customer,
-            [event.target.name]: event.target.value,
+        const { name, value } = event.target;
+
+        setCustomer((current) => ({
+            ...current,
+            [name]: value,
+        }));
+    };
+
+    useEffect(() => {
+        return () => {
+            pollerRef.current?.stop();
+        };
+    }, []);
+
+    /**
+     * Reads the status of the existing payment attempt. It never submits a
+     * checkout and never starts a payment.
+     */
+    const readAttemptStatus = async (attemptId, checkoutId) => {
+        try {
+            const response = await axios.get(
+                API_ENDPOINTS.paymentAttemptStatus(attemptId),
+                {
+                    headers: { "x-checkout-id": checkoutId },
+                    timeout: 5000,
+                }
+            );
+
+            return { status: response.status, data: response.data };
+        } catch (err) {
+            return {
+                status: err.response?.status || 0,
+                data: err.response?.data || null,
+            };
+        }
+    };
+
+    const applyVerification = (result) => {
+        setVerification(result);
+
+        if (result.state === PAYMENT_ATTEMPT_STATE.PAID) {
+            clearCart();
+
+            setOrderResult((current) => ({
+                ...(current || {}),
+                orderId: result.order?.id || current?.orderId || null,
+                transactionId:
+                    result.attempt?.transactionId || current?.transactionId,
+                message:
+                    "The payment was confirmed and your order is placed.",
+                pending: false,
+            }));
+
+            setRecoveryResult({
+                type: "payment_timeout_recovery",
+                detected: true,
+                status: "resolved",
+                action: "Verified the existing payment transaction",
+                result: "Payment confirmed; the order was finalized",
+            });
+
+            return;
+        }
+
+        if (result.state === PAYMENT_ATTEMPT_STATE.FAILED) {
+            setOrderResult((current) => ({
+                ...(current || {}),
+                orderId: result.order?.id || current?.orderId || null,
+                message:
+                    "The payment was declined, so the order was cancelled and no stock was reserved.",
+                pending: false,
+                failed: true,
+            }));
+        }
+    };
+
+    /**
+     * Starts watching an uncertain payment attempt.
+     */
+    const startVerification = (attemptId, checkoutId) => {
+        pollerRef.current?.stop();
+
+        const poller = createPaymentPoller({
+            check: () => readAttemptStatus(attemptId, checkoutId),
+            onUpdate: applyVerification,
         });
-        setError("");
+
+        pollerRef.current = poller;
+        poller.start();
+    };
+
+    const checkPaymentStatus = async () => {
+        if (!pollerRef.current) {
+            return;
+        }
+
+        setCheckingStatus(true);
+
+        try {
+            await pollerRef.current.checkNow();
+        } catch {
+            // The poller already keeps the result inconclusive.
+        } finally {
+            setCheckingStatus(false);
+        }
     };
 
 
@@ -64,7 +179,13 @@ export default function Checkout() {
         setProcessing(true);
 
         try {
-            const checkoutId = crypto.randomUUID();
+            const fingerprint = buildCartFingerprint(cart);
+            const attempt = resolveCheckoutAttempt(
+                checkoutAttemptRef.current,
+                fingerprint
+            );
+            checkoutAttemptRef.current = attempt;
+            const checkoutId = attempt.id;
 
             const response = await axios.post(API_ENDPOINTS.orders, {
                 checkoutId,
@@ -83,12 +204,20 @@ export default function Checkout() {
                 );
 
             if (backendData.success === false && isPendingPayment) {
+                const attemptId =
+                    backendData.orderId || backendData.order?._id || null;
+
                 setOrderResult({
-                    orderId: backendData.orderId || backendData.order?._id || null,
+                    orderId: attemptId,
                     message: backendData.message || "Payment is being verified. Do not retry checkout or pay again yet.",
                     pending: true,
                 });
                 setError("");
+
+                if (attemptId) {
+                    startVerification(attemptId, checkoutId);
+                }
+
                 return;
             }
 
@@ -96,7 +225,7 @@ export default function Checkout() {
                 throw new Error("The server did not confirm your order.");
             }
 
-            localStorage.removeItem("shcomCart");
+            clearCart();
 
             setRecoveryResult(backendData.recovery || null);
 
@@ -119,12 +248,19 @@ export default function Checkout() {
                 );
 
             if (paymentIsUnknown) {
+                const attemptId = err.response?.data?.orderId || null;
+
                 setOrderResult({
-                    orderId: err.response?.data?.orderId || null,
+                    orderId: attemptId,
                     message: backendMessage,
                     pending: true,
                 });
                 setError("");
+
+                if (attemptId && checkoutAttemptRef.current?.id) {
+                    startVerification(attemptId, checkoutAttemptRef.current.id);
+                }
+
                 return;
             }
 
@@ -275,13 +411,17 @@ export default function Checkout() {
                         <div
                             className={`rounded-xl border p-4 ${orderResult.pending
                                 ? "border-amber-200 bg-amber-50 text-amber-900"
-                                : "border-emerald-200 bg-emerald-50 text-emerald-900"
+                                : orderResult.failed
+                                    ? "border-red-200 bg-red-50 text-red-900"
+                                    : "border-emerald-200 bg-emerald-50 text-emerald-900"
                             }`}
                         >
                             <h3 className="font-bold">
                                 {orderResult.pending
                                     ? "Payment verification in progress"
-                                    : "Order placed successfully!"}
+                                    : orderResult.failed
+                                        ? "Payment could not be completed"
+                                        : "Order placed successfully!"}
                             </h3>
                             <p className="mt-2 text-sm">{orderResult.message}</p>
                             {orderResult.orderId && (
@@ -293,6 +433,51 @@ export default function Checkout() {
                                 <p className="mt-1 break-all text-sm">
                                     Transaction ID: {orderResult.transactionId}
                                 </p>
+                            )}
+                            {orderResult.pending && (
+                                <div className="mt-3 flex items-center gap-2 text-xs">
+                                    <LoaderCircle
+                                        size={14}
+                                        className="animate-spin"
+                                    />
+                                    <span>
+                                        Checking this payment every{" "}
+                                        {Math.round(
+                                            PAYMENT_POLL_INTERVAL_MS / 1000
+                                        )}{" "}
+                                        seconds for up to{" "}
+                                        {Math.round(
+                                            PAYMENT_POLL_MAX_DURATION_MS / 1000
+                                        )}{" "}
+                                        seconds.
+                                        {verification?.state ===
+                                            PAYMENT_ATTEMPT_STATE.INCONCLUSIVE &&
+                                        verification?.reason === "limit_reached"
+                                            ? " The result is still unconfirmed, so please check again later."
+                                            : verification?.state ===
+                                                  PAYMENT_ATTEMPT_STATE.INCONCLUSIVE
+                                                ? " The status could not be reached, so the result is still unconfirmed."
+                                                : ""}
+                                    </span>
+                                </div>
+                            )}
+                            {orderResult.pending && (
+                                <button
+                                    type="button"
+                                    onClick={checkPaymentStatus}
+                                    disabled={checkingStatus || !orderResult.orderId}
+                                    className="mt-4 inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm font-semibold text-amber-900 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    <RefreshCw
+                                        size={15}
+                                        className={
+                                            checkingStatus ? "animate-spin" : ""
+                                        }
+                                    />
+                                    {checkingStatus
+                                        ? "Checking..."
+                                        : "Check payment status"}
+                                </button>
                             )}
                             {orderResult.pending ? (
                                 <div className="mt-4 flex flex-wrap gap-3">

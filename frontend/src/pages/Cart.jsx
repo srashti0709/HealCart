@@ -11,15 +11,10 @@ import {
     Package,
 } from "lucide-react";
 import { API_ENDPOINTS } from "../config/api";
+import { readCart, writeCart } from "../lib/cart";
 
 export default function Cart() {
-    const [cart, setCart] = useState(() => {
-        try {
-            return JSON.parse(localStorage.getItem("shcomCart") || "[]");
-        } catch {
-            return [];
-        }
-    });
+    const [cart, setCart] = useState(() => readCart());
 
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -41,7 +36,7 @@ export default function Cart() {
     }, []);
 
     useEffect(() => {
-        localStorage.setItem("shcomCart", JSON.stringify(cart));
+        writeCart(cart);
     }, [cart]);
 
     const cartItems = cart.map((item) => {

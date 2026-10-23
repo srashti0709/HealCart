@@ -1,64 +1,19 @@
-const Restock = require("../models/Restock");
 const mongoose = require("mongoose");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
-const Incident = require("../models/Incident");
+const { recordIncident } = require("../services/incidentService");
+const {
+  deductStockForOrder,
+  requestLowStockRestocks,
+} = require("../services/orderInventoryService");
+const {
+  buildPaymentAttemptId,
+  recordPaymentAttempt,
+} = require("../services/paymentAttemptService");
 
 const PAYMENT_SERVICE_URL =
   process.env.PAYMENT_SERVICE_URL || "http://localhost:5001";
 
-const recordIncident = async (data) => {
-  try {
-    await Incident.create(data);
-  } catch (error) {
-    console.error("Failed to record incident:", error.message);
-  }
-};
-
-const LOW_STOCK_THRESHOLD = 2;
-const RESTOCK_QUANTITY = 10;
-
-const requestLowStockRestocks = async (orderItems) => {
-  try {
-    const productIds = [
-      ...new Set(orderItems.map((item) => item.product.toString())),
-    ];
-
-    for (const productId of productIds) {
-      const product = await Product.findById(productId);
-
-      if (!product || product.stock > LOW_STOCK_THRESHOLD) {
-        continue;
-      }
-
-      const existingRequest = await Restock.findOne({
-        product: product._id,
-        status: "requested",
-      });
-
-      if (existingRequest) {
-        continue;
-      }
-
-      await Restock.create({
-        product: product._id,
-        requestedQuantity: RESTOCK_QUANTITY,
-      });
-
-      await recordIncident({
-        incidentType: "low_stock",
-        service: "inventory-service",
-        severity: "medium",
-        status: "detected",
-        message: `Low stock detected for ${product.name}.`,
-        recoveryAction: "Created an automatic restock request",
-        recoveryResult: "Awaiting delivery confirmation",
-      });
-    }
-  } catch (error) {
-    console.error("Automatic restock request failed:", error.message);
-  }
-};
 
 
 const verifyPayment = async (orderId, amount) => {
@@ -95,23 +50,6 @@ const verifyPayment = async (orderId, amount) => {
     return { outcome: "unknown" };
   } catch {
     return { outcome: "unknown" };
-  }
-};
-
-const deductStockForOrder = async (order, session = null) => {
-  for (const item of order.items) {
-    const product = await Product.findOneAndUpdate(
-      {
-        _id: item.product,
-        stock: { $gte: item.quantity },
-      },
-      { $inc: { stock: -item.quantity } },
-      { new: true, session }
-    );
-
-    if (!product) {
-      throw new Error(`Insufficient stock for product ${item.product}`);
-    }
   }
 };
 
@@ -197,6 +135,17 @@ const placeOrder = async (req, res) => {
           ],
           { session }
         );
+
+        await recordPaymentAttempt(
+          {
+            attemptId: buildPaymentAttemptId(order._id),
+            checkoutId,
+            order: order._id,
+            amount: order.totalAmount,
+            status: "pending",
+          },
+          { session }
+        );
       });
     } finally {
       await session.endSession();
@@ -256,34 +205,44 @@ const placeOrder = async (req, res) => {
   }
 
   if (paymentResult.outcome === "paid") {
-    try {
-      const session = await mongoose.startSession();
+    const attempt = await recordPaymentAttempt({
+      attemptId: buildPaymentAttemptId(order._id),
+      checkoutId,
+      order: order._id,
+      amount: order.totalAmount,
+      status: "paid",
+      transactionId: paymentResult.payment.transactionId,
+    });
 
+    if (attempt.status === "paid") {
       try {
-        await session.withTransaction(async () => {
-          await deductStockForOrder(order, session);
+        const session = await mongoose.startSession();
+
+        try {
+          await session.withTransaction(async () => {
+            await deductStockForOrder(order, session);
+          });
+        } finally {
+          await session.endSession();
+        }
+
+        order.paymentStatus = attempt.status;
+        order.orderStatus = "placed";
+        await order.save();
+        await requestLowStockRestocks(order.items);
+
+        await recordIncident({
+          incidentType: "payment_timeout_recovery",
+          service: "payment-service",
+          severity: "medium",
+          status: "resolved",
+          message: "Payment was verified after an uncertain response.",
+          recoveryAction: "Verified the existing payment transaction",
+          recoveryResult: "Payment confirmed; stock was deducted after confirmation",
+          resolvedAt: new Date(),
         });
-      } finally {
-        await session.endSession();
-      }
 
-      order.paymentStatus = "paid";
-      order.orderStatus = "placed";
-      await order.save();
-      await requestLowStockRestocks(order.items);
-
-      await recordIncident({
-        incidentType: "payment_timeout_recovery",
-        service: "payment-service",
-        severity: "medium",
-        status: "resolved",
-        message: "Payment was verified after an uncertain response.",
-        recoveryAction: "Verified the existing payment transaction",
-        recoveryResult: "Payment confirmed; stock was deducted after confirmation",
-        resolvedAt: new Date(),
-      });
-
-      return res.status(201).json({
+        return res.status(201).json({
         success: true,
         message: "Order placed and payment verified successfully",
         recovery: {
@@ -299,93 +258,114 @@ const placeOrder = async (req, res) => {
           status: "paid",
         },
       });
-    } catch (error) {
-      await recordIncident({
-        incidentType: "payment_stock_commit_failure",
-        service: "backend",
-        severity: "critical",
-        status: "failed",
-        message: "Payment was confirmed, but stock allocation failed.",
-        recoveryAction: "Keep the order pending for manual reconciliation",
-        recoveryResult: error.message,
-      });
+      } catch (error) {
+        await recordIncident({
+          incidentType: "payment_stock_commit_failure",
+          service: "backend",
+          severity: "critical",
+          status: "failed",
+          message: "Payment was confirmed, but stock allocation failed.",
+          recoveryAction: "Keep the order pending for manual reconciliation",
+          recoveryResult: error.message,
+        });
 
-      order.paymentStatus = "unknown";
-      order.orderStatus = "processing";
-      await order.save().catch(() => {});
+        order.paymentStatus = "unknown";
+        order.orderStatus = "processing";
+        await order.save().catch(() => {});
 
-      return res.status(409).json({
-        success: false,
-        paymentStatus: "unknown",
-        message: "Payment succeeded, but stock could not be reserved. Please check your order status before retrying.",
-        orderId: order._id,
-      });
+        return res.status(409).json({
+          success: false,
+          paymentStatus: "unknown",
+          message: "Payment succeeded, but stock could not be reserved. Please check your order status before retrying.",
+          orderId: order._id,
+        });
+      }
     }
   }
 
   if (paymentResult.outcome === "failed") {
-    try {
-      const session = await mongoose.startSession();
+    const attempt = await recordPaymentAttempt({
+      attemptId: buildPaymentAttemptId(order._id),
+      checkoutId,
+      order: order._id,
+      amount: order.totalAmount,
+      status: "failed",
+      failureReason: paymentError,
+    });
 
+    if (attempt.status === "failed") {
       try {
-        await session.withTransaction(async () => {
-          await Order.findOneAndUpdate(
-            {
-              _id: order._id,
-              paymentStatus: "pending",
-            },
-            {
-              $set: {
-                paymentStatus: "failed",
-                orderStatus: "cancelled",
+        const session = await mongoose.startSession();
+
+        try {
+          await session.withTransaction(async () => {
+            await Order.findOneAndUpdate(
+              {
+                _id: order._id,
+                paymentStatus: "pending",
               },
-            },
-            { new: true, session }
-          );
+              {
+                $set: {
+                  paymentStatus: "failed",
+                  orderStatus: "cancelled",
+                },
+              },
+              { new: true, session }
+            );
+          });
+        } finally {
+          await session.endSession();
+        }
+
+        order = await Order.findById(order._id);
+
+        await recordIncident({
+          incidentType: "payment_failure_recovery",
+          service: "payment-service",
+          severity: "medium",
+          status: "resolved",
+          message: paymentError,
+          recoveryAction: "Cancelled failed order without touching stock that was never confirmed",
+          recoveryResult: "Payment failure confirmed; no stock was deducted",
+          resolvedAt: new Date(),
         });
-      } finally {
-        await session.endSession();
+
+        return res.status(502).json({
+          success: false,
+          message: "Payment failed. Please check your order status before retrying.",
+          order,
+        });
+      } catch (error) {
+        await recordIncident({
+          incidentType: "payment_failure_order_update_failure",
+          service: "backend",
+          severity: "critical",
+          status: "failed",
+          message: error.message,
+          recoveryAction: "Review the failed payment order manually",
+          recoveryResult: "Automatic cancellation could not be confirmed",
+        });
+
+        return res.status(500).json({
+          success: false,
+          message: "Payment failed, but order cancellation needs review.",
+          orderId: order._id,
+        });
       }
-
-      order = await Order.findById(order._id);
-
-      await recordIncident({
-        incidentType: "payment_failure_recovery",
-        service: "payment-service",
-        severity: "medium",
-        status: "resolved",
-        message: paymentError,
-        recoveryAction: "Cancelled failed order without touching stock that was never confirmed",
-        recoveryResult: "Payment failure confirmed; no stock was deducted",
-        resolvedAt: new Date(),
-      });
-
-      return res.status(502).json({
-        success: false,
-        message: "Payment failed. Please check your order status before retrying.",
-        order,
-      });
-    } catch (error) {
-      await recordIncident({
-        incidentType: "payment_failure_order_update_failure",
-        service: "backend",
-        severity: "critical",
-        status: "failed",
-        message: error.message,
-        recoveryAction: "Review the failed payment order manually",
-        recoveryResult: "Automatic cancellation could not be confirmed",
-      });
-
-      return res.status(500).json({
-        success: false,
-        message: "Payment failed, but order cancellation needs review.",
-        orderId: order._id,
-      });
     }
   }
 
+  const unknownAttempt = await recordPaymentAttempt({
+    attemptId: buildPaymentAttemptId(order._id),
+    checkoutId,
+    order: order._id,
+    amount: order.totalAmount,
+    status: "unknown",
+    failureReason: paymentError,
+  });
+
   try {
-    order.paymentStatus = "unknown";
+    order.paymentStatus = unknownAttempt.status;
     await order.save();
   } catch (error) {
     console.error("Failed to save uncertain payment state:", error.message);
@@ -396,6 +376,7 @@ const placeOrder = async (req, res) => {
     service: "payment-service",
     severity: "high",
     status: "detected",
+    order: order._id,
     message: paymentError,
     recoveryAction: "Verify payment status before retrying",
     recoveryResult: "Outcome unknown; no stock was deducted while pending",

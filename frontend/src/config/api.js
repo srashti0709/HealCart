@@ -1,3 +1,4 @@
+
 export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
@@ -19,4 +20,17 @@ export const API_ENDPOINTS = {
   health: `${API_BASE_URL}/api/health`,
   paymentHealth: `${PAYMENT_SERVICE_URL}/health`,
   recovery: `${RECOVERY_MONITOR_URL}/api/recovery`,
+  recoveryMonitor: `${RECOVERY_MONITOR_URL}/api/recovery`,
+  recoveryEvents: `${RECOVERY_MONITOR_URL}/api/recovery/events`,
+  chaos: `${CHAOS_CONTROLLER_URL}/api/chaos`,
+  chaosBackendCrash: `${CHAOS_CONTROLLER_URL}/api/chaos/backend-crash`,
+  traffic: `${CHAOS_CONTROLLER_URL}/api/chaos/traffic`,
+  trafficEndpoints: `${CHAOS_CONTROLLER_URL}/api/chaos/traffic/endpoints`,
+  trafficStart: `${CHAOS_CONTROLLER_URL}/api/chaos/traffic/start`,
+  trafficStop: `${CHAOS_CONTROLLER_URL}/api/chaos/traffic/stop`,
+  trafficStatus: `${CHAOS_CONTROLLER_URL}/api/chaos/traffic/status`,
+  trafficRequests: `${CHAOS_CONTROLLER_URL}/api/chaos/traffic/requests`,
+  paymentAttemptStatus: (attemptId) =>
+    `${API_BASE_URL}/api/payments/attempts/${encodeURIComponent(attemptId)}`,
+  paymentReconcile: `${CHAOS_CONTROLLER_URL}/api/chaos/payment-reconcile`,
 };

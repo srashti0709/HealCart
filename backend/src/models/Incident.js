@@ -13,6 +13,12 @@ const incidentSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    order: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+      default: null,
+      index: true,
+    },
     severity: {
       type: String,
       enum: ["low", "medium", "high", "critical"],

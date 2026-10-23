@@ -21,6 +21,9 @@ npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
 
+# Runtime experiment history
+chaos/traffic-history.json
+
 # OS/editor files
 .DS_Store
 .vscode/

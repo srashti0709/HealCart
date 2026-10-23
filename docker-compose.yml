@@ -32,3 +32,8 @@ services:
       PORT: "5001"
     ports:
       - "5001:5001"
+    volumes:
+      - payment-ledger:/app/data
+
+volumes:
+  payment-ledger:

@@ -29,7 +29,11 @@ const OrderHistory = () => {
   };
 
   useEffect(() => {
-    fetchOrders();
+    const timer = window.setTimeout(() => {
+      fetchOrders();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
   }, []);
 
   const formatDate = (date) => {
