@@ -67,6 +67,40 @@ const verifyRaceRun = async (runId) => {
     };
   }
 
+  const pendingPayment = orders.length === 1 &&
+    ["pending", "unknown"].includes(orders[0].paymentStatus) &&
+    orders[0].inventoryReserved === true &&
+    product.stock === 0;
+
+  if (pendingPayment) {
+    const now = new Date();
+    const updated = await RaceConditionRun.findOneAndUpdate(
+      { runId },
+      {
+        $set: {
+          status: "recovering",
+          stockAfterRecovery: null,
+          recoveryActionAt: run.recoveryActionAt || now,
+          verifiedAt: null,
+          message: "The competing checkout was rejected. Waiting for the winning payment to reach a confirmed state before final verification.",
+        },
+      },
+      { new: true }
+    );
+
+    await Product.updateOne(
+      { _id: product._id },
+      { $set: { raceFaultActive: false } }
+    );
+
+    return {
+      ...updated.toObject(),
+      productStock: product.stock,
+      orderCount: orders.length,
+      verified: false,
+    };
+  }
+
   let consistent = orders.length === 1 && product.stock >= 0 && product.stock <= 1;
   if (consistent) {
     const order = orders[0];
@@ -74,8 +108,6 @@ const verifyRaceRun = async (runId) => {
       consistent = product.stock === 0 && order.inventoryReserved === false;
     } else if (order.paymentStatus === "failed" && order.orderStatus === "cancelled") {
       consistent = product.stock === 1 && order.inventoryReserved === false;
-    } else if (["pending", "unknown"].includes(order.paymentStatus) && order.inventoryReserved === true) {
-      consistent = product.stock === 0;
     } else {
       consistent = false;
     }
