@@ -232,8 +232,12 @@ const placeOrder = async (req, res) => {
                 raceTestRunId: product.raceTestRunId,
                 isRaceTestProduct: true,
                 stock: { $gte: quantity },
+                raceReservationClaimed: false,
               },
-              { $inc: { stock: -quantity } },
+              {
+                $inc: { stock: -quantity },
+                $set: { raceReservationClaimed: true },
+              },
               { new: true, session }
             );
 
