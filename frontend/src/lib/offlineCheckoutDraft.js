@@ -18,7 +18,7 @@ function openDraftDb() {
 
 export async function saveCheckoutDraft(customer, cart) {
   const safeCustomer = Object.fromEntries(
-    ["name", "email", "address", "city", "postalCode"].map((key) => [key, String(customer?.[key] || "")])
+    ["name", "email", "phone", "address", "city", "postalCode"].map((key) => [key, String(customer?.[key] || "")])
   );
   const safeCart = Array.isArray(cart) ? cart.map(({ productId, quantity }) => ({ productId, quantity })) : [];
   const draft = { customer: safeCustomer, cart: safeCart, savedAt: new Date().toISOString() };
