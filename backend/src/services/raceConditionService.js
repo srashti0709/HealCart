@@ -99,9 +99,21 @@ const verifyRaceRun = async (runId) => {
     { new: true }
   );
 
+  const orderIsFinal = orders.length === 1 && (
+    (orders[0].paymentStatus === "paid" && orders[0].orderStatus === "placed") ||
+    (orders[0].paymentStatus === "failed" && orders[0].orderStatus === "cancelled")
+  );
+
   await Product.updateOne(
     { _id: product._id },
-    { $set: { raceFaultActive: false } }
+    {
+      $set: {
+        raceFaultActive: false,
+        ...(consistent && orderIsFinal
+          ? { isRaceTestProduct: false, raceReservationClaimed: false }
+          : {}),
+      },
+    }
   );
 
   if (!wasRecovered) {
