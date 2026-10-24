@@ -35,7 +35,7 @@ import {
   Workflow,
 } from "lucide-react";
 
-function Dashboard() {
+function Dashboard({ page = "overview" }) {
   const [dbCheckRunning, setDbCheckRunning] = useState(false);
   const [dbCheckResult, setDbCheckResult] = useState("");
   const [dbCheckError, setDbCheckError] = useState("");
@@ -1247,9 +1247,19 @@ function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100">
+    <div data-dashboard-page={page} className="min-h-screen bg-[#090d16] text-slate-100">
+      <style>{`
+        [data-dashboard-page="overview"] .dashboard-incidents-only,
+        [data-dashboard-page="overview"] .dashboard-chaos-only,
+        [data-dashboard-page="incidents"] .dashboard-overview-only,
+        [data-dashboard-page="incidents"] .dashboard-chaos-only,
+        [data-dashboard-page="chaos-center"] .dashboard-overview-only,
+        [data-dashboard-page="chaos-center"] .dashboard-incidents-only {
+          display: none !important;
+        }
+      `}</style>
       <main className="min-w-0 flex-1">
-        <section className="mx-6 mt-6 rounded-2xl border border-cyan-900 bg-[#101827] p-5 lg:mx-10">
+        <section className="dashboard-chaos-only mx-6 mt-6 rounded-2xl border border-cyan-900 bg-[#101827] p-5 lg:mx-10">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="font-semibold text-white">Offline Checkout Recovery Experiment</h2>
@@ -1334,11 +1344,11 @@ function Dashboard() {
             </p>
 
             <h2 className="mt-2 text-2xl font-bold tracking-tight">
-              System Overview
+              {page === "incidents" ? "Incidents" : page === "chaos-center" ? "Chaos Center" : "System Overview"}
             </h2>
 
             <p className="mt-1 text-sm text-slate-400">
-              Self-healing infrastructure monitoring
+              {page === "incidents" ? "Incident history, diagnosis and recovery outcomes" : page === "chaos-center" ? "Run controlled failures and verify self-healing behavior" : "Live service health and recovery overview"}
             </p>
           </div>
 
@@ -1363,10 +1373,10 @@ function Dashboard() {
           </div>
         </header>
 
-        <div className="space-y-8 p-6 lg:p-10">
+        <div className="dashboard-content space-y-8 p-6 lg:p-10">
           <section
             id="overview"
-            className="scroll-mt-6 rounded-2xl border border-slate-800 bg-gradient-to-br from-[#111c2c] to-[#0d1320] p-6 lg:p-8"
+            className="dashboard-overview-only scroll-mt-6 rounded-2xl border border-slate-800 bg-gradient-to-br from-[#111c2c] to-[#0d1320] p-6 lg:p-8"
           >
             <div className="flex flex-wrap items-start gap-4">
               <div className="rounded-xl bg-cyan-400/10 p-3 text-cyan-300">
@@ -1388,25 +1398,29 @@ function Dashboard() {
             </div>
           </section>
 
-          <ServiceDependencyMap
-            health={health}
-            paymentHealth={paymentHealth}
-            recoveryInfo={recoveryInfo}
-            recoveryError={recoveryError}
-            healthError={healthError}
-            paymentHealthError={paymentHealthError}
-          />
+          <div className="dashboard-overview-only">
+            <ServiceDependencyMap
+              health={health}
+              paymentHealth={paymentHealth}
+              recoveryInfo={recoveryInfo}
+              recoveryError={recoveryError}
+              healthError={healthError}
+              paymentHealthError={paymentHealthError}
+            />
+          </div>
 
-          <IncidentTimeline
-            events={Array.isArray(recoveryInfo?.events) ? recoveryInfo.events : []}
-            incidents={paymentIncidents}
-            loading={timelineLoading}
-            error={timelineError}
-            stale={timelineStale}
-            lastUpdated={timelineLastUpdated}
-          />
+          <div className="dashboard-incidents-only">
+            <IncidentTimeline
+              events={Array.isArray(recoveryInfo?.events) ? recoveryInfo.events : []}
+              incidents={paymentIncidents}
+              loading={timelineLoading}
+              error={timelineError}
+              stale={timelineStale}
+              lastUpdated={timelineLastUpdated}
+            />
+          </div>
 
-          <section id="service-health" className="scroll-mt-6">
+          <section id="service-health" className="dashboard-overview-only scroll-mt-6">
             <div className="mb-4">
               <h3 className="text-lg font-semibold">Service Health</h3>
               <p className="mt-1 text-sm text-slate-500">
@@ -1480,7 +1494,7 @@ function Dashboard() {
 
           <section
             id="incidents"
-            className="scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6"
+            className="dashboard-incidents-only scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6"
           >
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -1715,7 +1729,7 @@ function Dashboard() {
 
           <section
             id="recovery-analytics"
-            className="scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6"
+            className="dashboard-incidents-only scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6"
           >
             <div className="mb-6">
               <p className="text-xs font-medium uppercase tracking-wider text-cyan-400">
@@ -1908,7 +1922,7 @@ function Dashboard() {
           </section>
           <section
             id="chaos-control"
-            className="scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6"
+            className="dashboard-chaos-only scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6"
           >
             <p className="text-xs font-medium uppercase tracking-wider text-cyan-400">
               Controlled Experiments
@@ -2768,7 +2782,7 @@ function Dashboard() {
 
           </section>
 
-          <div className="mt-6 rounded-xl border border-slate-800 bg-[#101827] p-5">
+          <div className="dashboard-overview-only mt-6 rounded-xl border border-slate-800 bg-[#101827] p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h4 className="font-semibold text-white">
@@ -2913,8 +2927,10 @@ function Dashboard() {
             )}
           </div>
 
-          <SyntheticTrafficPanel />
-          <div className="mt-6 rounded-xl border border-slate-800 bg-[#101827] p-5">
+          <div className="dashboard-chaos-only">
+            <SyntheticTrafficPanel />
+          </div>
+          <div className="dashboard-chaos-only mt-6 rounded-xl border border-slate-800 bg-[#101827] p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h4 className="font-semibold text-white">
@@ -2983,7 +2999,7 @@ function Dashboard() {
           </div>
 
 
-          <section className="scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6">
+          <section className="dashboard-incidents-only scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6">
             <div className="mb-5">
               <h3 className="text-lg font-semibold text-white">
                 Recovery Event Timeline
@@ -3044,7 +3060,7 @@ function Dashboard() {
 
           <section
             id="recovery-metrics"
-            className="scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6"
+            className="dashboard-overview-only scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6"
           >
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-violet-400/10 p-2.5 text-violet-300">

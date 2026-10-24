@@ -1,24 +1,31 @@
-import { Link } from "react-router-dom";
+
+import { Link, NavLink } from "react-router-dom";
 import AdminNotificationBell from "./AdminNotificationBell";
 import {
   LayoutDashboard,
-  Server,
   AlertTriangle,
   Activity,
   Workflow,
   ArrowLeft,
   ShieldCheck,
-  Gauge,
 } from "lucide-react";
 
 const navigation = [
-  { label: "Overview", icon: LayoutDashboard, href: "#overview" },
-  { label: "Service Health", icon: Server, href: "#service-health" },
-  { label: "Incidents", icon: AlertTriangle, href: "#incidents" },
-  { label: "Recovery Analytics", icon: Activity, href: "#recovery-analytics" },
-  { label: "Recovery Metrics", icon: Workflow, href: "#recovery-metrics" },
-  { label: "Chaos Control Center", icon: Workflow, href: "#chaos-control" },
-  { label: "Synthetic Traffic", icon: Gauge, href: "#synthetic-traffic" },
+  {
+    label: "Overview",
+    icon: LayoutDashboard,
+    href: "/admin/command-center/overview",
+  },
+  {
+    label: "Incidents",
+    icon: AlertTriangle,
+    href: "/admin/command-center/incidents",
+  },
+  {
+    label: "Chaos Center",
+    icon: Workflow,
+    href: "/admin/command-center/chaos-center",
+  },
 ];
 
 export default function CommandCenterLayout({ children }) {
@@ -40,24 +47,25 @@ export default function CommandCenterLayout({ children }) {
 
         <div className="p-4">
           <p className="px-3 pb-3 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-            Monitoring
+            Command Center
           </p>
 
           <nav className="space-y-1">
             {navigation.map(({ label, icon: Icon, href }) => (
-              <a
+              <NavLink
                 key={label}
-                href={href}
-                onClick={(event) => {
-                  event.preventDefault();
-                  const target = document.getElementById(href.replace("#", ""));
-                  target?.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-                className="flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                to={href}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${
+                    isActive
+                      ? "bg-cyan-400/10 text-cyan-300 ring-1 ring-inset ring-cyan-400/20"
+                      : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                  }`
+                }
               >
                 <Icon size={18} />
-                {label}
-              </a>
+                <span>{label}</span>
+              </NavLink>
             ))}
           </nav>
         </div>
@@ -86,7 +94,7 @@ export default function CommandCenterLayout({ children }) {
         <div className="p-4 md:hidden">
           <Link
             to="/"
-            className="flex items-center gap-2 rounded-xl px-3 py-3 text-sm text-slate-400 hover:bg-slate-800 hover:text-white"
+            className="flex items-center gap-2 rounded-xl px-3 py-3 text-sm text-slate-400 transition hover:bg-slate-800 hover:text-white"
           >
             <ArrowLeft size={17} />
             Back to Storefront

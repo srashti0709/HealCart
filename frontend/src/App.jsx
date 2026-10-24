@@ -1,3 +1,4 @@
+
 import AdminNotifications from "./pages/AdminNotifications";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import ProductDetails from "./pages/ProductDetails";
@@ -44,13 +45,46 @@ export default function App() {
           <Route
             path="/admin/command-center"
             element={
+              <Navigate
+                to="/admin/command-center/overview"
+                replace
+              />
+            }
+          />
+
+          <Route
+            path="/admin/command-center/overview"
+            element={
               <AdminGate>
                 <CommandCenterLayout>
-                  <Dashboard />
+                  <Dashboard page="overview" />
                 </CommandCenterLayout>
               </AdminGate>
             }
           />
+
+          <Route
+            path="/admin/command-center/incidents"
+            element={
+              <AdminGate>
+                <CommandCenterLayout>
+                  <Dashboard page="incidents" />
+                </CommandCenterLayout>
+              </AdminGate>
+            }
+          />
+
+          <Route
+            path="/admin/command-center/chaos-center"
+            element={
+              <AdminGate>
+                <CommandCenterLayout>
+                  <Dashboard page="chaos-center" />
+                </CommandCenterLayout>
+              </AdminGate>
+            }
+          />
+
           <Route
             path="/admin/notifications"
             element={
