@@ -144,7 +144,7 @@ export default function AdminProducts() {
     "w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-400";
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100">
+    <div className="lavender-commerce min-h-screen bg-[#090d16] text-slate-100">
       <header className="sticky top-0 z-20 border-b border-white/10 bg-[#090d16]/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 lg:px-8">
           <Link to="/admin" className="flex items-center gap-3">
@@ -203,7 +203,7 @@ export default function AdminProducts() {
                 resetForm();
                 document.getElementById("product-form")?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="flex items-center gap-2 rounded-xl bg-violet-500 px-4 py-3 text-sm font-semibold text-white hover:bg-violet-400"
+              className="flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-3 text-sm font-semibold text-white hover:bg-violet-700"
             >
               <Plus size={17} /> Add product
             </button>
@@ -281,7 +281,7 @@ export default function AdminProducts() {
             <div className="sm:col-span-2 lg:col-span-3">
               <button
                 disabled={saving}
-                className="rounded-xl bg-violet-500 px-5 py-3 text-sm font-semibold text-white hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {saving ? "Saving..." : editingId ? "Save changes" : "Create product"}
               </button>
