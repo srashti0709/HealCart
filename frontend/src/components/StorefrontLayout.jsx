@@ -116,19 +116,19 @@ function StorefrontShell({ children }) {
         : "Store operating";
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="lavender-commerce min-h-screen bg-slate-50">
       <div className="sticky top-0 z-30">
         <header className="border-b border-slate-200 bg-white">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
             <Link to="/user" className="flex items-center gap-3">
-              <div className="rounded-xl bg-emerald-700 p-2 text-white">
+              <div className="rounded-xl bg-violet-600 p-2 text-white shadow-lg shadow-violet-200">
                 <ShieldCheck size={25} />
               </div>
 
               <div>
-                <h1 className="text-xl font-bold text-slate-900">SHCom</h1>
+                <h1 className="text-xl font-bold tracking-tight text-slate-900">TechNest</h1>
                 <p className="text-xs text-slate-500">
-                  Self-Healing Commerce
+                  Premium electronics & everyday tech
                 </p>
               </div>
             </Link>
@@ -161,7 +161,7 @@ function StorefrontShell({ children }) {
 
               <Link
                 to="/user/orders"
-                className="hidden text-sm font-medium text-slate-700 transition hover:text-emerald-800 sm:inline"
+                className="hidden text-sm font-medium text-slate-700 transition hover:text-violet-700 sm:inline"
               >
                 Order history
               </Link>
