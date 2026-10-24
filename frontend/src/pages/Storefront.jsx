@@ -75,30 +75,30 @@ export default function Storefront() {
   };
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-10">
-      <section className="relative overflow-hidden rounded-3xl bg-emerald-950 px-7 py-12 text-white sm:px-12 sm:py-16">
+    <main className="lavender-commerce mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10">
+      <section className="relative overflow-hidden rounded-3xl bg-emerald-950 px-7 py-12 text-white shadow-xl shadow-violet-200/50 sm:px-12 sm:py-16">
         <div className="relative z-[1] max-w-2xl">
           <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-emerald-100">
             <ShieldCheck size={16} />
-            Thoughtful shopping, dependable delivery
+            GEAR UP YOUR SETUP
           </span>
 
-          <h2 className="text-4xl font-bold leading-tight sm:text-5xl">
-            Find what you need.
+          <h2 className="text-4xl font-medium leading-tight tracking-tight sm:text-5xl">
+            Upgrade your tech experience.
             <br />
-            Shop with confidence.
+            Make every setup feel extraordinary.
           </h2>
 
           <p className="mt-5 max-w-xl leading-7 text-emerald-100">
-            Discover everyday essentials, keep track of stock at a glance, and
-            get through checkout without friction.
+            Discover thoughtful tech essentials for focused work, immersive play, and
+            a cleaner, more capable everyday setup.
           </p>
 
           <a
             href="#products"
             className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 font-semibold text-emerald-950 transition hover:bg-emerald-50"
           >
-            Explore products
+            Shop the collection
             <ShoppingBag size={18} />
           </a>
         </div>
