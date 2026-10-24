@@ -1,7 +1,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Bell, Check, ChevronRight } from "lucide-react";
+import {
+  Bell,
+  Check,
+  ChevronRight,
+  ShoppingBag,
+  Clock3,
+  AlertCircle,
+  Inbox,
+} from "lucide-react";
 import axios from "axios";
 import { API_BASE_URL } from "../config/api";
 
@@ -73,6 +81,24 @@ export default function AdminNotificationBell() {
 
   const recentNotifications = notifications.slice(0, 5);
 
+  const formatDate = (date) => {
+    if (!date) return "Date unavailable";
+
+    const parsedDate = new Date(date);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "Date unavailable";
+    }
+
+    return parsedDate.toLocaleString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <div className="relative" ref={containerRef}>
       <button
@@ -83,90 +109,184 @@ export default function AdminNotificationBell() {
         }}
         aria-label={`Notifications, ${unreadCount} unread`}
         aria-expanded={open}
-        className="relative rounded-xl border border-slate-200 bg-white p-2.5 text-slate-700 transition hover:bg-slate-100"
+        aria-haspopup="true"
+        className={`relative rounded-xl border p-3 transition focus:outline-none focus:ring-4 focus:ring-violet-100 ${
+          open
+            ? "border-violet-300 bg-violet-50 text-violet-800"
+            : "border-violet-100 bg-white text-slate-700 hover:border-violet-300 hover:bg-violet-50 hover:text-violet-800"
+        }`}
       >
-        <Bell size={20} />
+        <Bell size={22} />
+
         {unreadCount > 0 && (
-          <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-xs font-bold text-white">
+          <span className="absolute -right-2 -top-2 flex h-6 min-w-6 items-center justify-center rounded-full border-2 border-white bg-violet-700 px-1.5 text-base font-bold text-white shadow-sm">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-12 z-50 w-[min(360px,90vw)] overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-2xl">
-          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-            <div>
-              <h3 className="font-bold">Notifications</h3>
-              <p className="text-xs text-slate-500">
-                {unreadCount} unread purchase messages
-              </p>
+        <div
+          role="dialog"
+          aria-label="Notifications"
+          className="absolute right-0 top-[calc(100%+12px)] z-50 w-[min(390px,calc(100vw-32px))] overflow-hidden rounded-2xl border border-violet-100 bg-white text-slate-900 shadow-2xl shadow-violet-200/50"
+        >
+          <div className="relative overflow-hidden border-b border-violet-100 bg-gradient-to-br from-violet-50 via-white to-purple-50 px-5 py-5">
+            <div className="pointer-events-none absolute -right-8 -top-12 h-32 w-32 rounded-full bg-violet-100/80 blur-2xl" />
+
+            <div className="relative flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-violet-100 text-violet-800">
+                  <Bell size={24} />
+                </span>
+
+                <div>
+                  <h3 className="text-xl font-bold tracking-tight text-slate-950">
+                    Notifications
+                  </h3>
+
+                  <p className="mt-1 text-base text-slate-600">
+                    {unreadCount} unread{" "}
+                    {unreadCount === 1
+                      ? "purchase notification"
+                      : "purchase notifications"}
+                  </p>
+                </div>
+              </div>
+
+              {unreadCount > 0 && (
+                <span className="relative shrink-0 rounded-full border border-violet-200 bg-white px-3 py-2 text-base font-semibold text-violet-800">
+                  {unreadCount > 99 ? "99+" : unreadCount} new
+                </span>
+              )}
             </div>
-            <Bell size={18} className="text-slate-400" />
           </div>
 
           {error && (
-            <p className="px-4 py-3 text-sm text-red-600">{error}</p>
+            <div
+              role="alert"
+              className="flex items-start gap-3 border-b border-red-100 bg-red-50 px-5 py-4 text-base leading-6 text-red-800"
+            >
+              <AlertCircle size={21} className="mt-0.5 shrink-0" />
+              <p>{error}</p>
+            </div>
           )}
 
           {!error && recentNotifications.length === 0 && (
-            <div className="px-5 py-8 text-center">
-              <Bell className="mx-auto text-slate-300" size={28} />
-              <p className="mt-2 text-sm font-medium">No notifications yet</p>
-              <p className="mt-1 text-xs text-slate-500">
-                New purchases will appear here.
+            <div className="flex flex-col items-center px-5 py-9 text-center">
+              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-violet-100 text-violet-700">
+                <Inbox size={28} />
+              </span>
+
+              <p className="mt-4 text-lg font-semibold text-slate-900">
+                No notifications yet
+              </p>
+
+              <p className="mt-2 max-w-xs text-base leading-6 text-slate-600">
+                New purchases will appear here when an order is successfully
+                placed.
               </p>
             </div>
           )}
 
-          <div className="max-h-96 overflow-y-auto">
-            {recentNotifications.map((notification) => (
-              <button
-                key={notification._id}
-                type="button"
-                onClick={() => markRead(notification)}
-                className={`block w-full border-b border-slate-100 px-4 py-3 text-left transition hover:bg-slate-50 ${
-                  notification.readAt ? "" : "bg-emerald-50/60"
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <span
-                    className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
-                      notification.readAt
-                        ? "bg-slate-300"
-                        : "bg-emerald-600"
-                    }`}
-                  />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold">
-                      {notification.title}
+          <div className="max-h-[min(420px,60vh)] overflow-y-auto">
+            {recentNotifications.map((notification) => {
+              const isUnread = !notification.readAt;
+
+              return (
+                <button
+                  key={notification._id}
+                  type="button"
+                  onClick={() => markRead(notification)}
+                  aria-label={`${notification.title || "Purchase notification"}${isUnread ? ", mark as read" : ", already read"}`}
+                  className={`block w-full border-b border-violet-50 px-5 py-4 text-left transition focus:outline-none focus:ring-2 focus:ring-inset focus:ring-violet-300 ${
+                    isUnread
+                      ? "bg-violet-50/70 hover:bg-violet-100/70"
+                      : "bg-white hover:bg-slate-50"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className={`relative mt-0.5 grid h-11 w-11 shrink-0 place-items-center rounded-xl ${
+                        isUnread
+                          ? "bg-violet-100 text-violet-800"
+                          : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      <ShoppingBag size={21} />
+
+                      {isUnread && (
+                        <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-violet-600" />
+                      )}
                     </span>
-                    <span className="mt-1 block text-sm text-slate-600">
-                      {notification.items
-                        ?.map((item) => `${item.name} × ${item.quantity}`)
-                        .join(", ")}
+
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-start justify-between gap-2">
+                        <span className="break-words text-base font-semibold leading-6 text-slate-900">
+                          {notification.title || "Purchase notification"}
+                        </span>
+
+                        {isUnread ? (
+                          <span className="shrink-0 rounded-full border border-violet-200 bg-white px-2.5 py-1 text-base font-semibold text-violet-800">
+                            New
+                          </span>
+                        ) : (
+                          <Check
+                            size={20}
+                            className="mt-0.5 shrink-0 text-slate-500"
+                          />
+                        )}
+                      </span>
+
+                      {notification.items?.length > 0 && (
+                        <span className="mt-2 block break-words text-base leading-6 text-slate-600">
+                          {notification.items
+                            .map(
+                              (item) => `${item.name} × ${item.quantity}`
+                            )
+                            .join(", ")}
+                        </span>
+                      )}
+
+                      <span className="mt-2 block text-lg font-bold text-violet-800">
+                        ₹
+                        {Number(
+                          notification.totalAmount || 0
+                        ).toLocaleString("en-IN")}
+                      </span>
+
+                      <span className="mt-2 flex items-center gap-2 text-base leading-6 text-slate-600">
+                        <Clock3
+                          size={17}
+                          className="shrink-0 text-violet-700"
+                        />
+                        {formatDate(notification.createdAt)}
+                      </span>
+
+                      {isUnread && (
+                        <span className="mt-3 inline-flex items-center gap-2 text-base font-semibold text-violet-800">
+                          <Check size={18} />
+                          Mark as read
+                        </span>
+                      )}
                     </span>
-                    <span className="mt-1 block text-xs text-slate-500">
-                      ₹{Number(notification.totalAmount).toLocaleString("en-IN")}
-                      {" · "}
-                      {new Date(notification.createdAt).toLocaleString()}
-                    </span>
-                  </span>
-                  {!notification.readAt && (
-                    <Check size={15} className="mt-1 shrink-0 text-emerald-700" />
-                  )}
-                </div>
-              </button>
-            ))}
+                  </div>
+                </button>
+              );
+            })}
           </div>
 
           <Link
             to="/admin/notifications"
             onClick={() => setOpen(false)}
-            className="flex items-center justify-between px-4 py-3 text-sm font-semibold text-emerald-800 hover:bg-emerald-50"
+            className="group flex items-center justify-between gap-3 border-t border-violet-100 bg-[#faf9fe] px-5 py-4 text-base font-semibold text-violet-800 transition hover:bg-violet-100"
           >
-            See all notifications
-            <ChevronRight size={17} />
+            <span>See all notifications</span>
+
+            <ChevronRight
+              size={21}
+              className="transition-transform group-hover:translate-x-1"
+            />
           </Link>
         </div>
       )}

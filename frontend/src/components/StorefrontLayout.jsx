@@ -6,7 +6,16 @@ import {
   ShoppingBag,
   ShieldCheck,
   AlertCircle,
-  CreditCard,
+  ArrowRight,
+  Zap,
+  Headphones,
+  Keyboard,
+  Mouse,
+  Cable,
+  Monitor,
+  PackageCheck,
+  LockKeyhole,
+  HeartHandshake,
 } from "lucide-react";
 import { API_ENDPOINTS } from "../config/api";
 import StorefrontAvailabilityProvider from "./StorefrontAvailabilityProvider";
@@ -27,7 +36,9 @@ function useCart() {
   useEffect(() => {
     const sync = () => {
       const next = readCart();
-      setCart((current) => (isSameCart(current, next) ? current : next));
+      setCart((current) =>
+        isSameCart(current, next) ? current : next
+      );
     };
 
     return subscribeToCartChanges(sync);
@@ -44,6 +55,39 @@ function useCart() {
   return [cart, setCart];
 }
 
+const collections = [
+  {
+    name: "Keyboards",
+    description: "Mechanical precision for every keystroke.",
+    icon: Keyboard,
+    color: "bg-violet-100",
+  },
+  {
+    name: "Mice",
+    description: "Lightweight control and accuracy.",
+    icon: Mouse,
+    color: "bg-indigo-100",
+  },
+  {
+    name: "Headphones",
+    description: "Immersive sound, without distractions.",
+    icon: Headphones,
+    color: "bg-purple-100",
+  },
+  {
+    name: "Monitors",
+    description: "Beautiful visuals for your workspace.",
+    icon: Monitor,
+    color: "bg-fuchsia-100",
+  },
+  {
+    name: "Accessories",
+    description: "The finishing touches for your setup.",
+    icon: Cable,
+    color: "bg-blue-100",
+  },
+];
+
 function StorefrontShell({ children }) {
   const [cart] = useCart();
   const availability = useStorefrontAvailability();
@@ -57,7 +101,8 @@ function StorefrontShell({ children }) {
       });
 
       const healthy =
-        response?.status === 200 && response?.data?.status === "healthy";
+        response?.status === 200 &&
+        response?.data?.status === "healthy";
 
       setPaymentStatus(healthy ? "Healthy" : "Unavailable");
     } catch {
@@ -72,19 +117,21 @@ function StorefrontShell({ children }) {
       checkPaymentService();
     }, 0);
 
-    const intervalId = setInterval(checkPaymentService, 15000);
+    const intervalId = window.setInterval(checkPaymentService, 15000);
 
     return () => {
       window.clearTimeout(timer);
-      clearInterval(intervalId);
+      window.clearInterval(intervalId);
     };
   }, []);
 
   const { status, lastCheckedAt } = availability;
+
   const paymentOk = paymentStatus === "Healthy";
   const paymentKnown = paymentStatus !== "Checking";
 
   const backendChecking = status === AVAILABILITY_STATUS.CHECKING;
+
   const backendDown =
     status === AVAILABILITY_STATUS.UNAVAILABLE ||
     status === AVAILABILITY_STATUS.RECOVERING;
@@ -94,7 +141,10 @@ function StorefrontShell({ children }) {
     status === AVAILABILITY_STATUS.RECONNECTED;
 
   const cartCount = Array.isArray(cart)
-    ? cart.reduce((sum, item) => sum + (item.quantity || 0), 0)
+    ? cart.reduce(
+        (sum, item) => sum + (item.quantity || 0),
+        0
+      )
     : 0;
 
   const statusLabel = backendChecking
@@ -115,61 +165,57 @@ function StorefrontShell({ children }) {
         ? "Checkout temporarily unavailable"
         : "Store operating";
 
+  const serviceTone = backendChecking
+    ? "border-slate-200 bg-slate-100 text-slate-700"
+    : backendDown || (!paymentOk && paymentKnown)
+      ? "border-amber-200 bg-amber-50 text-amber-800"
+      : "border-emerald-200 bg-emerald-50 text-emerald-800";
+
+  const ServiceIcon = backendChecking
+    ? AlertCircle
+    : backendDown || (!paymentOk && paymentKnown)
+      ? AlertCircle
+      : ShieldCheck;
+
   return (
-    <div className="lavender-commerce min-h-screen bg-slate-50">
-      <div className="sticky top-0 z-30">
-        <header className="border-b border-slate-200 bg-white">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-            <Link to="/user" className="flex items-center gap-3">
-              <div className="rounded-xl bg-violet-600 p-2 text-white shadow-lg shadow-violet-200">
-                <ShoppingBag size={25} />
+    <div className="lavender-commerce min-h-screen overflow-x-hidden bg-[#fdfaff] text-[#211a3b] antialiased">
+      <div className="sticky top-0 z-40">
+        <header className="border-b border-violet-100 bg-white/95 shadow-[0_4px_24px_-8px_rgba(69,48,120,0.12)] backdrop-blur-xl">
+          <div className="mx-auto flex min-h-20 max-w-[1440px] items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-12">
+            <Link
+              to="/user"
+              className="group flex shrink-0 items-center gap-3"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-200 transition-transform duration-200 group-hover:-translate-y-0.5">
+                <ShoppingBag size={27} strokeWidth={2.2} />
               </div>
 
-              <div>
-                <h1 className="text-xl font-bold tracking-tight text-slate-900">TechNest</h1>
-                <p className="text-xs text-slate-500">
-                  Premium electronics & everyday tech
+              <div className="min-w-0">
+                <h1 className="font-bold tracking-tight text-[#211a3b] sm:text-xl">
+                  TechNest
+                </h1>
+                <p className="hidden text-base text-slate-600 sm:block">
+                  Premium electronics &amp; everyday tech
                 </p>
               </div>
             </Link>
 
-            <nav aria-label="Main navigation" className="hidden items-center gap-5 text-sm font-medium text-slate-600 xl:flex">
-              <Link to="/user" className="transition hover:text-violet-700">Shop</Link>
-              <a href="/user#products" className="transition hover:text-violet-700">Keyboards</a>
-              <a href="/user#products" className="transition hover:text-violet-700">Mice</a>
-              <a href="/user#products" className="transition hover:text-violet-700">Headphones</a>
-              <a href="/user#products" className="transition hover:text-violet-700">Accessories</a>
-            </nav>
-
-            <div className="flex items-center gap-4">
-              {backendChecking ? (
-                <div className="hidden items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 sm:flex">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-slate-400" />
-                  Checking services...
-                </div>
-              ) : backendHealthy && paymentOk ? (
-                <div className="hidden items-center gap-2 rounded-full bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-800 sm:flex">
-                  <ShieldCheck size={14} />
-                  {statusLabel}
-                </div>
-              ) : backendHealthy ? (
-                <div className="hidden items-center gap-2 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-800 sm:flex">
-                  <CreditCard size={14} />
-                  {statusLabel}
-                </div>
-              ) : (
-                <div
-                  role="status"
-                  className="hidden items-center gap-2 rounded-full bg-amber-100 px-3 py-1.5 text-xs font-semibold text-amber-800 sm:flex"
-                >
-                  <AlertCircle size={14} />
-                  {statusLabel}
-                </div>
-              )}
+            <div className="flex shrink-0 items-center gap-2 sm:gap-4">
+              <div
+                role="status"
+                className={`hidden items-center gap-2 rounded-full border px-3 py-2 text-base font-semibold lg:flex ${serviceTone}`}
+              >
+                <ServiceIcon size={18} />
+                <span>
+                  {backendHealthy && paymentOk
+                    ? "All systems operational"
+                    : statusLabel}
+                </span>
+              </div>
 
               <Link
                 to="/user/orders"
-                className="hidden text-sm font-medium text-slate-700 transition hover:text-violet-700 sm:inline"
+                className="hidden rounded-lg px-2 py-3 text-base font-medium text-slate-600 transition hover:bg-violet-50 hover:text-violet-800 md:inline-flex"
               >
                 Order history
               </Link>
@@ -177,12 +223,12 @@ function StorefrontShell({ children }) {
               <Link
                 to="/user/cart"
                 aria-label={`Open shopping cart with ${cartCount} items`}
-                className="relative rounded-xl p-2 transition hover:bg-emerald-50"
+                className="relative flex h-12 w-12 items-center justify-center rounded-xl text-slate-700 transition hover:bg-violet-50 hover:text-violet-800"
               >
-                <ShoppingBag size={24} />
+                <ShoppingBag size={25} strokeWidth={1.9} />
 
                 {cartCount > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-700 px-1 text-xs text-white">
+                  <span className="absolute -right-1 -top-1 flex h-6 min-w-6 items-center justify-center rounded-full bg-violet-600 px-1.5 text-base font-bold text-white shadow-sm ring-2 ring-white">
                     {cartCount}
                   </span>
                 )}
@@ -199,49 +245,213 @@ function StorefrontShell({ children }) {
         />
       </div>
 
-      {children}
+      <main>{children}</main>
 
-      <footer className="mt-16 border-t border-slate-200 bg-white py-7 text-center text-sm text-slate-500">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:justify-between">
+      <section className="relative isolate overflow-hidden border-y border-violet-100 bg-gradient-to-br from-[#f5efff] via-[#fbf8ff] to-[#f0edff] px-4 py-12 sm:px-6 lg:px-12">
+        <div className="pointer-events-none absolute -right-24 -top-32 -z-10 h-80 w-80 rounded-full bg-violet-300/30 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-20 -z-10 h-72 w-72 rounded-full bg-indigo-300/20 blur-3xl" />
+
+        <div className="mx-auto grid max-w-[1440px] gap-8 lg:grid-cols-12 lg:items-center">
+          <div className="flex flex-col gap-5 lg:col-span-6">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-violet-200 bg-white/80 px-4 py-2 text-base font-semibold text-violet-800 shadow-sm">
+              <Zap size={18} />
+              Built for reliable shopping
+            </div>
+
+            <h2 className="max-w-2xl text-3xl font-bold leading-tight tracking-tight text-[#211a3b] sm:text-4xl">
+              Your next favorite piece of tech starts here.
+            </h2>
+
+            <p className="max-w-2xl text-base leading-7 text-slate-700 sm:text-lg">
+              Discover electronics for your workspace, everyday life,
+              and everything in between, with a shopping experience
+              designed around reliability.
+            </p>
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to="/user#products"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-violet-600 px-6 py-3 text-base font-semibold text-white shadow-lg shadow-violet-200 transition hover:-translate-y-0.5 hover:bg-violet-700"
+              >
+                Explore products
+                <ArrowRight size={19} />
+              </Link>
+
+              <Link
+                to="/user/cart"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-violet-200 bg-white px-6 py-3 text-base font-semibold text-violet-800 transition hover:bg-violet-50"
+              >
+                <ShoppingBag size={19} />
+                View your cart
+              </Link>
+            </div>
+
+            <div className="flex flex-wrap gap-x-6 gap-y-3 pt-2 text-base text-slate-700">
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={20} className="text-violet-700" />
+                Reliable service monitoring
+              </div>
+
+              <div className="flex items-center gap-2">
+                <PackageCheck size={20} className="text-violet-700" />
+                Inventory-aware shopping
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:col-span-6">
+            {collections.map((collection) => {
+              const Icon = collection.icon;
+
+              return (
+                <a
+                  key={collection.name}
+                  href="/user#products"
+                  className="group flex items-start gap-4 rounded-2xl border border-white bg-white/85 p-5 shadow-[0_8px_30px_-16px_rgba(69,48,120,0.24)] transition duration-200 hover:-translate-y-1 hover:border-violet-200 hover:shadow-lg"
+                >
+                  <div
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-violet-800 transition group-hover:bg-violet-600 group-hover:text-white ${collection.color}`}
+                  >
+                    <Icon size={24} />
+                  </div>
+
+                  <div className="min-w-0">
+                    <h3 className="text-base font-bold text-[#211a3b] sm:text-lg">
+                      {collection.name}
+                    </h3>
+
+                    <p className="mt-1 text-base leading-6 text-slate-600">
+                      {collection.description}
+                    </p>
+
+                    <span className="mt-3 inline-flex items-center gap-1 text-base font-semibold text-violet-700">
+                      Explore
+                      <ArrowRight
+                        size={17}
+                        className="transition-transform group-hover:translate-x-1"
+                      />
+                    </span>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-violet-100 bg-white">
+        <div className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-12">
+          <div className="grid gap-8 border-b border-violet-100 pb-8 md:grid-cols-3 md:items-start">
             <div>
-              <p className="font-semibold text-slate-900">SHCom</p>
-              <p className="mt-1">Self-Healing Commerce</p>
-            </div>
+              <Link
+                to="/user"
+                className="inline-flex items-center gap-3"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white shadow-md shadow-violet-200">
+                  <ShoppingBag size={23} />
+                </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-4 text-slate-500">
-              <a href="#products" className="hover:text-emerald-700">
-                Products
-              </a>
-
-              <Link to="/user/cart" className="hover:text-emerald-700">
-                Cart
+                <span className="text-xl font-bold tracking-tight text-[#211a3b]">
+                  SHCom
+                </span>
               </Link>
 
-              <Link to="/user/orders" className="hover:text-emerald-700">
-                Order history
-              </Link>
+              <p className="mt-3 max-w-md text-base leading-7 text-slate-600">
+                Self-Healing Commerce — an electronics shopping
+                experience with service monitoring and automatic
+                recovery capabilities.
+              </p>
             </div>
 
-            <div className="text-slate-500">
-              {footerLabel}
+            <div>
+              <h3 className="text-base font-bold text-[#211a3b]">
+                Quick links
+              </h3>
 
-              {lastCheckedAt && (
-                <span className="ml-2 text-slate-400">
-                  · checked{" "}
-                  {new Date(lastCheckedAt).toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              )}
+              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-3">
+                <Link
+                  to="/user"
+                  className="text-base text-slate-600 transition hover:text-violet-700"
+                >
+                  Products
+                </Link>
 
-              {paymentCheckedAt && !paymentOk && paymentKnown ? (
-                <span className="ml-2 text-slate-400">
-                  · payment checked {paymentCheckedAt}
-                </span>
-              ) : null}
+                <Link
+                  to="/user/cart"
+                  className="text-base text-slate-600 transition hover:text-violet-700"
+                >
+                  Shopping cart
+                </Link>
+
+                <Link
+                  to="/user/orders"
+                  className="text-base text-slate-600 transition hover:text-violet-700"
+                >
+                  Order history
+                </Link>
+              </div>
             </div>
+
+            <div>
+              <h3 className="flex items-center gap-2 text-base font-bold text-[#211a3b]">
+                <HeartHandshake size={20} className="text-violet-700" />
+                Shopping with confidence
+              </h3>
+
+              <p className="mt-3 text-base leading-7 text-slate-600">
+                Service availability is monitored in the background
+                to help keep your shopping experience reliable.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4 pt-6 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-3">
+              <span
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
+                  backendHealthy && paymentOk
+                    ? "bg-emerald-50 text-emerald-700"
+                    : backendChecking
+                      ? "bg-slate-100 text-slate-700"
+                      : "bg-amber-50 text-amber-700"
+                }`}
+              >
+                {backendHealthy && paymentOk ? (
+                  <ShieldCheck size={23} />
+                ) : backendChecking ? (
+                  <LockKeyhole size={23} />
+                ) : (
+                  <AlertCircle size={23} />
+                )}
+              </span>
+
+              <div>
+                <p className="text-base font-semibold text-[#211a3b]">
+                  {footerLabel}
+                </p>
+
+                <p className="mt-1 text-base text-slate-600">
+                  {lastCheckedAt
+                    ? `Last backend check: ${new Date(
+                        lastCheckedAt
+                      ).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}`
+                    : "Waiting for backend health verification"}
+                </p>
+
+                {paymentCheckedAt && !paymentOk && paymentKnown && (
+                  <p className="mt-1 text-base text-amber-800">
+                    Payment service checked at {paymentCheckedAt}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <p className="text-base text-slate-600">
+              © {new Date().getFullYear()} SHCom. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>
