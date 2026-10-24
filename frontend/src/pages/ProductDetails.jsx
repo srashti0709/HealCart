@@ -121,7 +121,7 @@ export default function ProductDetails() {
           </div>
 
           <div className="flex flex-col items-start">
-            <span className="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-800">
+            <span className="rounded-full bg-violet-50 px-3 py-1 text-sm font-semibold text-violet-800">
               {product.category}
             </span>
 
@@ -129,7 +129,7 @@ export default function ProductDetails() {
               {product.name}
             </h1>
 
-            <p className="mt-4 text-3xl font-bold text-teal-800">
+            <p className="mt-4 text-3xl font-semibold text-violet-800">
               ₹{Number(product.price).toLocaleString("en-IN")}
             </p>
 
@@ -171,7 +171,7 @@ export default function ProductDetails() {
             <button
               onClick={addToCart}
               disabled={product.stock < 1}
-              className="mt-7 inline-flex items-center justify-center gap-2 rounded-xl bg-teal-800 px-6 py-3 font-semibold text-white transition hover:bg-teal-900 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className="mt-7 inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-slate-400"
             >
               <ShoppingCart size={19} />
               {product.stock > 0 ? "Add to Cart" : "Out of Stock"}
