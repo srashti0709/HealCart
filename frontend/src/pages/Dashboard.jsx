@@ -722,6 +722,75 @@ function Dashboard({ page = "overview" }) {
   return (
     <div data-dashboard-page={page} className="min-h-screen bg-[#080908] text-[#F3F4F1]">
       <style>{`
+
+        @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+        [data-dashboard-page="chaos-center"] {
+          --cc-bg:#0b0f0b;--cc-surface:#101410;--cc-panel:#191d18;--cc-raised:#1c211c;
+          --cc-border:#32372f;--cc-muted:#a0a493;--cc-text:#e0e4dc;--cc-lime:#deed00;
+          --cc-green:#4ae08d;--cc-amber:#f5b942;background:var(--cc-bg);color:var(--cc-text);
+          font-family:Inter,sans-serif;
+        }
+        [data-dashboard-page="chaos-center"] .dashboard-content {
+          padding:1.5rem clamp(1rem,2.5vw,2.5rem) 2.5rem;
+          background-image:linear-gradient(to right,rgba(71,72,50,.12) 1px,transparent 1px),linear-gradient(to bottom,rgba(71,72,50,.12) 1px,transparent 1px);
+          background-size:44px 44px;
+        }
+        [data-dashboard-page="chaos-center"] #chaos-control {padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+        [data-dashboard-page="chaos-center"] #chaos-control>p:first-child {
+          display:flex;align-items:center;gap:.55rem;color:var(--cc-lime);font:600 11px/1.4 "JetBrains Mono",monospace;letter-spacing:.16em;text-transform:uppercase
+        }
+        [data-dashboard-page="chaos-center"] #chaos-control>p:first-child:before {content:"◈";font-size:14px}
+        [data-dashboard-page="chaos-center"] #chaos-control>h3 {margin-top:.55rem;font-size:clamp(1.65rem,2.4vw,2.15rem);line-height:1.15;letter-spacing:-.045em;font-weight:650}
+        [data-dashboard-page="chaos-center"] #chaos-control>p:nth-of-type(2) {max-width:46rem;font-size:13px;line-height:1.65;color:var(--cc-muted)}
+        [data-dashboard-page="chaos-center"] #chaos-control>.mt-5,
+        [data-dashboard-page="chaos-center"] #chaos-control>.mt-6,
+        [data-dashboard-page="chaos-center"] .dashboard-chaos-only.mt-6 {
+          min-width:0;border:1px solid var(--cc-border);border-radius:13px;background:rgba(25,29,24,.97);box-shadow:0 16px 40px rgba(0,0,0,.16)
+        }
+        [data-dashboard-page="chaos-center"] #chaos-control>.mt-5 {position:relative;overflow:hidden;padding:1rem 1.25rem;background:rgba(11,15,11,.9)}
+        [data-dashboard-page="chaos-center"] #chaos-control>.mt-5:before {content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,transparent,var(--cc-lime),transparent);opacity:.8}
+        [data-dashboard-page="chaos-center"] #chaos-control h4,
+        [data-dashboard-page="chaos-center"] .dashboard-chaos-only.mt-6 h4 {font-size:17px;line-height:1.45;letter-spacing:-.02em;font-weight:600;color:var(--cc-text)}
+        [data-dashboard-page="chaos-center"] #chaos-control p,
+        [data-dashboard-page="chaos-center"] .dashboard-chaos-only.mt-6 p {line-height:1.65}
+        [data-dashboard-page="chaos-center"] #chaos-control .text-\[\#92968F\],
+        [data-dashboard-page="chaos-center"] .dashboard-chaos-only.mt-6 .text-\[\#92968F\] {color:var(--cc-muted)}
+        [data-dashboard-page="chaos-center"] #chaos-control button,
+        [data-dashboard-page="chaos-center"] #chaos-control a,
+        [data-dashboard-page="chaos-center"] .dashboard-chaos-only.mt-6 button,
+        [data-dashboard-page="chaos-center"] .dashboard-chaos-only.mt-6 a {
+          border-radius:6px;transition:background-color .18s,border-color .18s,color .18s,transform .18s
+        }
+        [data-dashboard-page="chaos-center"] #chaos-control button:hover:not(:disabled),
+        [data-dashboard-page="chaos-center"] #chaos-control a:hover,
+        [data-dashboard-page="chaos-center"] .dashboard-chaos-only.mt-6 button:hover:not(:disabled),
+        [data-dashboard-page="chaos-center"] .dashboard-chaos-only.mt-6 a:hover {filter:brightness(1.12);transform:translateY(-1px)}
+        [data-dashboard-page="chaos-center"] #chaos-control button:focus-visible,
+        [data-dashboard-page="chaos-center"] #chaos-control a:focus-visible {outline:2px solid var(--cc-lime);outline-offset:3px}
+        [data-dashboard-page="chaos-center"] #chaos-control .btn-primary {background:var(--cc-lime);color:#242700;box-shadow:0 0 16px rgba(222,237,0,.14)}
+        [data-dashboard-page="chaos-center"] #chaos-control .btn-secondary,
+        [data-dashboard-page="chaos-center"] .dashboard-chaos-only.mt-6 .btn-secondary {border:1px solid var(--cc-border);background:#20241f;color:var(--cc-text)}
+        [data-dashboard-page="chaos-center"] #chaos-control .rounded-xl.border,
+        [data-dashboard-page="chaos-center"] #chaos-control .rounded-2xl.border,
+        [data-dashboard-page="chaos-center"] .dashboard-chaos-only.mt-6 .rounded-xl.border {border-color:var(--cc-border)}
+        [data-dashboard-page="chaos-center"] #chaos-control .bg-\[\#0D0F0D\],
+        [data-dashboard-page="chaos-center"] #chaos-control .bg-\[\#171917\],
+        [data-dashboard-page="chaos-center"] .dashboard-chaos-only.mt-6 .bg-\[\#171917\] {background-color:#101410}
+        [data-dashboard-page="chaos-center"] #chaos-control .text-\[\#E5F500\] {color:var(--cc-lime)}
+        [data-dashboard-page="chaos-center"] #chaos-control .text-\[\#35D07F\] {color:var(--cc-green)}
+        [data-dashboard-page="chaos-center"] #chaos-control .text-\[\#F5B942\] {color:var(--cc-amber)}
+        [data-dashboard-page="chaos-center"] #chaos-control .font-mono,
+        [data-dashboard-page="chaos-center"] #chaos-control .font-mono * {font-family:"JetBrains Mono",monospace}
+        [data-dashboard-page="chaos-center"] #chaos-control .mt-6.rounded-2xl.border {padding:clamp(1rem,2vw,1.5rem)}
+        [data-dashboard-page="chaos-center"] #chaos-control .grid>div.rounded-xl,
+        [data-dashboard-page="chaos-center"] #chaos-control .grid>div.rounded-2xl {border-radius:8px;background:#101410}
+        [data-dashboard-page="chaos-center"] .dashboard-chaos-only.mt-6 {margin-top:1.5rem;padding:clamp(1rem,2vw,1.5rem)}
+        [data-dashboard-page="chaos-center"] .dashboard-chaos-only.mt-6 .space-y-3>div {border-radius:8px;background:#101410}
+        @media(max-width:640px) {
+          [data-dashboard-page="chaos-center"] .dashboard-content {padding:1rem .75rem 2rem}
+          [data-dashboard-page="chaos-center"] #chaos-control>.mt-6 {padding:1rem}
+        }
+
         [data-dashboard-page="overview"] .dashboard-incidents-only,
         [data-dashboard-page="overview"] .dashboard-chaos-only,
         [data-dashboard-page="incidents"] .dashboard-overview-only,
