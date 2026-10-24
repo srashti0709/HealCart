@@ -1290,7 +1290,7 @@ function Dashboard() {
               }}
               className="rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {wifiFailureRunning ? "Injecting Wi-Fi Failure..." : "Inject Offline Failure (5s)"}
+              {wifiFailureRunning ? "Injecting Wi-Fi Failure..." : "Inject Offline Failure "}
             </button>
           </div>
           <p className="mt-3 text-xs text-slate-500">Open Checkout in another tab and enter test details before clicking Inject Offline Failure. The local Windows helper disables Wi-Fi for at least 5 seconds, then automatically re-enables it. This affects internet for the whole laptop; it does not stop or crash the SHCom backend.</p>
