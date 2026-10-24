@@ -107,17 +107,22 @@ export default function ProductDetails() {
 
         <div className="grid gap-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-2 md:p-10">
           <div className="flex min-h-72 items-center justify-center rounded-2xl bg-slate-100 p-6">
-            <img
-              src={
-                product.image ||
-                "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600"
-              }
-              alt={product.name}
-              className="max-h-96 w-full object-contain"
-              onError={(event) => {
-                event.currentTarget.style.display = "none";
-              }}
-            />
+            {product.image ? (
+              <img
+                src={product.image}
+                alt={product.name}
+                className="max-h-96 w-full object-contain"
+                onError={(event) => {
+                  event.currentTarget.style.display = "none";
+                }}
+              />
+            ) : (
+              <div className="tech-image-placeholder min-h-72 w-full">
+                <strong>Product image placeholder</strong>
+                <span className="mt-2 text-sm">{product.name}</span>
+                <span className="mt-3 text-xs">Generate a clean square product photo; see IMAGE_GENERATION_PROMPTS.md.</span>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col items-start">
