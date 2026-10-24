@@ -77,7 +77,7 @@ export default function Storefront() {
   return (
     <main className="lavender-commerce mx-auto max-w-7xl px-4 py-7 sm:px-6 sm:py-10">
       <section className="relative overflow-hidden rounded-3xl bg-emerald-950 px-7 py-12 text-white shadow-xl shadow-violet-200/50 sm:px-12 sm:py-16">
-        <div className="relative z-[1] max-w-2xl">
+        <div className="relative z-[1] max-w-xl">
           <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm text-emerald-100">
             <ShieldCheck size={16} />
             GEAR UP YOUR SETUP
@@ -103,7 +103,11 @@ export default function Storefront() {
           </a>
         </div>
 
-        <div className="absolute -right-12 -top-16 h-72 w-72 rounded-full border border-emerald-400/20" />
+        <div className="tech-image-placeholder absolute right-8 top-1/2 z-[1] hidden w-[34%] -translate-y-1/2 lg:grid">
+          <strong>Hero product image</strong>
+          <span className="mt-2 text-xs">Reserved for a premium keyboard and wireless mouse composition.</span>
+        </div>
+        <div className="absolute -right-12 -top-16 h-72 w-72 rounded-full border border-white/25" />
         <div className="absolute -bottom-36 right-20 h-80 w-80 rounded-full border border-emerald-400/20" />
       </section>
 
@@ -216,18 +220,23 @@ export default function Storefront() {
                 key={product._id}
                 className="overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="flex h-44 items-center justify-center bg-slate-100">
-                  <img
-                    src={
-                      product.image ||
-                      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600"
-                    }
-                    alt={product.name}
-                    className="h-full w-full object-contain p-4"
-                    onError={(event) => {
-                      event.currentTarget.style.display = "none";
-                    }}
-                  />
+                <div className="flex h-48 items-center justify-center bg-slate-100 p-3">
+                  {product.image ? (
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="h-full w-full object-contain"
+                      onError={(event) => {
+                        event.currentTarget.style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <div className="tech-image-placeholder h-full w-full">
+                      <strong>Product image</strong>
+                      <span className="mt-1 text-xs">{product.name}</span>
+                      <span className="mt-2 text-[11px]">Add an image URL in admin when ready.</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-5">
