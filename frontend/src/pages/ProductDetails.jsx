@@ -73,7 +73,7 @@ export default function ProductDetails() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center gap-3">
+      <div className="lavender-commerce flex min-h-screen items-center justify-center gap-3">
         <LoaderCircle className="animate-spin" />
         Loading product...
       </div>
@@ -82,7 +82,7 @@ export default function ProductDetails() {
 
   if (error || !product) {
     return (
-      <main className="mx-auto max-w-5xl p-8">
+      <main className="lavender-commerce mx-auto max-w-5xl p-8">
         <p className="mb-4 text-red-600">{error || "Product not found."}</p>
         <button
           onClick={() => navigate("/user")}
@@ -95,7 +95,7 @@ export default function ProductDetails() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-900 sm:px-8">
+    <main className="lavender-commerce min-h-screen bg-slate-50 px-4 py-10 text-slate-900 sm:px-8">
       <div className="mx-auto max-w-6xl">
         <button
           onClick={() => navigate(-1)}
