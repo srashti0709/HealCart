@@ -141,30 +141,30 @@ export default function AdminProducts() {
   );
 
   const inputClass =
-    "w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-white outline-none transition focus:border-violet-400";
+    "w-full rounded-xl border border-violet-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-violet-400";
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100">
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-[#090d16]/95 backdrop-blur">
+    <div className="lavender-commerce min-h-screen bg-[#f1f0f6] text-slate-900">
+      <header className="sticky top-0 z-20 border-b border-violet-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-5 py-4 lg:px-8">
           <Link to="/admin" className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-violet-500/15 text-violet-300">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-violet-100 text-violet-700">
               <Package size={22} />
             </span>
             <span>
               <span className="block text-lg font-bold tracking-tight">SHCom Admin</span>
-              <span className="block text-xs text-slate-400">Product management</span>
+              <span className="block text-xs text-slate-500">Product management</span>
             </span>
           </Link>
 
           <nav className="flex flex-wrap items-center gap-2 text-sm">
-            <Link to="/admin" className="rounded-lg bg-violet-500/15 px-3 py-2 text-violet-200">
+            <Link to="/admin" className="rounded-lg bg-violet-100 px-3 py-2 text-violet-800">
               Products
             </Link>
-            <Link to="/admin/notifications" className="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5">
+            <Link to="/admin/notifications" className="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-600 hover:bg-violet-50">
               <Bell size={16} /> Notifications
             </Link>
-            <Link to="/admin/command-center" className="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-300 hover:bg-white/5">
+            <Link to="/admin/command-center" className="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-600 hover:bg-violet-50">
               <Activity size={16} /> Command Center
             </Link>
             <button
@@ -172,7 +172,7 @@ export default function AdminProducts() {
                 localStorage.removeItem("shcomAdminToken");
                 window.location.reload();
               }}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-400 hover:bg-white/5 hover:text-white"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-slate-500 hover:bg-violet-50 hover:text-slate-900"
             >
               <LogOut size={16} /> Logout
             </button>
@@ -187,14 +187,14 @@ export default function AdminProducts() {
               Store administration
             </p>
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Products</h1>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm text-slate-500">
               Manage your catalog and inventory. Customer checkout is kept separate.
             </p>
           </div>
           <div className="flex gap-3">
             <button
               onClick={loadProducts}
-              className="flex items-center gap-2 rounded-xl border border-slate-700 px-4 py-3 text-sm hover:bg-white/5"
+              className="flex items-center gap-2 rounded-xl border border-violet-100 px-4 py-3 text-sm hover:bg-violet-50"
             >
               <RefreshCw size={16} /> Refresh
             </button>
@@ -203,7 +203,7 @@ export default function AdminProducts() {
                 resetForm();
                 document.getElementById("product-form")?.scrollIntoView({ behavior: "smooth" });
               }}
-              className="flex items-center gap-2 rounded-xl bg-violet-500 px-4 py-3 text-sm font-semibold text-white hover:bg-violet-400"
+              className="flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-violet-700"
             >
               <Plus size={17} /> Add product
             </button>
@@ -211,18 +211,18 @@ export default function AdminProducts() {
         </section>
 
         <section className="grid gap-4 sm:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <p className="text-sm text-slate-400">Total products</p>
+          <div className="rounded-2xl border border-violet-100 bg-white shadow-sm p-5">
+            <p className="text-sm text-slate-500">Total products</p>
             <p className="mt-3 text-3xl font-bold">{products.length}</p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <p className="text-sm text-slate-400">Units in stock</p>
+          <div className="rounded-2xl border border-violet-100 bg-white shadow-sm p-5">
+            <p className="text-sm text-slate-500">Units in stock</p>
             <p className="mt-3 text-3xl font-bold">
               {products.reduce((sum, product) => sum + (Number(product.stock) || 0), 0)}
             </p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <p className="text-sm text-slate-400">Low stock products</p>
+          <div className="rounded-2xl border border-violet-100 bg-white shadow-sm p-5">
+            <p className="text-sm text-slate-500">Low stock products</p>
             <p className="mt-3 text-3xl font-bold text-amber-300">
               {products.filter((product) => Number(product.stock) <= 5).length}
             </p>
@@ -240,48 +240,48 @@ export default function AdminProducts() {
           </div>
         )}
 
-        <section id="product-form" className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-7">
+        <section id="product-form" className="rounded-2xl border border-violet-100 bg-white shadow-sm p-5 sm:p-7">
           <div className="mb-6 flex items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-semibold">{editingId ? "Edit product" : "Add a product"}</h2>
-              <p className="mt-1 text-sm text-slate-400">Changes are saved to your product database.</p>
+              <p className="mt-1 text-sm text-slate-500">Changes are saved to your product database.</p>
             </div>
             {editingId && (
-              <button onClick={resetForm} className="flex items-center gap-1 text-sm text-slate-400 hover:text-white">
+              <button onClick={resetForm} className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900">
                 <X size={16} /> Cancel edit
               </button>
             )}
           </div>
 
           <form onSubmit={saveProduct} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <label className="space-y-2 text-sm text-slate-300">
+            <label className="space-y-2 text-sm text-slate-600">
               Product name *
               <input className={inputClass} name="name" value={form.name} onChange={updateField} required maxLength={120} />
             </label>
-            <label className="space-y-2 text-sm text-slate-300">
+            <label className="space-y-2 text-sm text-slate-600">
               Category *
               <input className={inputClass} name="category" value={form.category} onChange={updateField} required maxLength={80} />
             </label>
-            <label className="space-y-2 text-sm text-slate-300">
+            <label className="space-y-2 text-sm text-slate-600">
               Price *
               <input className={inputClass} name="price" type="number" min="0" step="0.01" value={form.price} onChange={updateField} required />
             </label>
-            <label className="space-y-2 text-sm text-slate-300">
+            <label className="space-y-2 text-sm text-slate-600">
               Stock quantity *
               <input className={inputClass} name="stock" type="number" min="0" step="1" value={form.stock} onChange={updateField} required />
             </label>
-            <label className="space-y-2 text-sm text-slate-300 sm:col-span-2">
+            <label className="space-y-2 text-sm text-slate-600 sm:col-span-2">
               Image URL
               <input className={inputClass} name="image" type="url" value={form.image} onChange={updateField} placeholder="https://..." />
             </label>
-            <label className="space-y-2 text-sm text-slate-300 sm:col-span-2 lg:col-span-3">
+            <label className="space-y-2 text-sm text-slate-600 sm:col-span-2 lg:col-span-3">
               Description
               <textarea className={inputClass} name="description" value={form.description} onChange={updateField} rows={3} maxLength={2000} />
             </label>
             <div className="sm:col-span-2 lg:col-span-3">
               <button
                 disabled={saving}
-                className="rounded-xl bg-violet-500 px-5 py-3 text-sm font-semibold text-white hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-slate-900 hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {saving ? "Saving..." : editingId ? "Save changes" : "Create product"}
               </button>
@@ -293,7 +293,7 @@ export default function AdminProducts() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-xl font-semibold">Catalog</h2>
-              <p className="mt-1 text-sm text-slate-400">{filteredProducts.length} products shown</p>
+              <p className="mt-1 text-sm text-slate-500">{filteredProducts.length} products shown</p>
             </div>
             <input
               className={`${inputClass} max-w-sm`}
@@ -304,14 +304,14 @@ export default function AdminProducts() {
           </div>
 
           {loading ? (
-            <div className="rounded-2xl border border-white/10 p-10 text-center text-slate-400">Loading products...</div>
+            <div className="rounded-2xl border border-violet-100 p-10 text-center text-slate-500">Loading products...</div>
           ) : filteredProducts.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-700 p-10 text-center text-slate-400">No products found.</div>
+            <div className="rounded-2xl border border-dashed border-violet-100 p-10 text-center text-slate-500">No products found.</div>
           ) : (
             <div className="overflow-hidden rounded-2xl border border-white/10">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] text-left text-sm">
-                  <thead className="bg-white/[0.04] text-xs uppercase tracking-wider text-slate-400">
+                  <thead className="bg-violet-50 text-xs uppercase tracking-wider text-slate-500">
                     <tr>
                       <th className="px-5 py-4">Product</th>
                       <th className="px-5 py-4">Category</th>
@@ -320,35 +320,35 @@ export default function AdminProducts() {
                       <th className="px-5 py-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/10">
+                  <tbody className="divide-y divide-violet-100">
                     {filteredProducts.map((product) => (
-                      <tr key={product._id} className="hover:bg-white/[0.02]">
+                      <tr key={product._id} className="hover:bg-violet-50/70">
                         <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
                             {product.image ? (
-                              <img src={product.image} alt="" className="h-12 w-12 rounded-lg bg-white/5 object-cover" />
+                              <img src={product.image} alt="" className="h-12 w-12 rounded-lg bg-violet-50 object-cover" />
                             ) : (
-                              <div className="grid h-12 w-12 place-items-center rounded-lg bg-white/5 text-slate-500"><Package size={20} /></div>
+                              <div className="grid h-12 w-12 place-items-center rounded-lg bg-violet-50 text-slate-500"><Package size={20} /></div>
                             )}
                             <div>
-                              <p className="font-medium text-white">{product.name}</p>
+                              <p className="font-medium text-slate-900">{product.name}</p>
                               <p className="mt-1 max-w-xs truncate text-xs text-slate-500">{product.description}</p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-5 py-4 text-slate-300">{product.category}</td>
+                        <td className="px-5 py-4 text-slate-600">{product.category}</td>
                         <td className="px-5 py-4 font-medium">₹{Number(product.price).toLocaleString("en-IN")}</td>
                         <td className="px-5 py-4">
-                          <span className={Number(product.stock) <= 5 ? "rounded-full bg-amber-500/10 px-3 py-1 text-amber-300" : "text-slate-300"}>
+                          <span className={Number(product.stock) <= 5 ? "rounded-full bg-amber-500/10 px-3 py-1 text-amber-300" : "text-slate-600"}>
                             {product.stock}
                           </span>
                         </td>
                         <td className="px-5 py-4">
                           <div className="flex justify-end gap-2">
-                            <button onClick={() => startEdit(product)} aria-label={`Edit ${product.name}`} className="rounded-lg border border-slate-700 p-2 text-slate-300 hover:border-violet-400 hover:text-violet-300">
+                            <button onClick={() => startEdit(product)} aria-label={`Edit ${product.name}`} className="rounded-lg border border-violet-100 p-2 text-slate-600 hover:border-violet-400 hover:text-violet-700">
                               <Pencil size={16} />
                             </button>
-                            <button onClick={() => deleteProduct(product)} aria-label={`Delete ${product.name}`} className="rounded-lg border border-slate-700 p-2 text-slate-300 hover:border-red-400 hover:text-red-300">
+                            <button onClick={() => deleteProduct(product)} aria-label={`Delete ${product.name}`} className="rounded-lg border border-violet-100 p-2 text-slate-600 hover:border-red-400 hover:text-red-300">
                               <Trash2 size={16} />
                             </button>
                           </div>

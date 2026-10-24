@@ -1,13 +1,132 @@
-
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
-* {
-  box-sizing: border-box;
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: #292344;
+  background: #f1f0f6;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --tech-violet: #6d5df5;
+  --tech-violet-dark: #4b2be3;
+  --tech-violet-soft: #8a7bff;
+  --tech-lavender: #c9b8ff;
+  --tech-pale: #e7ddff;
+  --tech-canvas: #f1f0f6;
+  --tech-surface: #ffffff;
+  --tech-muted-surface: #f7f7fa;
+  --tech-ink: #292344;
+  --tech-muted: #625a82;
+  --tech-border: #e6e4ef;
 }
 
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f8fafc;
-  color: #0f172a;
+  min-width: 320px;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  background: #f1f0f6;
+  color: #292344;
+}
+h1, h2, h3, h4, .font-heading { font-family: Manrope, Inter, ui-sans-serif, sans-serif; }
+button, input, textarea, select { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid #8a7bff; outline-offset: 3px; }
+
+.lavender-commerce {
+  color: var(--tech-ink);
+  background: var(--tech-canvas);
+  min-height: 100vh;
+}
+.lavender-commerce .bg-emerald-950,
+.lavender-commerce .bg-teal-950,
+.lavender-commerce .bg-slate-900,
+.lavender-commerce .bg-slate-950 {
+  background: linear-gradient(120deg, #a99aff 0%, #8170fa 50%, #6b54f4 100%) !important;
+  color: white !important;
+}
+.lavender-commerce .bg-emerald-700,
+.lavender-commerce .bg-emerald-800,
+.lavender-commerce .bg-teal-800,
+.lavender-commerce .bg-indigo-600,
+.lavender-commerce .bg-violet-500 {
+  background-color: var(--tech-violet) !important;
+  color: #fff !important;
+}
+.lavender-commerce .hover\\:bg-emerald-900:hover,
+.lavender-commerce .hover\\:bg-emerald-800:hover,
+.lavender-commerce .hover\\:bg-teal-900:hover,
+.lavender-commerce .hover\\:bg-violet-400:hover {
+  background-color: var(--tech-violet-dark) !important;
+}
+.lavender-commerce .text-emerald-950,
+.lavender-commerce .text-emerald-900,
+.lavender-commerce .text-emerald-800,
+.lavender-commerce .text-emerald-700,
+.lavender-commerce .text-teal-800,
+.lavender-commerce .text-indigo-600 {
+  color: var(--tech-violet-dark) !important;
+}
+.lavender-commerce .bg-emerald-50,
+.lavender-commerce .bg-emerald-100,
+.lavender-commerce .bg-teal-50,
+.lavender-commerce .bg-indigo-50 {
+  background-color: #f0eaff !important;
+}
+.lavender-commerce .text-emerald-100,
+.lavender-commerce .text-emerald-200 { color: #f8f6ff !important; }
+.lavender-commerce .border-slate-200,
+.lavender-commerce .border-slate-300,
+.lavender-commerce .border-slate-100 {
+  border-color: var(--tech-border) !important;
+}
+.lavender-commerce .bg-slate-50 { background-color: var(--tech-muted-surface) !important; }
+.lavender-commerce .bg-slate-100 { background-color: #f0eef8 !important; }
+.lavender-commerce .text-slate-900,
+.lavender-commerce .text-slate-800 { color: var(--tech-ink) !important; }
+.lavender-commerce .text-slate-700,
+.lavender-commerce .text-slate-600,
+.lavender-commerce .text-slate-500 { color: var(--tech-muted) !important; }
+.lavender-commerce article,
+.lavender-commerce aside,
+.lavender-commerce section > .rounded-2xl,
+.lavender-commerce section > .rounded-3xl {
+  border-radius: 18px;
+}
+.lavender-commerce input,
+.lavender-commerce textarea,
+.lavender-commerce select {
+  border-color: var(--tech-border);
+}
+.lavender-commerce input:focus,
+.lavender-commerce textarea:focus,
+.lavender-commerce select:focus {
+  border-color: var(--tech-violet);
+  box-shadow: 0 0 0 3px rgb(109 93 245 / 12%);
+  outline: none;
+}
+.lavender-commerce .tech-image-placeholder {
+  display: grid;
+  min-height: 220px;
+  place-items: center;
+  padding: 1.5rem;
+  border: 1px dashed #b7a8f4;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #f7f4ff, #eee8ff);
+  color: #625a82;
+  text-align: center;
+}
+.lavender-commerce .tech-image-placeholder strong {
+  display: block;
+  color: #4b2be3;
+  font-family: Manrope, sans-serif;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
 }

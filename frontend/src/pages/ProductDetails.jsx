@@ -73,7 +73,7 @@ export default function ProductDetails() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center gap-3">
+      <div className="lavender-commerce flex min-h-screen items-center justify-center gap-3">
         <LoaderCircle className="animate-spin" />
         Loading product...
       </div>
@@ -82,7 +82,7 @@ export default function ProductDetails() {
 
   if (error || !product) {
     return (
-      <main className="mx-auto max-w-5xl p-8">
+      <main className="lavender-commerce mx-auto max-w-5xl p-8">
         <p className="mb-4 text-red-600">{error || "Product not found."}</p>
         <button
           onClick={() => navigate("/user")}
@@ -95,7 +95,7 @@ export default function ProductDetails() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10 text-slate-900 sm:px-8">
+    <main className="lavender-commerce min-h-screen bg-slate-50 px-4 py-10 text-slate-900 sm:px-8">
       <div className="mx-auto max-w-6xl">
         <button
           onClick={() => navigate(-1)}
@@ -107,21 +107,26 @@ export default function ProductDetails() {
 
         <div className="grid gap-10 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:grid-cols-2 md:p-10">
           <div className="flex min-h-72 items-center justify-center rounded-2xl bg-slate-100 p-6">
-            <img
-              src={
-                product.image ||
-                "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600"
-              }
-              alt={product.name}
-              className="max-h-96 w-full object-contain"
-              onError={(event) => {
-                event.currentTarget.style.display = "none";
-              }}
-            />
+            {product.image ? (
+              <img
+                src={product.image}
+                alt={product.name}
+                className="max-h-96 w-full object-contain"
+                onError={(event) => {
+                  event.currentTarget.style.display = "none";
+                }}
+              />
+            ) : (
+              <div className="tech-image-placeholder min-h-72 w-full">
+                <strong>Product image placeholder</strong>
+                <span className="mt-2 text-sm">{product.name}</span>
+                <span className="mt-3 text-xs">Generate a clean square product photo; see IMAGE_GENERATION_PROMPTS.md.</span>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col items-start">
-            <span className="rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-800">
+            <span className="rounded-full bg-violet-50 px-3 py-1 text-sm font-semibold text-violet-800">
               {product.category}
             </span>
 
@@ -129,7 +134,7 @@ export default function ProductDetails() {
               {product.name}
             </h1>
 
-            <p className="mt-4 text-3xl font-bold text-teal-800">
+            <p className="mt-4 text-3xl font-semibold text-violet-800">
               ₹{Number(product.price).toLocaleString("en-IN")}
             </p>
 
@@ -171,7 +176,7 @@ export default function ProductDetails() {
             <button
               onClick={addToCart}
               disabled={product.stock < 1}
-              className="mt-7 inline-flex items-center justify-center gap-2 rounded-xl bg-teal-800 px-6 py-3 font-semibold text-white transition hover:bg-teal-900 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className="mt-7 inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:bg-slate-400"
             >
               <ShoppingCart size={19} />
               {product.stock > 0 ? "Add to Cart" : "Out of Stock"}

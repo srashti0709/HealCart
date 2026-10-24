@@ -99,7 +99,7 @@ export default function Cart() {
         `₹${price.toLocaleString("en-IN")}`;
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="lavender-commerce min-h-screen bg-slate-50">
             <header className="border-b border-slate-200 bg-white">
                 <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5">
                     <Link to="/user" className="text-xl font-bold text-emerald-900">
@@ -151,7 +151,7 @@ export default function Cart() {
                         </p>
                         <Link
                             to="/user"
-                            className="mt-6 inline-flex rounded-xl bg-emerald-800 px-5 py-3 font-semibold text-white hover:bg-emerald-900"
+                            className="mt-6 inline-flex rounded-xl bg-violet-600 px-5 py-3 font-semibold text-white hover:bg-violet-700"
                         >
                             Explore products
                         </Link>

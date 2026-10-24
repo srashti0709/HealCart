@@ -49,7 +49,7 @@ const OrderHistory = () => {
     status ? status.charAt(0).toUpperCase() + status.slice(1) : "Unknown";
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-8">
+    <main className="lavender-commerce min-h-screen bg-slate-50 px-4 py-8 sm:px-8">
       <div className="mx-auto max-w-5xl">
         <Link
           to="/"
@@ -108,7 +108,7 @@ const OrderHistory = () => {
             </p>
             <Link
               to="/"
-              className="mt-5 inline-flex rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-700"
+              className="mt-5 inline-flex rounded-xl bg-violet-600 px-5 py-3 font-semibold text-white hover:bg-violet-700"
             >
               Explore products
             </Link>

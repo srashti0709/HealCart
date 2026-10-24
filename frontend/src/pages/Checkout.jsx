@@ -421,7 +421,7 @@ export default function Checkout() {
 
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="lavender-commerce min-h-screen bg-slate-50">
             <header className="border-b border-slate-200 bg-white">
                 <div className="mx-auto max-w-3xl px-5 py-5">
                     <Link to="/user" className="text-xl font-bold text-emerald-900">
