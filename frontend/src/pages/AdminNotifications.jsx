@@ -85,11 +85,11 @@ export default function AdminNotifications() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-8 text-slate-900 sm:px-8">
+    <main className="lavender-commerce min-h-screen bg-slate-50 px-4 py-8 text-slate-900 sm:px-8">
       <div className="mx-auto max-w-5xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-emerald-700">
+            <p className="text-sm font-semibold uppercase tracking-widest text-violet-700">
               Admin inbox
             </p>
             <h1 className="mt-2 text-3xl font-bold">Notifications</h1>
@@ -112,7 +112,7 @@ export default function AdminNotifications() {
               type="button"
               onClick={markAllRead}
               disabled={unreadCount === 0}
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-900 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <CheckCheck size={16} />
               Mark all read
