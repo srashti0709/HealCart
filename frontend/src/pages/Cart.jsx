@@ -151,7 +151,7 @@ export default function Cart() {
                         </p>
                         <Link
                             to="/user"
-                            className="mt-6 inline-flex rounded-xl bg-emerald-800 px-5 py-3 font-semibold text-white hover:bg-emerald-900"
+                            className="mt-6 inline-flex rounded-xl bg-violet-600 px-5 py-3 font-semibold text-white hover:bg-violet-700"
                         >
                             Explore products
                         </Link>
