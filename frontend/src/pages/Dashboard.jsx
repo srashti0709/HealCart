@@ -612,7 +612,7 @@ function Dashboard({ page = "overview" }) {
     {
       label: "Critical",
       count: incidents.filter((i) => i.severity === "critical").length,
-      color: "bg-red-500",
+      color: "bg-[#FF5C5C]",
     },
     {
       label: "High",
@@ -622,12 +622,12 @@ function Dashboard({ page = "overview" }) {
     {
       label: "Medium",
       count: incidents.filter((i) => i.severity === "medium").length,
-      color: "bg-amber-400",
+      color: "bg-[#F5B942]",
     },
     {
       label: "Low",
       count: incidents.filter((i) => i.severity === "low").length,
-      color: "bg-cyan-400",
+      color: "bg-[#E5F500]",
     },
   ];
 
@@ -720,7 +720,7 @@ function Dashboard({ page = "overview" }) {
   ];
 
   return (
-    <div data-dashboard-page={page} className="min-h-screen bg-[#090d16] text-slate-100">
+    <div data-dashboard-page={page} className="min-h-screen bg-[#080908] text-[#F3F4F1]">
       <style>{`
         [data-dashboard-page="overview"] .dashboard-incidents-only,
         [data-dashboard-page="overview"] .dashboard-chaos-only,
@@ -732,12 +732,12 @@ function Dashboard({ page = "overview" }) {
         }
       `}</style>
       <main className="min-w-0 flex-1">
-        <section className="dashboard-chaos-only mx-6 mt-6 rounded-2xl border border-cyan-900 bg-[#101827] p-5 lg:mx-10">
+        <section className="dashboard-chaos-only mx-6 mt-6 rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-5 lg:mx-10">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h2 className="font-semibold text-white">Offline Checkout Recovery Experiment</h2>
-              <p className="mt-1 text-sm text-slate-400">Arm this experiment, fill checkout details, then turn off your device internet. SHCom saves the draft locally, shows an offline screen, and offers recovery when the backend is reachable again.</p>
-              <p className="mt-2 text-sm text-slate-300">Status: {offlineCheckoutFault ? "Test armed — waiting for real connectivity loss" : checkoutRecoveryEvidence?.status === "data-restored" ? "Data restored — awaiting customer checkout" : checkoutRecoveryEvidence?.status === "connection-restored" ? "Connection restored — awaiting customer choice" : checkoutRecoveryEvidence?.status === "failure-detected" ? "Failure detected" : checkoutRecoveryEvidence?.status === "checkout-completed" ? "Checkout completed" : checkoutRecoveryEvidence?.status === "draft-discarded" ? "Draft discarded" : "Ready"} · Draft: {checkoutDraftMeta ? `${checkoutDraftMeta.fields || 0} fields, ${checkoutDraftMeta.items || 0} cart lines` : "No saved draft metadata"}</p>
+              <h2 className="font-semibold text-[#F3F4F1]">Offline Checkout Recovery Experiment</h2>
+              <p className="mt-1 text-sm text-[#92968F]">Arm this experiment, fill checkout details, then turn off your device internet. SHCom saves the draft locally, shows an offline screen, and offers recovery when the backend is reachable again.</p>
+              <p className="mt-2 text-sm text-[#F3F4F1]">Status: {offlineCheckoutFault ? "Test armed — waiting for real connectivity loss" : checkoutRecoveryEvidence?.status === "data-restored" ? "Data restored — awaiting customer checkout" : checkoutRecoveryEvidence?.status === "connection-restored" ? "Connection restored — awaiting customer choice" : checkoutRecoveryEvidence?.status === "failure-detected" ? "Failure detected" : checkoutRecoveryEvidence?.status === "checkout-completed" ? "Checkout completed" : checkoutRecoveryEvidence?.status === "draft-discarded" ? "Draft discarded" : "Ready"} · Draft: {checkoutDraftMeta ? `${checkoutDraftMeta.fields || 0} fields, ${checkoutDraftMeta.items || 0} cart lines` : "No saved draft metadata"}</p>
             </div>
             <button
               type="button"
@@ -771,13 +771,13 @@ function Dashboard({ page = "overview" }) {
                   setWifiFailureRunning(false);
                 }
               }}
-              className="rounded-xl bg-amber-500 px-4 py-3 text-sm font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-xl bg-[#E5F500] px-4 py-3 text-sm font-semibold text-[#080908] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {wifiFailureRunning ? "Injecting Wi-Fi Failure..." : "Inject Offline Failure "}
             </button>
           </div>
-          <p className="mt-3 text-xs text-slate-500">Open Checkout in another tab and enter test details before clicking Inject Offline Failure. The local Windows helper disables Wi-Fi for at least 5 seconds, then automatically re-enables it. This affects internet for the whole laptop; it does not stop or crash the SHCom backend.</p>
-          {wifiFailureMessage && <p role="status" className="mt-3 text-sm text-cyan-300">{wifiFailureMessage}</p>}
+          <p className="mt-3 text-xs text-[#92968F]">Open Checkout in another tab and enter test details before clicking Inject Offline Failure. The local Windows helper disables Wi-Fi for at least 5 seconds, then automatically re-enables it. This affects internet for the whole laptop; it does not stop or crash the SHCom backend.</p>
+          {wifiFailureMessage && <p role="status" className="mt-3 text-sm text-[#E5F500]">{wifiFailureMessage}</p>}
           {(() => {
             const status = checkoutRecoveryEvidence?.status;
             const event = status === "checkout-completed"
@@ -792,27 +792,27 @@ function Dashboard({ page = "overview" }) {
                       ? { title: "Saved draft discarded", message: "The saved checkout draft was discarded. Your cart and confirmed orders are handled separately.", at: checkoutRecoveryEvidence?.discardedAt }
                       : null;
             return (
-              <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900/60 p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Latest offline recovery event</p>
+              <div className="mt-4 rounded-lg border border-[#272A26] bg-[#171917]/80 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#92968F]">Latest offline recovery event</p>
                 {event ? (
                   <>
-                    <p className="mt-2 text-sm font-semibold text-slate-100">{event.title}</p>
-                    <p className="mt-1 text-sm text-slate-300">{event.message}</p>
-                    {event.at && <p className="mt-2 text-xs text-slate-400">Recorded at {new Date(event.at).toLocaleTimeString()}</p>}
+                    <p className="mt-2 text-sm font-semibold text-[#F3F4F1]">{event.title}</p>
+                    <p className="mt-1 text-sm text-[#F3F4F1]">{event.message}</p>
+                    {event.at && <p className="mt-2 text-xs text-[#92968F]">Recorded at {new Date(event.at).toLocaleTimeString()}</p>}
                   </>
                 ) : (
-                  <p className="mt-2 text-sm text-slate-300">No offline recovery event has been recorded in this browser yet.</p>
+                  <p className="mt-2 text-sm text-[#F3F4F1]">No offline recovery event has been recorded in this browser yet.</p>
                 )}
                 {checkoutDraftMeta?.savedAt && status !== "checkout-completed" && (
-                  <p className="mt-2 text-xs text-slate-400">Last local draft save: {new Date(checkoutDraftMeta.savedAt).toLocaleTimeString()}</p>
+                  <p className="mt-2 text-xs text-[#92968F]">Last local draft save: {new Date(checkoutDraftMeta.savedAt).toLocaleTimeString()}</p>
                 )}
               </div>
             );
           })()}
         </section>
-        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 px-6 py-5 lg:px-10">
+        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#272A26] px-6 py-5 lg:px-10">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-cyan-400">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#E5F500]">
               SHCom / Operations
             </p>
 
@@ -820,13 +820,13 @@ function Dashboard({ page = "overview" }) {
               {page === "incidents" ? "Incidents" : page === "chaos-center" ? "Chaos Center" : "System Overview"}
             </h2>
 
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-[#92968F]">
               {page === "incidents" ? "Incident history, diagnosis and recovery outcomes" : page === "chaos-center" ? "Run controlled failures and verify self-healing behavior" : "Live service health and recovery overview"}
             </p>
           </div>
 
           <div className="flex flex-col gap-2">
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-[#92968F]">
               {lastChecked
                 ? `Last checked: ${lastChecked}`
                 : "Waiting for first health check"}
@@ -835,7 +835,7 @@ function Dashboard({ page = "overview" }) {
             <button
               onClick={refreshAllStatuses}
               disabled={checking}
-              className="flex items-center justify-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 disabled:opacity-50"
+              className="flex items-center justify-center gap-2 rounded-lg border border-[#272A26] px-3 py-2 text-xs text-[#F3F4F1] hover:bg-[#171917] disabled:opacity-50"
             >
               <RefreshCw
                 size={14}
@@ -849,19 +849,19 @@ function Dashboard({ page = "overview" }) {
         <div className="dashboard-content space-y-8 p-6 lg:p-10">
           <section
             id="overview"
-            className="dashboard-overview-only scroll-mt-6 rounded-2xl border border-slate-800 bg-gradient-to-br from-[#111c2c] to-[#0d1320] p-6 lg:p-8"
+            className="dashboard-overview-only scroll-mt-6 rounded-2xl border border-[#272A26] bg-[#080908] p-6 lg:p-8"
           >
             <div className="flex flex-wrap items-start gap-4">
-              <div className="rounded-xl bg-cyan-400/10 p-3 text-cyan-300">
+              <div className="rounded-xl bg-[#E5F500]/10 p-3 text-[#E5F500]">
                 <Activity size={25} />
               </div>
 
               <div className="flex-1">
-                <h3 className="text-xl font-semibold">
-                  Welcome to SHCom Operations
-                </h3>
+            <h3 className="text-xl font-semibold tracking-tight text-[#F3F4F1]">
+              Welcome to SHCom Operations
+            </h3>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+            <p className="mt-2 max-w-2xl text-base leading-7 text-[#92968F]">
                   Track service availability, investigate incidents and
                   understand how SHCom responds to failures. Service
                   status is retrieved from your running backend and
@@ -895,59 +895,61 @@ function Dashboard({ page = "overview" }) {
 
           <section id="service-health" className="dashboard-overview-only scroll-mt-6">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold">Service Health</h3>
-              <p className="mt-1 text-sm text-slate-500">
+              <h3 className="text-lg font-semibold tracking-tight text-[#F3F4F1]">
+                Service Health
+              </h3>
+              <p className="mt-1 text-xs leading-5 text-[#92968F]">
                 Live backend, database and recovery-monitor status.
               </p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
               {services.map(({ name, detail, icon: Icon, status }) => (
                 <article
                   key={name}
-                  className="rounded-2xl border border-slate-800 bg-[#0d1320] p-5"
+                  className="rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <div className="rounded-lg bg-slate-800 p-2.5 text-slate-300">
+                    <div className="rounded-lg bg-[#171917] p-2.5 text-[#F3F4F1]">
                       <Icon size={19} />
                     </div>
 
                     <span
-                      className={`rounded-full border px-2.5 py-1 text-[11px] ${status === "Healthy" || status === "Connected"
-                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                      className={`rounded-full border px-2.5 py-1 text-[10px] font-medium ${status === "Healthy" || status === "Connected"
+                        ? "border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F]"
                         : status === "Unavailable" ||
                           status === "Disconnected" ||
                           status === "Degraded"
-                          ? "border-red-500/30 bg-red-500/10 text-red-400"
-                          : "border-slate-700 text-slate-300"
+                          ? "border-[#FF5C5C]/30 bg-[#FF5C5C]/10 text-[#FF5C5C]"
+                          : "border-[#272A26] text-[#F3F4F1]"
                         }`}
                     >
                       {status}
                     </span>
                   </div>
 
-                  <h4 className="mt-5 font-semibold">{name}</h4>
-                  <p className="mt-1 text-xs text-slate-500">{detail}</p>
+                  <h4 className="mt-6 font-semibold text-[#F3F4F1]">{name}</h4>
+                  <p className="mt-1 text-xs leading-5 text-[#92968F]">{detail}</p>
 
                   {name === "Recovery Monitor" && recoveryInfo && (
-                    <div className="mt-4 space-y-2 border-t border-slate-800 pt-3 text-xs">
+                    <div className="mt-5 space-y-2 border-t border-[#272A26] pt-3 text-xs">
                       <div className="flex justify-between gap-3">
-                        <span className="text-slate-500">Container</span>
-                        <span className="text-slate-300">
+                        <span className="text-[#92968F]">Container</span>
+                        <span className="text-[#F3F4F1]">
                           {recoveryInfo.container}
                         </span>
                       </div>
 
                       <div className="flex justify-between gap-3">
-                        <span className="text-slate-500">Docker status</span>
-                        <span className="text-slate-300">
+                        <span className="text-[#92968F]">Docker status</span>
+                        <span className="text-[#F3F4F1]">
                           {recoveryInfo.status}
                         </span>
                       </div>
 
                       <div className="flex justify-between gap-3">
-                        <span className="text-slate-500">Restart count</span>
-                        <span className="text-slate-300">
+                        <span className="text-[#92968F]">Restart count</span>
+                        <span className="text-[#F3F4F1]">
                           {recoveryInfo.restartCount ?? "Unknown"}
                         </span>
                       </div>
@@ -955,7 +957,7 @@ function Dashboard({ page = "overview" }) {
                   )}
 
                   {name === "Recovery Monitor" && recoveryError && (
-                    <p className="mt-3 text-xs text-red-400">
+                    <p className="mt-3 text-xs text-[#FF5C5C]">
                       {recoveryError}
                     </p>
                   )}
@@ -967,28 +969,28 @@ function Dashboard({ page = "overview" }) {
 
           <section
             id="incidents"
-            className="dashboard-incidents-only scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6"
+            className="dashboard-incidents-only scroll-mt-6 rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6"
           >
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold tracking-tight text-[#F3F4F1]">
                   Incident Log
                 </h3>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-xs leading-5 text-[#92968F]">
                   Real incidents recorded by the SHCom backend.
                 </p>
               </div>
 
               {/* Incident Filters */}
-              <div className="mb-6 grid gap-3 sm:grid-cols-3">
+              <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="mb-2 block text-sm text-slate-400">
+                  <label className="mb-2 block text-xs font-medium uppercase tracking-[0.1em] text-[#92968F]">
                     Severity
                   </label>
                   <select
                     value={severityFilter}
                     onChange={(e) => setSeverityFilter(e.target.value)}
-                    className="w-full rounded-lg border border-slate-700 bg-[#101827] px-3 py-2 text-sm text-white outline-none focus:border-cyan-400"
+                    className="w-full rounded-xl border border-[#272A26] bg-[#0D0F0D] px-3 py-2.5 text-xs text-[#F3F4F1] outline-none focus:border-[#E5F500] input-field"
                   >
                     <option value="all">All Severities</option>
                     <option value="low">Low</option>
@@ -999,13 +1001,13 @@ function Dashboard({ page = "overview" }) {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm text-slate-400">
+                  <label className="mb-2 block text-xs font-medium uppercase tracking-[0.1em] text-[#92968F]">
                     Status
                   </label>
                   <select
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full rounded-lg border border-slate-700 bg-[#101827] px-3 py-2 text-sm text-white outline-none focus:border-cyan-400"
+                    className="w-full rounded-xl border border-[#272A26] bg-[#0D0F0D] px-3 py-2.5 text-xs text-[#F3F4F1] outline-none focus:border-[#E5F500] input-field"
                   >
                     <option value="all">All Statuses</option>
                     <option value="detected">Detected</option>
@@ -1016,13 +1018,13 @@ function Dashboard({ page = "overview" }) {
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-sm text-slate-400">
+                  <label className="mb-2 block text-xs font-medium uppercase tracking-[0.1em] text-[#92968F]">
                     Incident Type
                   </label>
                   <select
                     value={typeFilter}
                     onChange={(e) => setTypeFilter(e.target.value)}
-                    className="w-full rounded-lg border border-slate-700 bg-[#101827] px-3 py-2 text-sm text-white outline-none focus:border-cyan-400"
+                    className="w-full rounded-xl border border-[#272A26] bg-[#0D0F0D] px-3 py-2.5 text-xs text-[#F3F4F1] outline-none focus:border-[#E5F500] input-field"
                   >
                     <option value="all">All Incident Types</option>
                     {[...new Set(
@@ -1042,20 +1044,20 @@ function Dashboard({ page = "overview" }) {
               </div>
 
 
-              <span className="rounded-full bg-slate-800 px-3 py-1 text-sm text-slate-300">
+              <span className="rounded-full bg-[#171917] px-3 py-1 text-sm text-[#F3F4F1]">
                 {incidents.length} incidents
               </span>
             </div>
 
             {incidentsError ? (
-              <p className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">
+              <p className="rounded-xl border border-[#FF5C5C]/20 bg-[#FF5C5C]/10 p-4 text-sm text-[#FF5C5C]">
                 {incidentsError}
               </p>
             ) : incidents.length === 0 ? (
-              <div className="rounded-xl border border-slate-800 p-8 text-center">
-                <AlertTriangle className="mx-auto mb-3 text-slate-500" size={28} />
-                <p className="text-slate-300">No incidents recorded.</p>
-                <p className="mt-1 text-sm text-slate-500">
+              <div className="rounded-xl border border-[#272A26] p-8 text-center">
+                <AlertTriangle className="mx-auto mb-3 text-[#92968F]" size={28} />
+                <p className="text-[#F3F4F1]">No incidents recorded.</p>
+                <p className="mt-1 text-sm text-[#92968F]">
                   New incidents will appear here when recorded by the backend.
                 </p>
               </div>
@@ -1064,28 +1066,28 @@ function Dashboard({ page = "overview" }) {
                 {filteredIncidents.map((incident) => (
                   <article
                     key={incident._id}
-                    className="rounded-xl border border-slate-800 bg-[#101827] p-4"
+                    className="rounded-xl border border-[#272A26] bg-[#0D0F0D] p-4"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <h4 className="font-medium text-white">
+                        <h4 className="font-medium text-[#F3F4F1]">
                           {incident.message || incident.incidentType}
                         </h4>
-                        <p className="mt-1 text-sm text-slate-400">
+                        <p className="mt-1 text-sm text-[#92968F]">
                           {incident.service} · {incident.incidentType}
                         </p>
                       </div>
 
                       <div className="flex flex-wrap gap-2">
-                        <span className="rounded-full bg-slate-800 px-2.5 py-1 text-xs text-slate-300">
+                        <span className="rounded-full bg-[#171917] px-2.5 py-1 text-xs text-[#F3F4F1]">
                           {incident.severity}
                         </span>
                         <span
                           className={`rounded-full px-2.5 py-1 text-xs ${incident.status === "resolved"
-                            ? "bg-emerald-500/10 text-emerald-300"
+                            ? "bg-[#35D07F]/10 text-[#35D07F]"
                             : incident.status === "failed"
-                              ? "bg-red-500/10 text-red-300"
-                              : "bg-amber-500/10 text-amber-300"
+                              ? "bg-[#FF5C5C]/10 text-[#FF5C5C]"
+                              : "bg-[#F5B942]/10 text-[#F5B942]"
                             }`}
                         >
                           {incident.status}
@@ -1094,21 +1096,21 @@ function Dashboard({ page = "overview" }) {
                     </div>
 
                     {incident.recoveryAction && (
-                      <p className="mt-4 text-sm text-slate-300">
-                        <span className="text-slate-500">Recovery action: </span>
+                      <p className="mt-4 text-sm text-[#F3F4F1]">
+                        <span className="text-[#92968F]">Recovery action: </span>
                         {incident.recoveryAction}
                       </p>
                     )}
 
                     {incident.recoveryResult && (
-                      <p className="mt-2 text-sm text-slate-300">
-                        <span className="text-slate-500">Result: </span>
+                      <p className="mt-2 text-sm text-[#F3F4F1]">
+                        <span className="text-[#92968F]">Result: </span>
                         {incident.recoveryResult}
                       </p>
                     )}
 
-                    <div className="mt-5 border-t border-slate-800 pt-4">
-                      <h5 className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    <div className="mt-5 border-t border-[#272A26] pt-4">
+                      <h5 className="mb-4 text-xs font-semibold uppercase tracking-wider text-[#92968F]">
                         Recovery Timeline
                       </h5>
 
@@ -1116,15 +1118,15 @@ function Dashboard({ page = "overview" }) {
                         {/* Stage 1: Incident detection */}
                         <div className="flex gap-3">
                           <div className="flex flex-col items-center">
-                            <CheckCircle2 size={18} className="text-cyan-400" />
-                            <div className="mt-2 h-full min-h-5 w-px bg-slate-700" />
+                            <CheckCircle2 size={18} className="text-[#E5F500]" />
+                            <div className="mt-2 h-full min-h-5 w-px bg-[#272A26]" />
                           </div>
 
                           <div className="pb-2">
-                            <p className="text-sm font-medium text-slate-200">
+                            <p className="text-sm font-medium text-[#F3F4F1]">
                               Incident Detected
                             </p>
-                            <p className="mt-1 text-xs text-slate-500">
+                            <p className="mt-1 text-xs text-[#92968F]">
                               {incident.detectedAt
                                 ? new Date(incident.detectedAt).toLocaleString()
                                 : "Detection time unavailable"}
@@ -1136,18 +1138,18 @@ function Dashboard({ page = "overview" }) {
                         <div className="flex gap-3">
                           <div className="flex flex-col items-center">
                             {incident.recoveryAction ? (
-                              <CheckCircle2 size={18} className="text-cyan-400" />
+                              <CheckCircle2 size={18} className="text-[#E5F500]" />
                             ) : (
-                              <Activity size={18} className="text-slate-500" />
+                              <Activity size={18} className="text-[#92968F]" />
                             )}
-                            <div className="mt-2 h-full min-h-5 w-px bg-slate-700" />
+                            <div className="mt-2 h-full min-h-5 w-px bg-[#272A26]" />
                           </div>
 
                           <div className="pb-2">
-                            <p className="text-sm font-medium text-slate-200">
+                            <p className="text-sm font-medium text-[#F3F4F1]">
                               Recovery Action
                             </p>
-                            <p className="mt-1 text-xs text-slate-500">
+                            <p className="mt-1 text-xs text-[#92968F]">
                               {incident.recoveryAction || "No recovery action recorded"}
                             </p>
                           </div>
@@ -1157,16 +1159,16 @@ function Dashboard({ page = "overview" }) {
                         <div className="flex gap-3">
                           <div>
                             {incident.status === "resolved" ? (
-                              <CheckCircle2 size={18} className="text-emerald-400" />
+                              <CheckCircle2 size={18} className="text-[#35D07F]" />
                             ) : incident.status === "failed" ? (
-                              <AlertTriangle size={18} className="text-red-400" />
+                              <AlertTriangle size={18} className="text-[#FF5C5C]" />
                             ) : (
-                              <Activity size={18} className="text-amber-400" />
+                              <Activity size={18} className="text-[#F5B942]" />
                             )}
                           </div>
 
                           <div>
-                            <p className="text-sm font-medium text-slate-200">
+                            <p className="text-sm font-medium text-[#F3F4F1]">
                               {incident.status === "resolved"
                                 ? "Recovery Resolved"
                                 : incident.status === "failed"
@@ -1175,7 +1177,7 @@ function Dashboard({ page = "overview" }) {
                                     ? "Recovery In Progress"
                                     : "Awaiting Recovery"}
                             </p>
-                            <p className="mt-1 text-xs text-slate-500">
+                            <p className="mt-1 text-xs text-[#92968F]">
                               {incident.resolvedAt
                                 ? new Date(incident.resolvedAt).toLocaleString()
                                 : incident.status === "resolved"
@@ -1188,7 +1190,7 @@ function Dashboard({ page = "overview" }) {
                     </div>
 
 
-                    <p className="mt-3 text-xs text-slate-500">
+                    <p className="mt-3 text-xs text-[#92968F]">
                       Detected:{" "}
                       {incident.detectedAt
                         ? new Date(incident.detectedAt).toLocaleString()
@@ -1202,52 +1204,60 @@ function Dashboard({ page = "overview" }) {
 
           <section
             id="recovery-analytics"
-            className="dashboard-incidents-only scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6"
+            className="dashboard-incidents-only scroll-mt-6 rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6"
           >
             <div className="mb-6">
-              <p className="text-xs font-medium uppercase tracking-wider text-cyan-400">
+              <p className="text-xs font-medium uppercase tracking-wider text-[#E5F500]">
                 Performance Insights
               </p>
-              <h3 className="mt-2 text-lg font-semibold text-white">
+              <h3 className="mt-2 text-lg font-semibold text-[#F3F4F1]">
                 Recovery Analytics
               </h3>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-[#92968F]">
                 Calculated from real incidents recorded by SHCom.
               </p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <article className="rounded-xl border border-slate-800 bg-[#101827] p-4">
-                <p className="text-sm text-slate-400">Total Incidents</p>
-                <p className="mt-3 text-3xl font-bold text-white">
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+              <article className="rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
+                <p className="text-xs font-medium uppercase tracking-[0.1em] text-[#92968F]">
+                  Total Incidents
+                </p>
+                <p className="mt-4 text-4xl font-bold tabular-nums text-[#F3F4F1]">
                   {totalIncidents}
                 </p>
               </article>
 
-              <article className="rounded-xl border border-slate-800 bg-[#101827] p-4">
-                <p className="text-sm text-slate-400">Resolved</p>
-                <p className="mt-3 text-3xl font-bold text-emerald-400">
+              <article className="rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
+                <p className="text-xs font-medium uppercase tracking-[0.1em] text-[#92968F]">
+                  Resolved
+                </p>
+                <p className="mt-4 text-4xl font-bold tabular-nums text-[#35D07F]">
                   {resolvedIncidents}
                 </p>
               </article>
 
-              <article className="rounded-xl border border-slate-800 bg-[#101827] p-4">
-                <p className="text-sm text-slate-400">Failed</p>
-                <p className="mt-3 text-3xl font-bold text-red-400">
+              <article className="rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
+                <p className="text-xs font-medium uppercase tracking-[0.1em] text-[#92968F]">
+                  Failed
+                </p>
+                <p className="mt-4 text-4xl font-bold tabular-nums text-[#FF5C5C]">
                   {failedIncidents}
                 </p>
               </article>
 
-              <article className="rounded-xl border border-slate-800 bg-[#101827] p-4">
-                <p className="text-sm text-slate-400">Active Incidents</p>
-                <p className="mt-3 text-3xl font-bold text-amber-400">
+              <article className="rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
+                <p className="text-xs font-medium uppercase tracking-[0.1em] text-[#92968F]">
+                  Active Incidents
+                </p>
+                <p className="mt-4 text-4xl font-bold tabular-nums text-[#F5B942]">
                   {activeIncidents}
                 </p>
               </article>
             </div>
 
             {incidentsAreStale ? (
-              <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2.5 text-xs text-amber-200">
+              <div className="mt-4 flex items-start gap-2 rounded-xl border border-[#F5B942]/20 bg-[#F5B942]/10 px-3 py-2.5 text-xs text-[#F5B942]">
                 <AlertTriangle size={14} className="mt-0.5 shrink-0" />
                 <span>
                   These figures are the last ones loaded at{" "}
@@ -1256,7 +1266,7 @@ function Dashboard({ page = "overview" }) {
                 </span>
               </div>
             ) : incidentsUpdatedAt ? (
-              <p className="mt-4 text-xs text-slate-500">
+              <p className="mt-4 text-xs text-[#92968F]">
                 Last updated at {incidentsUpdatedAt}
               </p>
             ) : null}
@@ -1264,43 +1274,47 @@ function Dashboard({ page = "overview" }) {
 
             <div className="mt-6 grid gap-6 lg:grid-cols-2">
               {/* Resolution Rate */}
-              <div className="rounded-xl border border-slate-800 bg-[#101827] p-5">
+              <div className="rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
                 <div className="flex items-center justify-between gap-3">
-                  <h4 className="font-semibold text-white">Resolution Rate</h4>
-                  <span className="text-xl font-bold text-cyan-400">
+                  <h4 className="text-base font-semibold tracking-tight text-[#F3F4F1]">
+                    Resolution Rate
+                  </h4>
+                  <span className="text-2xl font-bold tabular-nums text-[#E5F500]">
                     {recoverySuccessRate}%
                   </span>
                 </div>
 
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-700">
+                <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#272A26]">
                   <div
-                    className="h-full rounded-full bg-cyan-400 transition-all"
+                    className="h-full rounded-full bg-[#E5F500] transition-all"
                     style={{ width: `${recoverySuccessRate}%` }}
                   />
                 </div>
 
-                <p className="mt-3 text-xs leading-5 text-slate-500">
+                <p className="mt-3 text-xs leading-5 text-[#92968F]">
                   Percentage of all recorded incidents currently marked resolved.
                 </p>
               </div>
 
               {/* Incidents by Severity */}
-              <div className="rounded-xl border border-slate-800 bg-[#101827] p-5">
-                <h4 className="mb-5 font-semibold text-white">
+              <div className="rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
+                <h4 className="mb-5 text-base font-semibold tracking-tight text-[#F3F4F1]">
                   Incidents by Severity
                 </h4>
 
                 <div className="space-y-4">
                   {incidentsBySeverity.map((item) => (
                     <div key={item.label}>
-                      <div className="mb-2 flex justify-between text-sm">
-                        <span className="text-slate-300">{item.label}</span>
-                        <span className="text-slate-400">{item.count}</span>
+                      <div className="mb-2 flex justify-between text-xs">
+                        <span className="text-[#F3F4F1]">{item.label}</span>
+                        <span className="text-xs tabular-nums text-[#92968F]">
+                          {item.count}
+                        </span>
                       </div>
 
-                      <div className="h-2 overflow-hidden rounded-full bg-slate-700">
+                      <div className="h-1.5 overflow-hidden rounded-full bg-[#272A26]">
                         <div
-                          className={`h-full rounded-full ${item.color}`}
+                          className="h-full rounded-full bg-[#E5F500] transition-all"
                           style={{
                             width: `${totalIncidents > 0
                               ? (item.count / totalIncidents) * 100
@@ -1315,13 +1329,13 @@ function Dashboard({ page = "overview" }) {
               </div>
 
               {/* Incidents by Type */}
-              <div className="rounded-xl border border-slate-800 bg-[#101827] p-5">
-                <h4 className="mb-5 font-semibold text-white">
+              <div className="rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
+                <h4 className="mb-5 text-base font-semibold tracking-tight text-[#F3F4F1]">
                   Incidents by Type
                 </h4>
 
                 {incidentsByType.length === 0 ? (
-                  <p className="text-sm text-slate-500">
+                  <p className="text-xs text-[#92968F]">
                     No incidents recorded yet.
                   </p>
                 ) : (
@@ -1329,13 +1343,13 @@ function Dashboard({ page = "overview" }) {
                     {incidentsByType.map((item) => (
                       <div key={item.label}>
                         <div className="mb-2 flex justify-between gap-3 text-sm">
-                          <span className="text-slate-300">{item.label}</span>
-                          <span className="text-slate-400">{item.count}</span>
+                          <span className="text-[#F3F4F1]">{item.label}</span>
+                          <span className="text-[#92968F]">{item.count}</span>
                         </div>
 
-                        <div className="h-2 overflow-hidden rounded-full bg-slate-700">
+                        <div className="h-2 overflow-hidden rounded-full bg-[#272A26]">
                           <div
-                            className="h-full rounded-full bg-violet-400 transition-all"
+                            className="h-full rounded-full bg-[#E5F500] transition-all"
                             style={{
                               width: `${totalIncidents > 0
                                 ? (item.count / totalIncidents) * 100
@@ -1351,31 +1365,31 @@ function Dashboard({ page = "overview" }) {
               </div>
 
               {/* Recovery Action Summary */}
-              <div className="rounded-xl border border-slate-800 bg-[#101827] p-5">
-                <h4 className="mb-5 font-semibold text-white">
+              <div className="rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
+                <h4 className="mb-5 text-base font-semibold tracking-tight text-[#F3F4F1]">
                   Recovery Action Summary
                 </h4>
 
                 {recoveryActionsSummary.length === 0 ? (
-                  <p className="text-sm text-slate-500">
+                  <p className="text-xs text-[#92968F]">
                     No recovery actions recorded yet.
                   </p>
                 ) : (
                   <div className="space-y-4">
                     {recoveryActionsSummary.map((item) => (
                       <div key={item.action}>
-                        <div className="mb-2 flex justify-between gap-3 text-sm">
-                          <span className="text-slate-300">
+                        <div className="mb-2 flex justify-between gap-3 text-xs">
+                          <span className="text-[#F3F4F1]">
                             {item.action}
                           </span>
-                          <span className="text-slate-400">
+                          <span className="text-xs tabular-nums text-[#92968F]">
                             {item.count}
                           </span>
                         </div>
 
-                        <div className="h-2 overflow-hidden rounded-full bg-slate-700">
+                        <div className="h-1.5 overflow-hidden rounded-full bg-[#272A26]">
                           <div
-                            className="h-full rounded-full bg-emerald-400 transition-all"
+                            className="h-full rounded-full bg-[#35D07F] transition-all"
                             style={{
                               width: `${totalIncidents > 0
                                 ? (item.count / totalIncidents) * 100
@@ -1395,25 +1409,27 @@ function Dashboard({ page = "overview" }) {
           </section>
           <section
             id="chaos-control"
-            className="dashboard-chaos-only scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6"
+            className="dashboard-chaos-only scroll-mt-6 rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6"
           >
-            <p className="text-xs font-medium uppercase tracking-wider text-cyan-400">
+            <p className="text-xs font-medium uppercase tracking-wider text-[#E5F500]">
               Controlled Experiments
             </p>
-            <h3 className="mt-2 text-lg font-semibold text-white">
+            <h3 className="mt-2 text-lg font-semibold text-[#F3F4F1]">
               Chaos Control Center
             </h3>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-[#92968F]">
               Trigger controlled failures and observe automatic recovery.
             </p>
 
 
-            <div className="mt-5 rounded-xl border border-slate-800 bg-[#101827] p-4">
-              <p className="text-sm text-slate-400">Experiment Status</p>
-              <p className={`mt-2 text-sm font-semibold ${chaosRunning ? "text-amber-400" :
-                chaosError ? "text-red-400" :
-                  chaosResult ? "text-emerald-400" :
-                    "text-slate-300"
+            <div className="mt-5 rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
+              <p className="text-xs font-medium uppercase tracking-[0.1em] text-[#92968F]">
+                Experiment Status
+              </p>
+              <p className={`mt-2 text-sm font-medium ${chaosRunning ? "text-[#F5B942]" :
+                chaosError ? "text-[#FF5C5C]" :
+                  chaosResult ? "text-[#35D07F]" :
+                    "text-[#F3F4F1]"
                 }`}>
                 {chaosRunning ? "Recovery in progress..." :
                   chaosError ? "Experiment failed" :
@@ -1422,11 +1438,13 @@ function Dashboard({ page = "overview" }) {
               </p>
             </div>
 
-            <div className="mt-6 rounded-xl border border-slate-800 bg-[#101827] p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="mt-6 rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
+              <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <h4 className="font-semibold text-white">Backend Crash Recovery</h4>
-                  <p className="mt-1 text-sm text-slate-400">
+                  <h4 className="text-base font-semibold tracking-tight text-[#F3F4F1]">
+                    Backend Crash
+                  </h4>
+                  <p className="mt-1 text-xs leading-5 text-[#92968F]">
                     Crashes the backend container and verifies its automatic restart.
                   </p>
                 </div>
@@ -1434,24 +1452,24 @@ function Dashboard({ page = "overview" }) {
                   type="button"
                   onClick={runBackendCrash}
                   disabled={chaosRunning}
-                  className="rounded-lg border border-cyan-700 px-4 py-2 text-sm text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="btn-primary px-5 py-2.5 text-xs font-medium disabled:opacity-50"
                 >
                   {chaosRunning ? "Recovering..." : "Run Crash Test"}
                 </button>
               </div>
 
               {chaosRunning && (
-                <p className="mt-4 text-sm text-amber-400">
+                <p className="mt-4 text-sm text-[#F5B942]">
                   Crash triggered. Waiting for automatic recovery...
                 </p>
               )}
 
               {chaosResult && (
-                <p className="mt-4 text-sm text-emerald-400">{chaosResult}</p>
+                <p className="mt-4 text-sm text-[#35D07F]">{chaosResult}</p>
               )}
 
               {chaosError && (
-                <p className="mt-4 text-sm text-red-400">{chaosError}</p>
+                <p className="mt-4 text-sm text-[#FF5C5C]">{chaosError}</p>
               )}
 
               <BackendCrashCoordinationControls
@@ -1471,11 +1489,13 @@ function Dashboard({ page = "overview" }) {
               />
             </div>
 
-            <div className="mt-6 rounded-xl border border-amber-800 bg-[#101827] p-5">
-              <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="mt-6 rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
+              <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <h4 className="font-semibold text-white">Payment Chaos</h4>
-                  <p className="mt-1 text-sm text-slate-400">
+                  <h4 className="text-base font-semibold tracking-tight text-[#F3F4F1]">
+                    Payment Chaos
+                  </h4>
+                  <p className="mt-1 text-xs leading-5 text-[#92968F]">
                     Simulates a payment response timeout after the payment is recorded,
                     allowing SHCom to verify and reconcile the transaction.
                   </p>
@@ -1485,24 +1505,24 @@ function Dashboard({ page = "overview" }) {
                   type="button"
                   onClick={injectPaymentChaos}
                   disabled={chaosRunning || paymentChaosLoading}
-                  className="rounded-lg border border-amber-700 px-4 py-2 text-sm text-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="btn-secondary px-5 py-2.5 text-xs font-medium disabled:opacity-50"
                 >
                   {paymentChaosLoading ? "Activating..." : "Inject Payment Chaos"}
                 </button>
               </div>
 
               {paymentChaosMessage && (
-                <p className="mt-4 text-sm text-amber-300" role="status">
+                <p className="mt-4 text-sm text-[#F5B942]" role="status">
                   {paymentChaosMessage}
                 </p>
               )}
 
               {paymentRecovery.running || paymentRecovery.status === "recovered" ? (
-                <div className="mt-4 rounded-xl border border-amber-900/30 bg-amber-900/10 p-3">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-amber-400 mb-1">
+                <div className="mt-4 rounded-xl border border-[#F5B942]/30 bg-[#F5B942]/10 p-4">
+                  <p className="text-xs font-medium uppercase tracking-[0.1em] text-[#F5B942] mb-1">
                     Payment Chaos Recovery
                   </p>
-                  <p className="text-xs text-amber-200 mb-2">
+                  <p className="text-xs text-[#F5B942] mb-2">
                     {paymentRecovery.message}
                   </p>
                   <div className="space-y-1">
@@ -1514,20 +1534,20 @@ function Dashboard({ page = "overview" }) {
                         <span
                           className={`flex-shrink-0 w-2 h-2 rounded-full mt-1 ${
                             s.status === "recovered"
-                              ? "bg-emerald-500"
+                              ? "bg-[#35D07F]"
                               : s.status === "error"
-                                ? "bg-red-500"
-                                : "bg-amber-500"
+                                ? "bg-[#FF5C5C]"
+                                : "bg-[#E5F500]"
                           }`}
                         />
-                        <span className="text-amber-100">
+                        <span className="text-[#F5B942]">
                           {new Date(s.t).toLocaleTimeString()} — {s.message}
                         </span>
                       </div>
                     ))}
                   </div>
                   {paymentRecovery.status === "recovered" && (
-                    <p className="mt-2 text-xs font-semibold text-emerald-400">
+                    <p className="mt-2 text-xs font-medium text-[#35D07F]">
                       Recovery complete — no duplicate order or payment was created.
                     </p>
                   )}
@@ -1537,11 +1557,13 @@ function Dashboard({ page = "overview" }) {
 
 
 
-            <div className="mt-6 rounded-xl border border-amber-800/60 bg-[#101827] p-5">
+            <div className="mt-6 rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="max-w-2xl">
-                  <h4 className="font-semibold text-white">Last-Item Race Condition</h4>
-                  <p className="mt-2 text-sm leading-6 text-slate-400">
+                  <h4 className="text-base font-semibold tracking-tight text-[#F3F4F1]">
+                    Last-Item Race Condition
+                  </h4>
+                  <p className="mt-2 text-xs leading-6 text-[#92968F]">
                     Inject a controlled checkout timing fault and create a dedicated storefront product with exactly one unit. Open it in two browser sessions, add one unit to each cart, and submit both checkouts close together.
                   </p>
                 </div>
@@ -1549,33 +1571,37 @@ function Dashboard({ page = "overview" }) {
                   type="button"
                   onClick={createLastItemRace}
                   disabled={racePreparing || chaosRunning}
-                  className="rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="btn-primary px-5 py-2.5 text-xs font-medium disabled:opacity-50"
                 >
                   {racePreparing ? "Injecting..." : "Create Failure"}
                 </button>
               </div>
 
               {raceError && (
-                <p role="alert" className="mt-4 rounded-lg border border-red-900/50 bg-red-950/30 p-3 text-sm text-red-300">
+                <p role="alert" className="mt-4 rounded-lg border border-[#FF5C5C]/30 bg-[#FF5C5C]/20 p-3 text-sm text-[#FF5C5C]">
                   {raceError}
                 </p>
               )}
 
               {raceRun && (
-                <div className="mt-4 rounded-xl border border-slate-800 bg-[#0d1320] p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="mt-4 rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
-                      <p className="font-semibold text-white">{raceRun.product?.name || "Last-Item Race Test"}</p>
-                      <p className="mt-1 text-xs text-slate-500">Run ID: {raceRun.runId}</p>
+                      <p className="text-base font-semibold tracking-tight text-[#F3F4F1]">
+                        {raceRun.product?.name || "Last-Item Race Test"}
+                      </p>
+                      <p className="mt-1 text-xs text-[#92968F]">
+                        Run ID: {raceRun.runId}
+                      </p>
                     </div>
-                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    <span className={`rounded-full px-3 py-1 text-[10px] font-medium ${
                       raceRun.status === "recovered"
-                        ? "bg-emerald-500/10 text-emerald-300"
+                        ? "bg-[#35D07F]/10 text-[#35D07F]"
                         : raceRun.status === "failed"
-                          ? "bg-red-500/10 text-red-300"
+                          ? "bg-[#FF5C5C]/10 text-[#FF5C5C]"
                           : raceRun.status === "recovering"
-                            ? "bg-amber-500/10 text-amber-300"
-                            : "bg-cyan-500/10 text-cyan-300"
+                            ? "bg-[#F5B942]/10 text-[#F5B942]"
+                            : "bg-[#E5F500]/10 text-[#E5F500]"
                     }`}>
                       {raceRun.status === "recovered"
                         ? "Recovery Verified"
@@ -1587,35 +1613,53 @@ function Dashboard({ page = "overview" }) {
                     </span>
                   </div>
 
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="rounded-lg border border-slate-800 p-3">
-                      <p className="text-xs text-slate-500">Initial stock</p>
-                      <p className="mt-1 text-xl font-semibold text-white">{raceRun.initialStock ?? 1}</p>
+                  <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="rounded-xl border border-[#272A26] bg-[#171917] p-4">
+                      <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#92968F]">
+                        Initial stock
+                      </p>
+                      <p className="mt-2 text-2xl font-bold tabular-nums text-[#F3F4F1]">
+                        {raceRun.initialStock ?? 1}
+                      </p>
                     </div>
-                    <div className="rounded-lg border border-slate-800 p-3">
-                      <p className="text-xs text-slate-500">Checkout attempts</p>
-                      <p className="mt-1 text-xl font-semibold text-white">{raceRun.attemptCount ?? 0} / 2</p>
+                    <div className="rounded-xl border border-[#272A26] bg-[#171917] p-4">
+                      <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#92968F]">
+                        Checkout attempts
+                      </p>
+                      <p className="mt-2 text-2xl font-bold tabular-nums text-[#F3F4F1]">
+                        {raceRun.attemptCount ?? 0} / 2
+                      </p>
                     </div>
-                    <div className="rounded-lg border border-slate-800 p-3">
-                      <p className="text-xs text-slate-500">Reservations accepted</p>
-                      <p className="mt-1 text-xl font-semibold text-emerald-300">{raceRun.successfulReservations ?? 0}</p>
+                    <div className="rounded-xl border border-[#272A26] bg-[#171917] p-4">
+                      <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#92968F]">
+                        Reservations accepted
+                      </p>
+                      <p className="mt-2 text-2xl font-bold tabular-nums text-[#35D07F]">
+                        {raceRun.successfulReservations ?? 0}
+                      </p>
                     </div>
-                    <div className="rounded-lg border border-slate-800 p-3">
-                      <p className="text-xs text-slate-500">Competing attempts rejected</p>
-                      <p className="mt-1 text-xl font-semibold text-amber-300">{raceRun.rejectedAttempts ?? 0}</p>
+                    <div className="rounded-xl border border-[#272A26] bg-[#171917] p-4">
+                      <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#92968F]">
+                        Competing attempts rejected
+                      </p>
+                      <p className="mt-2 text-2xl font-bold tabular-nums text-[#F5B942]">
+                        {raceRun.rejectedAttempts ?? 0}
+                      </p>
                     </div>
                   </div>
 
-                  <p className="mt-4 text-sm text-slate-300">{raceRun.message || "Waiting for two customer checkout attempts."}</p>
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-5 text-xs leading-5 text-[#F3F4F1]">
+                    {raceRun.message || "Waiting for two customer checkout attempts."}
+                  </p>
+                  <p className="mt-2 text-[10px] text-[#92968F]">
                     Current stock: {raceRun.product?.stock ?? "—"} · Verified final stock: {raceRun.stockAfterRecovery ?? "Not verified"}
                   </p>
-                  <div className="mt-4 flex flex-wrap gap-3">
+                  <div className="mt-5 flex flex-wrap gap-3">
                     <a
                       href="/user#products"
                       target="_blank"
                       rel="noreferrer"
-                      className="rounded-lg border border-emerald-700 px-3 py-2 text-sm font-semibold text-emerald-300 hover:bg-emerald-950/40"
+                      className="btn-secondary px-4 py-2.5 text-xs font-medium"
                     >
                       Open Storefront
                     </a>
@@ -1624,7 +1668,7 @@ function Dashboard({ page = "overview" }) {
                         href={raceRun.storefrontPath}
                         target="_blank"
                         rel="noreferrer"
-                        className="rounded-lg border border-cyan-700 px-3 py-2 text-sm font-semibold text-cyan-300 hover:bg-cyan-950/40"
+                        className="btn-secondary px-4 py-2.5 text-xs font-medium"
                       >
                         Open Test Product
                       </a>
@@ -1632,20 +1676,20 @@ function Dashboard({ page = "overview" }) {
                     <button
                       type="button"
                       onClick={() => refreshLastItemRace(raceRun.runId)}
-                      className="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-300 hover:bg-slate-800"
+                      className="btn-secondary px-4 py-2.5 text-xs font-medium"
                     >
                       Refresh Result
                     </button>
                   </div>
 
-                  <div className="mt-4 space-y-1 text-xs text-slate-500">
+                  <div className="mt-5 space-y-2 text-[10px] text-[#92968F]">
                     <p>Fault injected: {raceRun.faultInjectedAt ? new Date(raceRun.faultInjectedAt).toLocaleString() : "—"}</p>
                     <p>First checkout: {raceRun.firstAttemptAt ? new Date(raceRun.firstAttemptAt).toLocaleString() : "Waiting"}</p>
                     <p>Conflict detected: {raceRun.conflictDetectedAt ? new Date(raceRun.conflictDetectedAt).toLocaleString() : "Waiting"}</p>
                     <p>Recovery verified: {raceRun.verifiedAt ? new Date(raceRun.verifiedAt).toLocaleString() : "Not verified"}</p>
                   </div>
                   {raceRun.status === "ready" && (
-                    <p className="mt-4 rounded-lg bg-amber-950/30 p-3 text-sm text-amber-200">
+                    <p className="mt-5 rounded-xl border border-[#F5B942]/30 bg-[#F5B942]/10 p-4 text-xs text-[#F5B942]">
                       Next: open the test product in two separate browser profiles, add one unit to each cart, and submit checkout in both sessions as close together as possible.
                     </p>
                   )}
@@ -1655,13 +1699,13 @@ function Dashboard({ page = "overview" }) {
 
           </section>
 
-          <div className="dashboard-overview-only mt-6 rounded-xl border border-slate-800 bg-[#101827] p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="dashboard-overview-only mt-6 rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h4 className="font-semibold text-white">
+                <h4 className="text-base font-semibold tracking-tight text-[#F3F4F1]">
                   Admin Orders
                 </h4>
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-xs leading-5 text-[#92968F]">
                   Read-only view of all orders placed through the Storefront.
                   Payment status reflects the durable backend record, not
                   frontend inference.
@@ -1671,26 +1715,26 @@ function Dashboard({ page = "overview" }) {
                 type="button"
                 onClick={fetchAdminOrders}
                 disabled={ordersLoading || ordersRefreshing}
-                className="rounded-lg border border-cyan-700 px-4 py-2 text-sm text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
+                className="btn-secondary px-4 py-2.5 text-xs font-medium disabled:opacity-50"
               >
                 {ordersRefreshing ? "Refreshing..." : "Refresh Orders"}
               </button>
             </div>
 
             {ordersLoading && (
-              <div className="mt-4 rounded-lg border border-slate-800 bg-[#0d1320] p-6 text-center text-slate-400">
+              <div className="mt-4 rounded-lg border border-[#272A26] bg-[#0D0F0D] p-6 text-center text-[#92968F]">
                 Loading orders...
               </div>
             )}
 
             {ordersError && !ordersLoading && orders.length === 0 && (
-              <div className="mt-4 rounded-lg border border-red-900/30 bg-red-900/10 p-6">
-                <p className="text-sm text-red-400">{ordersError}</p>
+              <div className="mt-4 rounded-lg border border-[#FF5C5C]/30 bg-[#FF5C5C]/10 p-6">
+                <p className="text-sm text-[#FF5C5C]">{ordersError}</p>
                 <button
                   type="button"
                   onClick={fetchAdminOrders}
                   disabled={ordersLoading || ordersRefreshing}
-                  className="mt-3 text-sm text-cyan-400 underline"
+                  className="mt-3 text-sm text-[#E5F500] underline"
                 >
                   Try again
                 </button>
@@ -1698,8 +1742,8 @@ function Dashboard({ page = "overview" }) {
             )}
 
             {!ordersLoading && !ordersError && orders.length === 0 && (
-              <div className="mt-4 rounded-lg border border-slate-800 bg-[#0d1320] p-6 text-center text-slate-400">
-                <p className="text-sm">No orders found.</p>
+              <div className="mt-4 rounded-xl border border-[#272A26] bg-[#0D0F0D] p-6 text-center text-[#92968F]">
+                <p className="text-xs text-center">No orders found.</p>
               </div>
             )}
 
@@ -1707,23 +1751,23 @@ function Dashboard({ page = "overview" }) {
               <div className="mt-4 overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-700 text-xs uppercase tracking-wider text-slate-400">
-                      <th className="pb-3 font-semibold text-slate-300">
+                    <tr className="border-b border-[#272A26] text-xs uppercase tracking-wider text-[#92968F]">
+                      <th className="pb-3 font-semibold text-[#F3F4F1]">
                         Order ID
                       </th>
-                      <th className="pb-3 font-semibold text-slate-300">
+                      <th className="pb-3 font-semibold text-[#F3F4F1]">
                         Date
                       </th>
-                      <th className="pb-3 font-semibold text-slate-300">
+                      <th className="pb-3 font-semibold text-[#F3F4F1]">
                         Checkout ID
                       </th>
-                      <th className="pb-3 font-semibold text-slate-300 text-right">
+                      <th className="pb-3 font-semibold text-[#F3F4F1] text-right">
                         Amount
                       </th>
-                      <th className="pb-3 font-semibold text-slate-300">
+                      <th className="pb-3 font-semibold text-[#F3F4F1]">
                         Order Status
                       </th>
-                      <th className="pb-3 font-semibold text-slate-300">
+                      <th className="pb-3 font-semibold text-[#F3F4F1]">
                         Payment Status
                       </th>
                     </tr>
@@ -1742,20 +1786,20 @@ function Dashboard({ page = "overview" }) {
                       return (
                         <tr
                           key={order._id}
-                          className="border-b border-slate-800/50 hover:bg-slate-800/30 transition"
+                          className="border-b border-[#272A26]/50 hover:bg-[#171917]/30 transition"
                         >
-                          <td className="py-3 text-xs font-mono text-slate-200 break-all">
+                          <td className="py-3 text-xs font-mono text-[#F3F4F1] break-all">
                             {order._id}
                           </td>
-                          <td className="py-3 text-xs text-slate-400">
+                          <td className="py-3 text-xs text-[#92968F]">
                             {order.createdAt
                               ? new Date(order.createdAt).toLocaleString()
                               : "—"}
                           </td>
-                          <td className="py-3 text-xs font-mono text-slate-300 break-all">
+                          <td className="py-3 text-xs font-mono text-[#F3F4F1] break-all">
                             {order.checkoutId || "—"}
                           </td>
-                          <td className="py-3 text-xs text-right text-slate-200">
+                          <td className="py-3 text-xs text-right text-[#F3F4F1]">
                             ₹{Number(order.totalAmount || 0)
                               .toFixed(2)
                               .toLocaleString("en-IN")}
@@ -1763,12 +1807,12 @@ function Dashboard({ page = "overview" }) {
                           <td className="py-3 text-xs">
                             <span
                               className={`rounded-full px-2 py-0.5 text-xs font-semibold ${orderStatus === "placed"
-                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  ? "bg-[#35D07F]/10 text-[#35D07F] border border-[#35D07F]/30"
                                   : orderStatus === "processing"
-                                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                    ? "bg-[#F5B942]/10 text-[#F5B942] border border-[#F5B942]/20"
                                     : orderStatus === "completed"
-                                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                      : "bg-red-500/10 text-red-400 border border-red-500/20"
+                                      ? "bg-[#35D07F]/10 text-[#35D07F] border border-[#35D07F]/30"
+                                      : "bg-[#FF5C5C]/10 text-[#FF5C5C] border border-[#FF5C5C]/20"
                                 }`}
                             >
                               {orderStatus.charAt(0).toUpperCase() +
@@ -1778,10 +1822,10 @@ function Dashboard({ page = "overview" }) {
                           <td className="py-3 text-xs">
                             <span
                               className={`rounded-full px-2 py-0.5 text-xs font-semibold ${isPaid
-                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  ? "bg-[#35D07F]/10 text-[#35D07F] border border-[#35D07F]/30"
                                   : isFailed
-                                    ? "bg-red-500/10 text-red-400 border border-red-500/20"
-                                    : "bg-slate-500/10 text-slate-400 border border-slate-500/20"
+                                    ? "bg-[#FF5C5C]/10 text-[#FF5C5C] border border-[#FF5C5C]/20"
+                                    : "bg-[#272A26]/20 text-[#92968F] border border-[#272A26]/50"
                                 }`}
                             >
                               {paymentStatus.charAt(0).toUpperCase() +
@@ -1793,7 +1837,7 @@ function Dashboard({ page = "overview" }) {
                     })}
                   </tbody>
                 </table>
-                <p className="mt-3 text-xs text-slate-500">
+                <p className="mt-3 text-xs text-[#92968F]">
                   {orders.length} order{orders.length !== 1 ? "s" : ""} total
                 </p>
               </div>
@@ -1803,29 +1847,29 @@ function Dashboard({ page = "overview" }) {
           <div className="dashboard-chaos-only">
             <SyntheticTrafficPanel />
           </div>
-          <div className="dashboard-chaos-only mt-6 rounded-xl border border-slate-800 bg-[#101827] p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="dashboard-chaos-only mt-6 rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h4 className="font-semibold text-white">
+                <h4 className="text-base font-semibold tracking-tight text-[#F3F4F1]">
                   Experiment History
                 </h4>
-                <p className="mt-1 text-sm text-slate-400">
+                <p className="mt-1 text-xs leading-5 text-[#92968F]">
                   Recorded outcomes of completed recovery experiments.
                 </p>
               </div>
-              <span className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">
+              <span className="rounded-full border border-[#272A26] px-3 py-1 text-xs text-[#F3F4F1]">
                 {experimentHistory.length} recorded
               </span>
             </div>
 
             {experimentStatusError && (
-              <p className="mt-4 text-sm text-red-400">
+              <p className="mt-4 text-xs text-[#FF5C5C]">
                 {experimentStatusError}
               </p>
             )}
 
             {!experimentStatusError && experimentHistory.length === 0 && (
-              <p className="mt-4 rounded-lg border border-slate-800 p-4 text-sm text-slate-400">
+              <p className="mt-4 rounded-xl border border-[#272A26] p-4 text-xs text-[#92968F]">
                 No experiment results recorded yet.
               </p>
             )}
@@ -1835,31 +1879,32 @@ function Dashboard({ page = "overview" }) {
                 {experimentHistory.slice().reverse().map((experiment) => (
                   <div
                     key={experiment.id}
-                    className="rounded-lg border border-slate-800 p-4"
+                    className="rounded-xl border border-[#272A26] bg-[#171917] p-5"
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="font-medium text-white">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-sm font-medium tracking-tight text-[#F3F4F1]">
                         {(experiment.scenario || "Unknown scenario")
                           .replaceAll("-", " ")
                           .replace(/\b\w/g, (letter) => letter.toUpperCase())}
                       </p>
                       <span
-                        className={`rounded-full px-2 py-1 text-xs ${experiment.status === "passed"
-                            ? "bg-emerald-500/10 text-emerald-400"
+                        className={`rounded-full px-2.5 py-1 text-[10px] font-medium ${
+                          experiment.status === "passed"
+                            ? "bg-[#35D07F]/10 text-[#35D07F]"
                             : experiment.status === "stopped"
-                              ? "bg-amber-500/10 text-amber-400"
-                              : "bg-red-500/10 text-red-400"
-                          }`}
+                              ? "bg-[#F5B942]/10 text-[#F5B942]"
+                              : "bg-[#FF5C5C]/10 text-[#FF5C5C]"
+                        }`}
                       >
                         {experiment.status || "Unknown"}
                       </span>
                     </div>
 
-                    <p className="mt-2 text-sm text-slate-400">
+                    <p className="mt-3 text-xs leading-5 text-[#92968F]">
                       {experiment.message || "No details recorded."}
                     </p>
 
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-[10px] text-[#92968F]">
                       Completed:{" "}
                       {experiment.completedAt
                         ? new Date(experiment.completedAt).toLocaleString()
@@ -1872,22 +1917,22 @@ function Dashboard({ page = "overview" }) {
           </div>
 
 
-          <section className="dashboard-incidents-only scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6">
+          <section className="dashboard-incidents-only scroll-mt-6 rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6">
             <div className="mb-5">
-              <h3 className="text-lg font-semibold text-white">
+              <h3 className="text-lg font-semibold tracking-tight text-[#F3F4F1]">
                 Recovery Event Timeline
               </h3>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-xs leading-5 text-[#92968F]">
                 Live backend crash and MongoDB connection recovery events.
               </p>
             </div>
 
             {!recoveryInfo ? (
-              <p className="text-sm text-slate-400">
+              <p className="text-xs text-[#92968F]">
                 Waiting for recovery monitor...
               </p>
             ) : !recoveryInfo.events?.length ? (
-              <p className="rounded-xl border border-slate-800 p-5 text-sm text-slate-400">
+              <p className="rounded-xl border border-[#272A26] p-5 text-xs text-[#92968F]">
                 No recovery events recorded yet. New events will appear here automatically.
               </p>
             ) : (
@@ -1895,18 +1940,18 @@ function Dashboard({ page = "overview" }) {
                 {recoveryInfo.events.map((event, index) => (
                   <article
                     key={`${event.timestamp}-${event.type}-${index}`}
-                    className="rounded-xl border border-slate-800 bg-[#101827] p-4"
+                    className="rounded-xl border border-[#272A26] bg-[#171917] p-5"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
                         {event.type === "crash" ||
                           event.type === "database-disconnected" ? (
-                          <AlertTriangle size={18} className="text-amber-400" />
+                          <AlertTriangle size={18} className="text-[#F5B942]" />
                         ) : (
-                          <CheckCircle2 size={18} className="text-emerald-400" />
+                          <CheckCircle2 size={18} className="text-[#35D07F]" />
                         )}
 
-                        <h4 className="text-sm font-medium text-white">
+                        <h4 className="text-sm font-medium tracking-tight text-[#F3F4F1]">
                           {event.type
                             .split("-")
                             .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -1914,12 +1959,12 @@ function Dashboard({ page = "overview" }) {
                         </h4>
                       </div>
 
-                      <span className="text-xs text-slate-500">
+                      <span className="text-[10px] text-[#92968F]">
                         {new Date(event.timestamp).toLocaleString()}
                       </span>
                     </div>
 
-                    <p className="mt-2 text-sm text-slate-400">
+                    <p className="mt-3 text-xs leading-5 text-[#92968F]">
                       {event.message}
                     </p>
                   </article>
@@ -1933,46 +1978,56 @@ function Dashboard({ page = "overview" }) {
 
           <section
             id="recovery-metrics"
-            className="dashboard-overview-only scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6"
+            className="dashboard-overview-only scroll-mt-6 rounded-2xl border border-[#272A26] bg-[#0D0F0D] p-6"
           >
             <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-violet-400/10 p-2.5 text-violet-300">
+              <div className="rounded-xl bg-[#E5F500]/10 p-3 text-[#E5F500]">
                 <Workflow size={20} />
               </div>
 
               <div>
-                <h3 className="font-semibold">Recovery Metrics</h3>
-                <p className="mt-1 text-sm text-slate-500">
+                <h3 className="text-lg font-semibold tracking-tight text-[#F3F4F1]">
+                  Recovery Metrics
+                </h3>
+                <p className="mt-1 text-xs leading-5 text-[#92968F]">
                   Current Docker recovery information.
                 </p>
               </div>
             </div>
 
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-xl border border-slate-800 p-4">
-                <p className="text-sm text-slate-500">Backend container</p>
-                <p className="mt-2 text-lg font-semibold">
+            <div className="mt-5 grid gap-5 sm:grid-cols-2">
+              <div className="rounded-2xl border border-[#272A26] bg-[#171917] p-6">
+                <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#92968F]">
+                  Backend container
+                </p>
+                <p className="mt-3 text-xl font-bold tabular-nums text-[#F3F4F1]">
                   {recoveryInfo?.container ?? "Waiting for data"}
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-800 p-4">
-                <p className="text-sm text-slate-500">Total restarts</p>
-                <p className="mt-2 text-lg font-semibold">
+              <div className="rounded-2xl border border-[#272A26] bg-[#171917] p-6">
+                <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#92968F]">
+                  Total restarts
+                </p>
+                <p className="mt-3 text-xl font-bold tabular-nums text-[#F3F4F1]">
                   {recoveryInfo?.restartCount ?? "Unknown"}
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-800 p-4">
-                <p className="text-sm text-slate-500">Container health</p>
-                <p className="mt-2 text-lg font-semibold">
+              <div className="rounded-2xl border border-[#272A26] bg-[#171917] p-6">
+                <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#92968F]">
+                  Container health
+                </p>
+                <p className="mt-3 text-xl font-bold tabular-nums text-[#F3F4F1]">
                   {recoveryInfo?.health ?? "Unknown"}
                 </p>
               </div>
 
-              <div className="rounded-xl border border-slate-800 p-4">
-                <p className="text-sm text-slate-500">Monitor connection</p>
-                <p className="mt-2 text-lg font-semibold">
+              <div className="rounded-2xl border border-[#272A26] bg-[#171917] p-6">
+                <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-[#92968F]">
+                  Monitor connection
+                </p>
+                <p className="mt-3 text-xl font-bold tabular-nums text-[#F3F4F1]">
                   {recoveryError
                     ? "Unavailable"
                     : recoveryInfo?.available
@@ -1983,7 +2038,7 @@ function Dashboard({ page = "overview" }) {
             </div>
           </section>
 
-          <footer className="border-t border-slate-800 pt-5 text-xs text-slate-500">
+          <footer className="border-t border-[#272A26] pt-6 text-[10px] text-[#92968F]">
             SHCom · Self-Healing Commerce
           </footer>
         </div>
@@ -1993,3 +2048,5 @@ function Dashboard({ page = "overview" }) {
 }
 
 export default Dashboard;
+
+

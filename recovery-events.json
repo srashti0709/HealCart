@@ -1,5 +1,61 @@
 [
   {
+    "id": "evt-database-recovered-1792857220240-191cb0",
+    "type": "database-recovered",
+    "description": "MongoDB connection restored successfully.",
+    "message": "MongoDB connection restored successfully.",
+    "timestamp": "2026-10-24T15:53:40.236Z",
+    "source": "Docker log observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "database": "mongodb",
+      "message": "[Database Recovery] MongoDB connected successfully."
+    }
+  },
+  {
+    "id": "evt-database-disconnected-1792857219873-92c72a",
+    "type": "database-disconnected",
+    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "timestamp": "2026-10-24T15:53:39.858Z",
+    "source": "Docker log observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "database": "mongodb",
+      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
+    }
+  },
+  {
+    "id": "evt-database-recovered-1792857217350-8a490c",
+    "type": "database-recovered",
+    "description": "MongoDB connection restored successfully.",
+    "message": "MongoDB connection restored successfully.",
+    "timestamp": "2026-10-24T15:53:37.346Z",
+    "source": "Docker log observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "database": "mongodb",
+      "message": "[Database Recovery] MongoDB connected successfully."
+    }
+  },
+  {
+    "id": "evt-database-disconnected-1792857208806-6a3ec2",
+    "type": "database-disconnected",
+    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "timestamp": "2026-10-24T15:28:06.007Z",
+    "source": "Docker log observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "database": "mongodb",
+      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
+    }
+  },
+  {
     "id": "evt-database-recovered-1792855105883-9ae781",
     "type": "database-recovered",
     "description": "MongoDB connection restored successfully.",
@@ -775,62 +831,6 @@
     "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
     "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
     "timestamp": "2026-10-24T06:10:45.247Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792822245267-eef07c",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:10:45.241Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792822245254-b084e0",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:10:45.239Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792822245233-653e65",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:10:45.222Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792822245209-8484b8",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:10:45.205Z",
     "source": "Docker log observation",
     "outcome": "failure",
     "experimentId": null,
