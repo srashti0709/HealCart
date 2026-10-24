@@ -122,7 +122,7 @@ function StorefrontShell({ children }) {
           <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
             <Link to="/user" className="flex items-center gap-3">
               <div className="rounded-xl bg-violet-600 p-2 text-white shadow-lg shadow-violet-200">
-                <ShieldCheck size={25} />
+                <ShoppingBag size={25} />
               </div>
 
               <div>
@@ -132,6 +132,14 @@ function StorefrontShell({ children }) {
                 </p>
               </div>
             </Link>
+
+            <nav aria-label="Main navigation" className="hidden items-center gap-5 text-sm font-medium text-slate-600 xl:flex">
+              <Link to="/user" className="transition hover:text-violet-700">Shop</Link>
+              <a href="/user#products" className="transition hover:text-violet-700">Keyboards</a>
+              <a href="/user#products" className="transition hover:text-violet-700">Mice</a>
+              <a href="/user#products" className="transition hover:text-violet-700">Headphones</a>
+              <a href="/user#products" className="transition hover:text-violet-700">Accessories</a>
+            </nav>
 
             <div className="flex items-center gap-4">
               {backendChecking ? (
