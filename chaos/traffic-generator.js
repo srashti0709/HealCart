@@ -991,8 +991,22 @@ function getTrafficStatus() {
     };
 }
 
+
 function getTrafficRequests(limit = 100) {
-    const source = activeRun ? activeRun.records : lastRun?.requests || [];
+    const historyRequests = loadHistory()
+        .slice()
+        .reverse()
+        .find(
+            (entry) =>
+                Array.isArray(entry.requests) &&
+                entry.requests.length > 0
+        )?.requests || [];
+
+    const source = activeRun
+        ? activeRun.records
+        : lastRun?.requests?.length
+            ? lastRun.requests
+            : historyRequests;
 
     const bounded = Math.min(
         Math.max(1, toInteger(limit) || 100),
@@ -1001,6 +1015,7 @@ function getTrafficRequests(limit = 100) {
 
     return source.slice(-bounded).reverse();
 }
+
 
 function getTrafficMetadata() {
     return {

@@ -1,3 +1,4 @@
+
 import "@xyflow/react/dist/style.css";
 import { useMemo, useState } from "react";
 import {
@@ -9,6 +10,7 @@ import {
   ReactFlow,
 } from "@xyflow/react";
 import {
+  Activity,
   CheckCircle2,
   CreditCard,
   Database,
@@ -19,6 +21,17 @@ import {
   TimerReset,
 } from "lucide-react";
 
+const COLORS = {
+  background: "#0D0F0D",
+  surface: "#141813",
+  border: "#292D24",
+  accent: "#DEED00",
+  muted: "#92968F",
+  healthy: "#35D07F",
+  recovering: "#F5B942",
+  unhealthy: "#FF5C5C",
+};
+
 const statusText = {
   healthy: "Healthy",
   recovering: "Recovering",
@@ -27,20 +40,18 @@ const statusText = {
 };
 
 const statusClass = {
-  healthy: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
-  recovering: "border-amber-500/30 bg-amber-500/10 text-amber-300",
-  unhealthy: "border-red-500/30 bg-red-500/10 text-red-300",
-  unknown: "border-slate-700 bg-slate-800/60 text-slate-300",
+  healthy: "border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F]",
+  recovering: "border-[#F5B942]/30 bg-[#F5B942]/10 text-[#F5B942]",
+  unhealthy: "border-[#FF5C5C]/30 bg-[#FF5C5C]/10 text-[#FF5C5C]",
+  unknown: "border-[#292D24] bg-[#1A1D18] text-[#92968F]",
 };
 
 const formatTimestamp = (value) => {
-  if (!value) return "Unknown";
+  if (!value) return "No recorded time";
 
   const time = new Date(value);
 
-  if (Number.isNaN(time.getTime())) {
-    return "Unknown";
-  }
+  if (Number.isNaN(time.getTime())) return "No recorded time";
 
   return time.toLocaleString();
 };
@@ -50,72 +61,129 @@ const formatFreshness = (value, cutoffMs = 30000) => {
 
   const timestamp = new Date(value).getTime();
 
-  if (!Number.isFinite(timestamp)) {
-    return "Unknown";
-  }
+  if (!Number.isFinite(timestamp)) return "Unknown";
 
   const ageMs = Date.now() - timestamp;
 
-  if (ageMs <= cutoffMs) return "Fresh";
+  if (ageMs < 0 || ageMs <= cutoffMs) return "Fresh";
   if (ageMs <= cutoffMs * 4) return "Stale";
+
   return "Stale";
 };
 
 const getLatestEventByType = (events = [], types = []) => {
-  if (!Array.isArray(events) || events.length === 0) return null;
+  if (!Array.isArray(events)) return null;
 
-  const matches = events.filter(
-    (event) =>
-      event &&
-      typeof event.type === "string" &&
-      types.includes(event.type)
-  );
-
-  if (!matches.length) return null;
-
-  return matches.sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-  )[0];
+  return events
+    .filter(
+      (event) =>
+        event &&
+        typeof event.type === "string" &&
+        types.includes(event.type) &&
+        Number.isFinite(new Date(event.timestamp).getTime())
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() -
+        new Date(a.timestamp).getTime()
+    )[0] || null;
 };
 
-const getFailureEvent = (events = []) => {
-  const failureTypes = ["crash", "database-disconnected"];
-  const latest = getLatestEventByType(events, failureTypes);
+const getFailureEvent = (events = []) =>
+  getLatestEventByType(events, ["crash", "database-disconnected"]);
 
-  return latest || null;
+const isAfter = (first, second) => {
+  if (!first) return false;
+  if (!second) return true;
+
+  return new Date(first).getTime() > new Date(second).getTime();
 };
 
 function ServiceNode({ data }) {
-  const Icon = data.icon;
+  const Icon = data.icon || Activity;
+  const state = data.state || "unknown";
 
   return (
     <div
-      className={`w-[220px] rounded-2xl border bg-[#0a1220]/95 p-3 shadow-[0_18px_60px_rgba(15,23,42,0.45)] backdrop-blur ${
-        data.selected ? "border-cyan-400/60 ring-2 ring-cyan-500/20" : "border-slate-700"
+      className={`w-[205px] rounded-xl border bg-[#141813] p-3 transition-colors duration-200 ${
+        data.selected
+          ? "border-[#DEED00]/70 shadow-[0_0_0_1px_rgba(222,237,0,0.12),0_12px_35px_rgba(0,0,0,0.25)]"
+          : "border-[#292D24] hover:border-[#414638]"
       }`}
     >
-      <Handle type="target" position={Position.Left} className="!h-2.5 !w-2.5 !border-0 !bg-cyan-300" />
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <div className={`rounded-xl border p-2 ${statusClass[data.state] || statusClass.unknown}`}>
-            <Icon size={16} className="shrink-0" />
-          </div>
-          <div className="min-w-0">
-            <div className="truncate text-sm font-semibold text-white">{data.label}</div>
-            <div className="mt-0.5 truncate text-[10px] uppercase tracking-[0.2em] text-slate-500">
-              {data.role}
-            </div>
-          </div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="!h-2 !w-2 !border-0 !bg-[#DEED00]"
+      />
+
+      <div className="flex items-start gap-2.5">
+        <div
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${
+            statusClass[state] || statusClass.unknown
+          }`}
+        >
+          <Icon size={17} />
         </div>
-        <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusClass[data.state] || statusClass.unknown}`}>
-          {statusText[data.state] || "Unknown"}
+
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[12px] font-semibold text-[#F0F1EB]">
+            {data.label}
+          </p>
+          <p className="mt-1 truncate text-[9px] uppercase tracking-[0.13em] text-[#92968F]">
+            {data.role}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-[#292D24] pt-2.5">
+        <span className="text-[10px] text-[#92968F]">Service status</span>
+        <span
+          className={`rounded-md border px-2 py-1 text-[9px] font-semibold ${
+            statusClass[state] || statusClass.unknown
+          }`}
+        >
+          {statusText[state] || "Unknown"}
         </span>
       </div>
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-slate-800 pt-2 text-[10px] text-slate-400">
-        <span>Probe</span>
-        <span className="font-medium text-slate-200">{data.probeFreshness || "Unknown"}</span>
+
+      <div className="mt-2 flex items-center justify-between gap-2">
+        <span className="text-[10px] text-[#92968F]">Health probe</span>
+        <span
+          className={`text-[10px] font-medium ${
+            data.probeFreshness === "Fresh"
+              ? "text-[#35D07F]"
+              : "text-[#92968F]"
+          }`}
+        >
+          {data.probeFreshness || "Unknown"}
+        </span>
       </div>
-      <Handle type="source" position={Position.Right} className="!h-2.5 !w-2.5 !border-0 !bg-cyan-300" />
+
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="!h-2 !w-2 !border-0 !bg-[#DEED00]"
+      />
+    </div>
+  );
+}
+
+const nodeTypes = { serviceNode: ServiceNode };
+
+function DetailItem({ label, value, accent = false }) {
+  return (
+    <div className="min-w-0 rounded-lg border border-[#292D24] bg-[#10120F] p-3">
+      <p className="text-[9px] uppercase tracking-[0.13em] text-[#92968F]">
+        {label}
+      </p>
+      <p
+        className={`mt-2 break-words text-xs font-medium ${
+          accent ? "text-[#DEED00]" : "text-[#E5E7DF]"
+        }`}
+      >
+        {value ?? "Unknown"}
+      </p>
     </div>
   );
 }
@@ -128,57 +196,80 @@ export default function ServiceDependencyMap({
   healthError,
   paymentHealthError,
 }) {
+  const [selectedNodeId, setSelectedNodeId] = useState("backend");
+
   const events = useMemo(
-    () => (Array.isArray(recoveryInfo?.events) ? recoveryInfo.events : []),
+    () =>
+      Array.isArray(recoveryInfo?.events)
+        ? recoveryInfo.events
+        : [],
     [recoveryInfo]
   );
-  const lastFailure = getFailureEvent(events);
-  const lastRecovery = getLatestEventByType(events, ["recovered", "database-recovered"]);
+
+  const lastFailure = useMemo(
+    () => getFailureEvent(events),
+    [events]
+  );
+
+  const lastRecovery = useMemo(
+    () =>
+      getLatestEventByType(events, [
+        "recovered",
+        "database-recovered",
+      ]),
+    [events]
+  );
 
   const serviceStates = useMemo(() => {
-    const latestBackendProbe = health?.timestamp || null;
-    const latestPaymentProbe = paymentHealth?.timestamp || null;
-    const latestSuccessfulBackendHealth =
-      health &&
-      health.success === true &&
-      health.status === "healthy" &&
-      health.database === "connected"
-        ? health.timestamp
-        : null;
+    const backendTimestamp = health?.timestamp || null;
+    const paymentTimestamp = paymentHealth?.timestamp || null;
 
-    const latestSuccessfulPaymentHealth =
-      paymentHealth &&
-      paymentHealth.success === true &&
-      paymentHealth.status === "healthy"
-        ? latestPaymentProbe || new Date().toISOString()
-        : null;
+    const backendHealthy =
+      health?.success === true &&
+      health?.status === "healthy" &&
+      health?.database === "connected";
+
+    const paymentHealthy =
+      paymentHealth?.success === true &&
+      paymentHealth?.status === "healthy";
 
     const backendState = (() => {
-      if (health && health.success === true && health.status === "healthy" && health.database === "connected") {
-        return formatFreshness(health.timestamp, 45000) === "Fresh" ? "healthy" : "unknown";
+      if (backendHealthy) {
+        return formatFreshness(backendTimestamp, 45000) === "Fresh"
+          ? "healthy"
+          : "unknown";
       }
 
-      if (lastFailure && (!lastRecovery || new Date(lastFailure.timestamp) > new Date(lastRecovery.timestamp))) {
+      if (
+        lastFailure &&
+        isAfter(lastFailure.timestamp, lastRecovery?.timestamp)
+      ) {
         return "recovering";
       }
 
-      if (health && (health.status !== "healthy" || health.database !== "connected")) {
+      if (
+        health &&
+        (health.status !== "healthy" ||
+          health.database !== "connected")
+      ) {
         return "unhealthy";
-      }
-
-      if (healthError || recoveryError) {
-        return "unknown";
       }
 
       return "unknown";
     })();
 
     const paymentState = (() => {
-      if (paymentHealth && paymentHealth.success === true && paymentHealth.status === "healthy") {
-        return "healthy";
+      if (paymentHealthy) {
+        return formatFreshness(paymentTimestamp, 45000) === "Fresh"
+          ? "healthy"
+          : "unknown";
       }
 
-      if (paymentHealthError || (paymentHealth && paymentHealth.status !== "healthy")) {
+      if (
+        paymentHealthError ||
+        (paymentHealth &&
+          paymentHealth.status !== "healthy")
+      ) {
         return "unhealthy";
       }
 
@@ -186,127 +277,174 @@ export default function ServiceDependencyMap({
     })();
 
     const mongoState = (() => {
-      if (health && health.database === "connected") {
-        return "healthy";
+      if (health?.database === "connected") {
+        return backendState === "healthy" ? "healthy" : "unknown";
       }
 
-      if (lastFailure && (!lastRecovery || new Date(lastFailure.timestamp) > new Date(lastRecovery.timestamp))) {
+      if (
+        lastFailure &&
+        isAfter(lastFailure.timestamp, lastRecovery?.timestamp)
+      ) {
         return "recovering";
       }
 
-      if (health && health.database === "disconnected") {
+      if (health?.database === "disconnected") {
         return "unhealthy";
       }
 
       return "unknown";
     })();
 
+    const browserOnline =
+      typeof navigator !== "undefined" && navigator.onLine;
+
+    const details = {
+      client: {
+        label: "Client",
+        role: "User browser",
+        lastSuccessfulProbe: null,
+        latestFailure: browserOnline ? null : new Date().toISOString(),
+        recoveryAttempts: 0,
+        recoveryVerifiedAt: null,
+        probeFreshness: browserOnline ? "Online" : "Offline",
+        dependencies: ["Frontend"],
+        containerStatus: browserOnline
+          ? "Browser online"
+          : "Browser offline",
+        description:
+          "The browser session initiating customer storefront traffic.",
+        icon: MonitorSmartphone,
+      },
+      frontend: {
+        label: "Frontend",
+        role: "React storefront",
+        lastSuccessfulProbe: null,
+        latestFailure: null,
+        recoveryAttempts: 0,
+        recoveryVerifiedAt: null,
+        probeFreshness: "Browser session",
+        dependencies: ["Backend API"],
+        containerStatus: "Running in browser",
+        description:
+          "The SHCom customer-facing storefront. This browser-side status does not independently verify the frontend server.",
+        icon: Globe,
+      },
+      backend: {
+        label: "Backend API",
+        role: "Express service · 5000",
+        lastSuccessfulProbe: backendHealthy
+          ? backendTimestamp
+          : null,
+        latestFailure: lastFailure?.timestamp || null,
+        recoveryAttempts: events.filter((event) =>
+          ["crash", "database-disconnected"].includes(event.type)
+        ).length,
+        recoveryVerifiedAt: backendHealthy
+          ? backendTimestamp
+          : null,
+        probeFreshness: formatFreshness(backendTimestamp, 45000),
+        dependencies: ["MongoDB", "Payment Service"],
+        containerStatus: recoveryInfo?.status || "Unknown",
+        description:
+          "Application-level health depends on a recent successful backend probe and a connected MongoDB database.",
+        icon: Server,
+      },
+      payment: {
+        label: "Payment Service",
+        role: "Payment interface · 5001",
+        lastSuccessfulProbe: paymentHealthy
+          ? paymentTimestamp
+          : null,
+        latestFailure: paymentHealthError
+          ? new Date().toISOString()
+          : null,
+        recoveryAttempts: paymentHealthError ? 1 : 0,
+        recoveryVerifiedAt: paymentHealthy
+          ? paymentTimestamp
+          : null,
+        probeFreshness: formatFreshness(paymentTimestamp, 45000),
+        dependencies: ["Backend API"],
+        containerStatus: paymentHealth?.status || "Unknown",
+        description:
+          "The payment service used by order submission and payment verification.",
+        icon: CreditCard,
+      },
+      mongodb: {
+        label: "MongoDB",
+        role: "MongoDB Atlas",
+        lastSuccessfulProbe:
+          health?.database === "connected" && backendState === "healthy"
+            ? backendTimestamp
+            : null,
+        latestFailure:
+          lastFailure?.type === "database-disconnected"
+            ? lastFailure.timestamp
+            : null,
+        recoveryAttempts: events.filter(
+          (event) => event.type === "database-disconnected"
+        ).length,
+        recoveryVerifiedAt:
+          lastRecovery?.type === "database-recovered"
+            ? lastRecovery.timestamp
+            : null,
+        probeFreshness: formatFreshness(backendTimestamp, 45000),
+        dependencies: ["Backend API"],
+        containerStatus: health?.database || "Unknown",
+        description:
+          "MongoDB Atlas stores application data. Its connection state is observed through the backend health response.",
+        icon: Database,
+      },
+    };
+
     return {
-      client: typeof navigator !== "undefined" && navigator.onLine ? "healthy" : "unknown",
+      client: browserOnline ? "healthy" : "unhealthy",
       frontend: "healthy",
       backend: backendState,
       payment: paymentState,
       mongodb: mongoState,
-      details: {
-        client: {
-          label: "Client",
-          role: "User browser",
-          lastSuccessfulProbe: new Date().toISOString(),
-          latestFailure: null,
-          recoveryAttempts: 0,
-          recoveryVerifiedAt: null,
-          probeFreshness: "Fresh",
-          dependencies: ["Frontend"],
-          containerStatus: "Browser session active",
-          description: "The browser session initiating storefront traffic.",
-          lastProbeTime: new Date().toISOString(),
-          icon: MonitorSmartphone,
-        },
-        frontend: {
-          label: "Frontend",
-          role: "React storefront",
-          lastSuccessfulProbe: new Date().toISOString(),
-          latestFailure: null,
-          recoveryAttempts: 0,
-          recoveryVerifiedAt: null,
-          probeFreshness: "Fresh",
-          dependencies: ["Backend API"],
-          containerStatus: "Live in browser",
-          description: "The SHCom storefront serving the user experience.",
-          lastProbeTime: new Date().toISOString(),
-          icon: Globe,
-        },
-        backend: {
-          label: "Backend API",
-          role: "Express service · 5000",
-          lastSuccessfulProbe: latestSuccessfulBackendHealth || latestBackendProbe || null,
-          latestFailure: lastFailure?.timestamp || null,
-          recoveryAttempts: events.filter((event) => ["crash", "database-disconnected"].includes(event.type)).length,
-          recoveryVerifiedAt: latestSuccessfulBackendHealth || null,
-          probeFreshness: formatFreshness(latestBackendProbe || latestSuccessfulBackendHealth, 45000),
-          dependencies: ["MongoDB", "Payment Service"],
-          containerStatus: recoveryInfo?.status || "unknown",
-          description: "Application-level health depends on MongoDB connectivity and the API responding successfully.",
-          lastProbeTime: latestBackendProbe || null,
-          icon: Server,
-        },
-        payment: {
-          label: "Payment Service",
-          role: "Payment interface · 5001",
-          lastSuccessfulProbe: latestSuccessfulPaymentHealth || latestPaymentProbe || null,
-          latestFailure: paymentHealthError ? new Date().toISOString() : null,
-          recoveryAttempts: paymentHealthError ? 1 : 0,
-          recoveryVerifiedAt: latestSuccessfulPaymentHealth || null,
-          probeFreshness: formatFreshness(latestPaymentProbe || latestSuccessfulPaymentHealth, 45000),
-          dependencies: ["Backend API"],
-          containerStatus: paymentHealth ? paymentHealth.status : "unknown",
-          description: "The internal payment processor used by order submission and verification flows.",
-          lastProbeTime: latestPaymentProbe || null,
-          icon: CreditCard,
-        },
-        mongodb: {
-          label: "MongoDB",
-          role: "MongoDB Atlas",
-          lastSuccessfulProbe: health?.database === "connected" ? health.timestamp || null : null,
-          latestFailure: lastFailure && lastFailure.type === "database-disconnected" ? lastFailure.timestamp : null,
-          recoveryAttempts: events.filter((event) => event.type === "database-disconnected").length,
-          recoveryVerifiedAt: lastRecovery && lastRecovery.type === "database-recovered" ? lastRecovery.timestamp : null,
-          probeFreshness: formatFreshness(health?.timestamp || undefined, 45000),
-          dependencies: ["Backend API"],
-          containerStatus: health?.database || "unknown",
-          description: "The application's persistence layer. Failures surface as degraded or disconnected health in the backend API.",
-          lastProbeTime: health?.timestamp || null,
-          icon: Database,
-        },
-      },
+      details,
     };
-  }, [events, health, healthError, lastFailure, lastRecovery, paymentHealth, paymentHealthError, recoveryError, recoveryInfo]);
-
-  const [selectedNodeId, setSelectedNodeId] = useState("backend");
+  }, [
+    events,
+    health,
+    lastFailure,
+    lastRecovery,
+    paymentHealth,
+    paymentHealthError,
+    recoveryInfo,
+  ]);
 
   const nodeDetails = useMemo(() => {
-    const details = {
-      client: { ...serviceStates.details.client, status: serviceStates.client },
-      frontend: { ...serviceStates.details.frontend, status: serviceStates.frontend },
-      backend: { ...serviceStates.details.backend, status: serviceStates.backend },
-      payment: { ...serviceStates.details.payment, status: serviceStates.payment },
-      mongodb: { ...serviceStates.details.mongodb, status: serviceStates.mongodb },
-    };
+    const details = {};
+
+    for (const id of [
+      "client",
+      "frontend",
+      "backend",
+      "payment",
+      "mongodb",
+    ]) {
+      details[id] = {
+        ...serviceStates.details[id],
+        status: serviceStates[id],
+      };
+    }
 
     return details;
   }, [serviceStates]);
 
-  const selectedNode = nodeDetails[selectedNodeId] || nodeDetails.backend;
+  const selectedNode =
+    nodeDetails[selectedNodeId] || nodeDetails.backend;
 
   const nodes = useMemo(
     () => [
       {
         id: "client",
-        position: { x: 10, y: 150 },
         type: "serviceNode",
+        position: { x: 20, y: 145 },
         data: {
           label: "Client",
-          role: "User browser",
+          role: "Browser",
           icon: MonitorSmartphone,
           state: serviceStates.client,
           probeFreshness: nodeDetails.client.probeFreshness,
@@ -315,8 +453,8 @@ export default function ServiceDependencyMap({
       },
       {
         id: "frontend",
-        position: { x: 275, y: 150 },
         type: "serviceNode",
+        position: { x: 275, y: 145 },
         data: {
           label: "Frontend",
           role: "React app",
@@ -328,8 +466,8 @@ export default function ServiceDependencyMap({
       },
       {
         id: "backend",
-        position: { x: 540, y: 150 },
         type: "serviceNode",
+        position: { x: 530, y: 145 },
         data: {
           label: "Backend API",
           role: "Express · 5000",
@@ -341,8 +479,8 @@ export default function ServiceDependencyMap({
       },
       {
         id: "payment",
-        position: { x: 810, y: 90 },
         type: "serviceNode",
+        position: { x: 800, y: 55 },
         data: {
           label: "Payment Service",
           role: "Payment · 5001",
@@ -354,8 +492,8 @@ export default function ServiceDependencyMap({
       },
       {
         id: "mongodb",
-        position: { x: 810, y: 260 },
         type: "serviceNode",
+        position: { x: 800, y: 245 },
         data: {
           label: "MongoDB",
           role: "MongoDB Atlas",
@@ -369,178 +507,328 @@ export default function ServiceDependencyMap({
     [nodeDetails, selectedNodeId, serviceStates]
   );
 
-  const edges = useMemo(
-    () => [
-      {
-        id: "client-frontend",
-        source: "client",
-        target: "frontend",
-        type: "smoothstep",
-        markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "#67e8f9" },
-        animated: true,
-        style: { stroke: "#67e8f9", strokeWidth: 2 },
+  
+const edges = useMemo(
+  () => [
+    {
+      id: "client-frontend",
+      source: "client",
+      target: "frontend",
+      type: "smoothstep",
+      animated: true,
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: "#DEED00",
+        width: 14,
+        height: 14,
       },
-      {
-        id: "frontend-backend",
-        source: "frontend",
-        target: "backend",
-        type: "smoothstep",
-        markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "#67e8f9" },
-        animated: true,
-        style: { stroke: "#67e8f9", strokeWidth: 2 },
+      style: { stroke: "#DEED00", strokeWidth: 1.5 },
+    },
+    {
+      id: "frontend-backend",
+      source: "frontend",
+      target: "backend",
+      type: "smoothstep",
+      animated: true,
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: "#DEED00",
+        width: 14,
+        height: 14,
       },
-      {
-        id: "backend-mongodb",
-        source: "backend",
-        target: "mongodb",
-        type: "smoothstep",
-        markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "#22c55e" },
-        animated: true,
-        style: { stroke: "#22c55e", strokeWidth: 2 },
+      style: { stroke: "#DEED00", strokeWidth: 1.5 },
+    },
+    {
+      id: "backend-mongodb",
+      source: "backend",
+      target: "mongodb",
+      type: "smoothstep",
+      animated: true,
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: "#35D07F",
+        width: 14,
+        height: 14,
       },
-      {
-        id: "backend-payment",
-        source: "backend",
-        target: "payment",
-        type: "smoothstep",
-        markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "#fbbf24" },
-        animated: true,
-        style: { stroke: "#fbbf24", strokeWidth: 2 },
+      style: { stroke: "#35D07F", strokeWidth: 1.5 },
+    },
+    {
+      id: "backend-payment",
+      source: "backend",
+      target: "payment",
+      type: "smoothstep",
+      animated: true,
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: "#F5B942",
+        width: 14,
+        height: 14,
       },
-    ],
-    []
-  );
+      style: { stroke: "#F5B942", strokeWidth: 1.5 },
+    },
+  ],
+  []
+);
 
-  const dependencyStateSummary = selectedNode.dependencies?.map((name) => {
-    const key = name.toLowerCase().replace(/\s+/g, "-");
-    const match = {
-      backend: serviceStates.backend,
-      "payment-service": serviceStates.payment,
-      mongodb: serviceStates.mongodb,
-      frontend: serviceStates.frontend,
-      client: serviceStates.client,
-    }[key];
 
-    return {
-      name,
-      state: match || "unknown",
-    };
-  }) || [];
+  const dependencyStateSummary =
+    selectedNode.dependencies?.map((name) => {
+      const key = name.toLowerCase().replace(/\s+/g, "-");
 
-  const hasData = !!(health || paymentHealth || recoveryInfo);
+      const states = {
+        backend: serviceStates.backend,
+        "backend-api": serviceStates.backend,
+        "payment-service": serviceStates.payment,
+        mongodb: serviceStates.mongodb,
+        frontend: serviceStates.frontend,
+        client: serviceStates.client,
+      };
+
+      return { name, state: states[key] || "unknown" };
+    }) || [];
+
+  const hasData = Boolean(health || paymentHealth || recoveryInfo);
 
   return (
-    <section id="service-map" className="scroll-mt-6 rounded-2xl border border-slate-800 bg-[#0d1320] p-6">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.22em] text-cyan-400">Architecture</p>
-          <h3 className="mt-2 text-2xl font-semibold text-white">Service dependency map</h3>
-          <p className="mt-2 max-w-2xl text-sm text-slate-400">
-            Real SHCom runtime dependencies: customer browser requests flow to the frontend, the backend checks MongoDB and payment status, and recovery events are tracked separately from application health.
+    <section
+      id="service-map"
+      className="min-w-0 overflow-hidden rounded-xl border border-[#292D24] bg-[#0D0F0D] p-4 sm:p-5"
+    >
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-[#DEED00]" />
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#DEED00]">
+              Architecture
+            </p>
+          </div>
+
+          <h3 className="mt-2 text-lg font-semibold tracking-tight text-[#F0F1EB] sm:text-xl">
+            Service dependency map
+          </h3>
+
+          <p className="mt-1.5 max-w-2xl text-xs leading-5 text-[#92968F]">
+            Live service relationships, health probes, and recovery state.
+            Select a node to inspect its details.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-300">
+
+        <div className="flex flex-wrap gap-1.5">
           {Object.entries(statusText).map(([state, label]) => (
-            <span key={state} className={`rounded-full border px-2.5 py-1 ${statusClass[state]}`}>
+            <span
+              key={state}
+              className={`rounded-md border px-2 py-1 text-[9px] font-medium ${
+                statusClass[state]
+              }`}
+            >
               {label}
             </span>
           ))}
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_340px]">
-        <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-950/40">
-          {!hasData ? (
-            <div className="flex h-[460px] items-center justify-center text-sm text-slate-400">
-              Loading dependency data...
+      <div className="grid min-w-0 gap-4 2xl:grid-cols-[minmax(0,1fr)_285px]">
+        <div className="min-w-0 overflow-hidden rounded-xl border border-[#292D24] bg-[#10120F]">
+          <div className="flex h-10 items-center justify-between border-b border-[#292D24] px-3 sm:px-4">
+            <div className="flex items-center gap-2">
+              <Activity size={13} className="text-[#DEED00]" />
+              <span className="text-[10px] font-medium uppercase tracking-[0.12em] text-[#D4D6CE]">
+                Runtime topology
+              </span>
             </div>
-          ) : (
-            <div className="h-[460px] w-full">
+            <span className="text-[9px] text-[#92968F]">
+              05 services
+            </span>
+          </div>
+
+          <div className="relative h-[410px] w-full sm:h-[440px]">
+            {!hasData ? (
+              <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+                <Activity size={22} className="text-[#92968F]" />
+                <p className="text-xs text-[#92968F]">
+                  Waiting for service health data…
+                </p>
+              </div>
+            ) : (
               <ReactFlow
                 nodes={nodes}
                 edges={edges}
                 fitView
-                fitViewOptions={{ padding: 0.25 }}
-                minZoom={0.5}
-                maxZoom={1.5}
-                nodeTypes={{ serviceNode: ServiceNode }}
+                fitViewOptions={{ padding: 0.12, maxZoom: 0.9 }}
+                minZoom={0.35}
+                maxZoom={1.15}
+                nodeTypes={nodeTypes}
                 onNodeClick={(_, node) => setSelectedNodeId(node.id)}
                 proOptions={{ hideAttribution: true }}
+                nodesDraggable={false}
+                nodesConnectable={false}
+                elementsSelectable
+                className="shcom-service-flow"
               >
-                <Background color="#334155" gap={16} size={1} />
-                <Controls showInteractive={false} className="!rounded-xl !border !border-slate-700 !bg-slate-900/80 !text-slate-200" />
+                <Background
+                  color="#292D24"
+                  gap={22}
+                  size={1}
+                />
+                <Controls
+                  showInteractive={false}
+                  className="!overflow-hidden !rounded-lg !border !border-[#292D24] !bg-[#141813] [&>button]:!border-[#292D24] [&>button]:!bg-[#141813] [&>button]:!fill-[#92968F] [&>button:hover]:!bg-[#292D24]"
+                />
               </ReactFlow>
-            </div>
-          )}
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-[#292D24] px-3 py-2.5 sm:px-4">
+            <span className="text-[9px] uppercase tracking-[0.12em] text-[#92968F]">
+              Connections
+            </span>
+            <span className="flex items-center gap-1.5 text-[10px] text-[#C8CBC1]">
+              <span className="h-1.5 w-4 rounded-full bg-[#DEED00]" />
+              Request flow
+            </span>
+            <span className="flex items-center gap-1.5 text-[10px] text-[#C8CBC1]">
+              <span className="h-1.5 w-4 rounded-full bg-[#35D07F]" />
+              Database
+            </span>
+            <span className="flex items-center gap-1.5 text-[10px] text-[#C8CBC1]">
+              <span className="h-1.5 w-4 rounded-full bg-[#F5B942]" />
+              Payment
+            </span>
+          </div>
         </div>
 
-        <aside className="rounded-2xl border border-slate-800 bg-[#0b1220] p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Selected service</p>
-              <h4 className="mt-2 text-xl font-semibold text-white">{selectedNode.label}</h4>
+        <aside className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-[#292D24] bg-[#10120F] 2xl:h-[495px]">
+          <div className="flex items-start justify-between gap-3 border-b border-[#292D24] p-4">
+            <div className="min-w-0">
+              <p className="text-[9px] uppercase tracking-[0.17em] text-[#92968F]">
+                Selected service
+              </p>
+              <h4 className="mt-2 truncate text-base font-semibold text-[#F0F1EB]">
+                {selectedNode.label}
+              </h4>
+              <p className="mt-1 text-[10px] text-[#92968F]">
+                {selectedNode.role}
+              </p>
             </div>
-            <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${statusClass[selectedNode.status] || statusClass.unknown}`}>
+
+            <span
+              className={`shrink-0 rounded-md border px-2 py-1 text-[9px] font-semibold ${
+                statusClass[selectedNode.status] || statusClass.unknown
+              }`}
+            >
               {statusText[selectedNode.status] || "Unknown"}
             </span>
           </div>
 
-          <div className="mt-4 space-y-4 text-sm">
-            <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-              <div className="flex items-center gap-2 text-slate-300">
-                <ShieldAlert size={16} className="text-cyan-400" />
-                Role
-              </div>
-              <p className="mt-2 text-slate-200">{selectedNode.role || "Unknown"}</p>
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
+            <div className="grid grid-cols-2 gap-2">
+              <DetailItem
+                label="Last successful check"
+                value={formatTimestamp(selectedNode.lastSuccessfulProbe)}
+              />
+              <DetailItem
+                label="Latest failure"
+                value={formatTimestamp(selectedNode.latestFailure)}
+              />
+              <DetailItem
+                label="Recovery attempts"
+                value={selectedNode.recoveryAttempts ?? 0}
+                accent
+              />
+              <DetailItem
+                label="Verified recovery"
+                value={formatTimestamp(selectedNode.recoveryVerifiedAt)}
+              />
+              <DetailItem
+                label="Probe freshness"
+                value={selectedNode.probeFreshness || "Unknown"}
+              />
+              <DetailItem
+                label="Observed status"
+                value={selectedNode.containerStatus || "Unknown"}
+              />
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-              <DetailItem label="Last successful check" value={formatTimestamp(selectedNode.lastSuccessfulProbe)} />
-              <DetailItem label="Latest failure" value={formatTimestamp(selectedNode.latestFailure)} />
-              <DetailItem label="Recovery attempts" value={selectedNode.recoveryAttempts ?? 0} />
-              <DetailItem label="Verified recovery" value={formatTimestamp(selectedNode.recoveryVerifiedAt)} />
-              <DetailItem label="Probe freshness" value={selectedNode.probeFreshness || "Unknown"} />
-              <DetailItem label="Container status" value={selectedNode.containerStatus || "Unknown"} />
+            <div className="rounded-lg border border-[#292D24] bg-[#141813] p-3">
+              <div className="flex items-center gap-2">
+                <TimerReset size={14} className="text-[#DEED00]" />
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#D4D6CE]">
+                  Dependencies
+                </p>
+              </div>
+
+              <div className="mt-3 space-y-2.5">
+                {dependencyStateSummary.length ? (
+                  dependencyStateSummary.map((item) => (
+                    <div
+                      key={item.name}
+                      className="flex items-center justify-between gap-2"
+                    >
+                      <span className="text-xs text-[#C8CBC1]">
+                        {item.name}
+                      </span>
+                      <span
+                        className={`rounded-md border px-2 py-0.5 text-[9px] font-medium ${
+                          statusClass[item.state] || statusClass.unknown
+                        }`}
+                      >
+                        {statusText[item.state] || "Unknown"}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-[#92968F]">
+                    No dependency data available.
+                  </p>
+                )}
+              </div>
             </div>
 
-            <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-              <div className="flex items-center gap-2 text-slate-300">
-                <TimerReset size={16} className="text-cyan-400" />
-                Dependency states
+            <div className="rounded-lg border border-[#292D24] bg-[#141813] p-3">
+              <div className="flex items-center gap-2">
+                <ShieldAlert size={14} className="text-[#DEED00]" />
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#D4D6CE]">
+                  Service observations
+                </p>
               </div>
-              <div className="mt-3 space-y-2">
-                {dependencyStateSummary.length ? dependencyStateSummary.map((item) => (
-                  <div key={item.name} className="flex items-center justify-between gap-3 text-xs text-slate-300">
-                    <span>{item.name}</span>
-                    <span className={`rounded-full border px-2 py-0.5 ${statusClass[item.state] || statusClass.unknown}`}>
-                      {statusText[item.state] || "Unknown"}
-                    </span>
-                  </div>
-                )) : <p className="text-xs text-slate-500">No dependency data available.</p>}
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-              <div className="flex items-center gap-2 text-slate-300">
-                <CheckCircle2 size={16} className="text-emerald-400" />
-                Observed data
-              </div>
-              <p className="mt-2 text-xs leading-5 text-slate-400">
-                {selectedNode.description || "No additional detail is available for this service."}
+              <p className="mt-2 text-xs leading-5 text-[#92968F]">
+                {selectedNode.description ||
+                  "No additional service details are available."}
               </p>
             </div>
+
+            {(healthError || recoveryError || paymentHealthError) && (
+              <div className="rounded-lg border border-[#F5B942]/25 bg-[#F5B942]/5 p-3">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert size={13} className="text-[#F5B942]" />
+                  <p className="text-[10px] font-semibold text-[#F5B942]">
+                    Monitoring warning
+                  </p>
+                </div>
+                <p className="mt-1.5 text-[10px] leading-4 text-[#92968F]">
+                  One or more monitoring requests failed. Unknown status
+                  means health could not be verified; it does not confirm
+                  that a service is down.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 border-t border-[#292D24] px-4 py-3">
+            <CheckCircle2
+              size={13}
+              className={
+                selectedNode.status === "healthy"
+                  ? "text-[#35D07F]"
+                  : "text-[#92968F]"
+              }
+            />
+            <span className="text-[10px] text-[#92968F]">
+              Status is based on available monitoring data
+            </span>
           </div>
         </aside>
       </div>
     </section>
-  );
-}
-
-function DetailItem({ label, value }) {
-  return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
-      <p className="text-[10px] uppercase tracking-[0.18em] text-slate-500">{label}</p>
-      <p className="mt-2 text-sm font-medium text-slate-200">{String(value || "Unknown")}</p>
-    </div>
   );
 }

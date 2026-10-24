@@ -20,6 +20,95 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 app.use(cors());
 app.use(express.json());
 
+const trafficBuckets = new Map();
+const TRAFFIC_METRICS_WINDOW_SECONDS = 60;
+
+app.use((req, res, next) => {
+  if (
+    !req.path.startsWith("/api/") ||
+    req.path === "/api/metrics/traffic"
+  ) {
+    return next();
+  }
+
+  const startedAt = Date.now();
+  const bucketTime = Math.floor(startedAt / 1000) * 1000;
+
+  let bucket = trafficBuckets.get(bucketTime);
+
+  if (!bucket) {
+    bucket = {
+      requests: 0,
+      successful: 0,
+      failed: 0,
+      latencyTotalMs: 0,
+      latencySamples: 0,
+    };
+
+    trafficBuckets.set(bucketTime, bucket);
+  }
+
+  bucket.requests += 1;
+
+  res.on("finish", () => {
+    if (res.statusCode >= 400) {
+      bucket.failed += 1;
+    } else {
+      bucket.successful += 1;
+    }
+
+    bucket.latencyTotalMs += Date.now() - startedAt;
+    bucket.latencySamples += 1;
+  });
+
+  next();
+});
+
+app.get("/api/metrics/traffic", (req, res) => {
+  const now = Math.floor(Date.now() / 1000) * 1000;
+  const oldestAllowed = now - TRAFFIC_METRICS_WINDOW_SECONDS * 1000;
+
+  for (const timestamp of trafficBuckets.keys()) {
+    if (timestamp < oldestAllowed) {
+      trafficBuckets.delete(timestamp);
+    }
+  }
+
+  const points = [];
+
+  for (
+    let offset = TRAFFIC_METRICS_WINDOW_SECONDS - 1;
+    offset >= 0;
+    offset -= 1
+  ) {
+    const timestamp = now - offset * 1000;
+    const bucket = trafficBuckets.get(timestamp);
+
+    points.push({
+      timestamp: new Date(timestamp).toISOString(),
+      requests: bucket?.requests ?? 0,
+      successful: bucket?.successful ?? 0,
+      failed: bucket?.failed ?? 0,
+      avgLatencyMs:
+        bucket && bucket.latencySamples > 0
+          ? Math.round(
+              bucket.latencyTotalMs / bucket.latencySamples
+            )
+          : 0,
+    });
+  }
+
+  res.set("Cache-Control", "no-store");
+
+  res.json({
+    success: true,
+    service: "backend",
+    generatedAt: new Date().toISOString(),
+    points,
+  });
+});
+
+
 app.get("/", (req, res) => {
   res.json({
     success: true,

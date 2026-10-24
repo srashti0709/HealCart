@@ -1,10 +1,1154 @@
 [
   {
-    "id": "evt-database-recovered-1792857220240-191cb0",
+    "id": "evt-traffic-stopped-1792871934146-4cb653",
+    "type": "traffic-stopped",
+    "description": "Synthetic traffic run traffic-mvmtnjzg-1-hq9eqx ended (Backend crash experiment finished) after 7.9s. 24 requests recorded, 16 successful.",
+    "message": "Synthetic traffic run traffic-mvmtnjzg-1-hq9eqx ended (Backend crash experiment finished) after 7.9s. 24 requests recorded, 16 successful.",
+    "timestamp": "2026-10-24T19:58:54.146Z",
+    "source": "Synthetic traffic",
+    "outcome": "unverified",
+    "experimentId": "traffic-mvmtnjzg-1-hq9eqx",
+    "details": {
+      "experimentId": "traffic-mvmtnjzg-1-hq9eqx",
+      "runStatus": "stopped",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "totalRequests": 24,
+      "successfulRequests": 16,
+      "failedRequests": 8,
+      "timeoutRequests": 0,
+      "networkErrorRequests": 8,
+      "averageLatencyMs": 108.19
+    }
+  },
+  {
+    "id": "evt-recovered-1792871930698-b374a6",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:58:50.698Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792871928518-6224fc",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:58:48.000Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "start",
+      "state": "running"
+    }
+  },
+  {
+    "id": "evt-crash-1792871928008-f4cab2",
+    "type": "crash",
+    "description": "Backend container stopped unexpectedly.",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-24T19:58:48.000Z",
+    "source": "Docker observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "die",
+      "state": "stopped"
+    }
+  },
+  {
+    "id": "evt-traffic-started-1792871926381-d6635a",
+    "type": "traffic-started",
+    "description": "Synthetic traffic run traffic-mvmtnjzg-1-hq9eqx started to observe the backend crash (correlation crash-mvmtnjze-4sa271).",
+    "message": "Synthetic traffic run traffic-mvmtnjzg-1-hq9eqx started to observe the backend crash (correlation crash-mvmtnjze-4sa271).",
+    "timestamp": "2026-10-24T19:58:46.380Z",
+    "source": "Synthetic traffic",
+    "outcome": "in_progress",
+    "experimentId": "traffic-mvmtnjzg-1-hq9eqx",
+    "details": {
+      "correlationId": "crash-mvmtnjze-4sa271",
+      "scenario": "backend-crash",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      }
+    }
+  },
+  {
+    "id": "evt-traffic-stopped-1792871587166-5669d0",
+    "type": "traffic-stopped",
+    "description": "Synthetic traffic run traffic-mvmtg4w5-3-81hnuk ended (Backend crash experiment finished) after 7.0s. 22 requests recorded, 13 successful.",
+    "message": "Synthetic traffic run traffic-mvmtg4w5-3-81hnuk ended (Backend crash experiment finished) after 7.0s. 22 requests recorded, 13 successful.",
+    "timestamp": "2026-10-24T19:53:07.166Z",
+    "source": "Synthetic traffic",
+    "outcome": "unverified",
+    "experimentId": "traffic-mvmtg4w5-3-81hnuk",
+    "details": {
+      "experimentId": "traffic-mvmtg4w5-3-81hnuk",
+      "runStatus": "stopped",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "totalRequests": 22,
+      "successfulRequests": 13,
+      "failedRequests": 9,
+      "timeoutRequests": 0,
+      "networkErrorRequests": 8,
+      "averageLatencyMs": 100.08
+    }
+  },
+  {
+    "id": "evt-recovered-1792871583763-3d0f59",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:53:03.763Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792871581553-ef6284",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:53:01.000Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "start",
+      "state": "running"
+    }
+  },
+  {
+    "id": "evt-crash-1792871581185-7b631c",
+    "type": "crash",
+    "description": "Backend container stopped unexpectedly.",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-24T19:53:01.000Z",
+    "source": "Docker observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "die",
+      "state": "stopped"
+    }
+  },
+  {
+    "id": "evt-traffic-started-1792871580105-df0384",
+    "type": "traffic-started",
+    "description": "Synthetic traffic run traffic-mvmtg4w5-3-81hnuk started to observe the backend crash (correlation crash-mvmtg4w5-jzg4vb).",
+    "message": "Synthetic traffic run traffic-mvmtg4w5-3-81hnuk started to observe the backend crash (correlation crash-mvmtg4w5-jzg4vb).",
+    "timestamp": "2026-10-24T19:53:00.105Z",
+    "source": "Synthetic traffic",
+    "outcome": "in_progress",
+    "experimentId": "traffic-mvmtg4w5-3-81hnuk",
+    "details": {
+      "correlationId": "crash-mvmtg4w5-jzg4vb",
+      "scenario": "backend-crash",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      }
+    }
+  },
+  {
+    "id": "evt-traffic-stopped-1792871493931-9bb95b",
+    "type": "traffic-stopped",
+    "description": "Synthetic traffic run traffic-mvmte4zx-2-r8l5nn ended (Backend crash experiment finished) after 7.0s. 21 requests recorded, 14 successful.",
+    "message": "Synthetic traffic run traffic-mvmte4zx-2-r8l5nn ended (Backend crash experiment finished) after 7.0s. 21 requests recorded, 14 successful.",
+    "timestamp": "2026-10-24T19:51:33.931Z",
+    "source": "Synthetic traffic",
+    "outcome": "unverified",
+    "experimentId": "traffic-mvmte4zx-2-r8l5nn",
+    "details": {
+      "experimentId": "traffic-mvmte4zx-2-r8l5nn",
+      "runStatus": "stopped",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "totalRequests": 21,
+      "successfulRequests": 14,
+      "failedRequests": 7,
+      "timeoutRequests": 0,
+      "networkErrorRequests": 7,
+      "averageLatencyMs": 85.93
+    }
+  },
+  {
+    "id": "evt-recovered-1792871490551-6fd068",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:51:30.551Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792871488310-4495ed",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:51:28.000Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "start",
+      "state": "running"
+    }
+  },
+  {
+    "id": "evt-crash-1792871487953-5c8103",
+    "type": "crash",
+    "description": "Backend container stopped unexpectedly.",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-24T19:51:27.000Z",
+    "source": "Docker observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "die",
+      "state": "stopped"
+    }
+  },
+  {
+    "id": "evt-traffic-started-1792871486918-80f0d5",
+    "type": "traffic-started",
+    "description": "Synthetic traffic run traffic-mvmte4zx-2-r8l5nn started to observe the backend crash (correlation crash-mvmte4zx-ed1l20).",
+    "message": "Synthetic traffic run traffic-mvmte4zx-2-r8l5nn started to observe the backend crash (correlation crash-mvmte4zx-ed1l20).",
+    "timestamp": "2026-10-24T19:51:26.918Z",
+    "source": "Synthetic traffic",
+    "outcome": "in_progress",
+    "experimentId": "traffic-mvmte4zx-2-r8l5nn",
+    "details": {
+      "correlationId": "crash-mvmte4zx-ed1l20",
+      "scenario": "backend-crash",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      }
+    }
+  },
+  {
+    "id": "evt-traffic-stopped-1792871433148-699250",
+    "type": "traffic-stopped",
+    "description": "Synthetic traffic run traffic-mvmtcs1g-1-4snep8 ended (Backend crash experiment finished) after 9.7s. 28 requests recorded, 16 successful.",
+    "message": "Synthetic traffic run traffic-mvmtcs1g-1-4snep8 ended (Backend crash experiment finished) after 9.7s. 28 requests recorded, 16 successful.",
+    "timestamp": "2026-10-24T19:50:33.147Z",
+    "source": "Synthetic traffic",
+    "outcome": "unverified",
+    "experimentId": "traffic-mvmtcs1g-1-4snep8",
+    "details": {
+      "experimentId": "traffic-mvmtcs1g-1-4snep8",
+      "runStatus": "stopped",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "totalRequests": 28,
+      "successfulRequests": 16,
+      "failedRequests": 12,
+      "timeoutRequests": 0,
+      "networkErrorRequests": 12,
+      "averageLatencyMs": 98.19
+    }
+  },
+  {
+    "id": "evt-recovered-1792871429653-66fa53",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:50:29.653Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792871426393-67c72d",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:50:26.000Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "start",
+      "state": "running"
+    }
+  },
+  {
+    "id": "evt-crash-1792871425759-c9d7a7",
+    "type": "crash",
+    "description": "Backend container stopped unexpectedly.",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-24T19:50:25.000Z",
+    "source": "Docker observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "die",
+      "state": "stopped"
+    }
+  },
+  {
+    "id": "evt-traffic-started-1792871423614-1bd256",
+    "type": "traffic-started",
+    "description": "Synthetic traffic run traffic-mvmtcs1g-1-4snep8 started to observe the backend crash (correlation crash-mvmtcs1f-4iwu06).",
+    "message": "Synthetic traffic run traffic-mvmtcs1g-1-4snep8 started to observe the backend crash (correlation crash-mvmtcs1f-4iwu06).",
+    "timestamp": "2026-10-24T19:50:23.611Z",
+    "source": "Synthetic traffic",
+    "outcome": "in_progress",
+    "experimentId": "traffic-mvmtcs1g-1-4snep8",
+    "details": {
+      "correlationId": "crash-mvmtcs1f-4iwu06",
+      "scenario": "backend-crash",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      }
+    }
+  },
+  {
+    "id": "evt-traffic-stopped-1792870739475-59aa15",
+    "type": "traffic-stopped",
+    "description": "Synthetic traffic run traffic-mvmsxyvx-7-u1srm6 ended (Backend crash experiment finished) after 6.9s. 14 requests recorded, 10 successful.",
+    "message": "Synthetic traffic run traffic-mvmsxyvx-7-u1srm6 ended (Backend crash experiment finished) after 6.9s. 14 requests recorded, 10 successful.",
+    "timestamp": "2026-10-24T19:38:59.475Z",
+    "source": "Synthetic traffic",
+    "outcome": "unverified",
+    "experimentId": "traffic-mvmsxyvx-7-u1srm6",
+    "details": {
+      "experimentId": "traffic-mvmsxyvx-7-u1srm6",
+      "runStatus": "stopped",
+      "config": {
+        "ratePerSecond": 2,
+        "concurrency": 8,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 240
+      },
+      "totalRequests": 14,
+      "successfulRequests": 10,
+      "failedRequests": 4,
+      "timeoutRequests": 0,
+      "networkErrorRequests": 4,
+      "averageLatencyMs": 71.1
+    }
+  },
+  {
+    "id": "evt-recovered-1792870736113-5f2083",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:38:56.113Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792870733935-b635f6",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:38:53.000Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "start",
+      "state": "running"
+    }
+  },
+  {
+    "id": "evt-crash-1792870733589-36a9c3",
+    "type": "crash",
+    "description": "Backend container stopped unexpectedly.",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-24T19:38:53.000Z",
+    "source": "Docker observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "die",
+      "state": "stopped"
+    }
+  },
+  {
+    "id": "evt-traffic-started-1792870732513-833054",
+    "type": "traffic-started",
+    "description": "Synthetic traffic run traffic-mvmsxyvx-7-u1srm6 started to observe the backend crash (correlation crash-mvmsxyvx-ookh5d).",
+    "message": "Synthetic traffic run traffic-mvmsxyvx-7-u1srm6 started to observe the backend crash (correlation crash-mvmsxyvx-ookh5d).",
+    "timestamp": "2026-10-24T19:38:52.513Z",
+    "source": "Synthetic traffic",
+    "outcome": "in_progress",
+    "experimentId": "traffic-mvmsxyvx-7-u1srm6",
+    "details": {
+      "correlationId": "crash-mvmsxyvx-ookh5d",
+      "scenario": "backend-crash",
+      "config": {
+        "ratePerSecond": 2,
+        "concurrency": 8,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 240
+      }
+    }
+  },
+  {
+    "id": "evt-traffic-stopped-1792870695982-537566",
+    "type": "traffic-stopped",
+    "description": "Synthetic traffic run traffic-mvmsx18r-6-vxgxqb ended (Backend crash experiment finished) after 7.1s. 22 requests recorded, 15 successful.",
+    "message": "Synthetic traffic run traffic-mvmsx18r-6-vxgxqb ended (Backend crash experiment finished) after 7.1s. 22 requests recorded, 15 successful.",
+    "timestamp": "2026-10-24T19:38:15.982Z",
+    "source": "Synthetic traffic",
+    "outcome": "unverified",
+    "experimentId": "traffic-mvmsx18r-6-vxgxqb",
+    "details": {
+      "experimentId": "traffic-mvmsx18r-6-vxgxqb",
+      "runStatus": "stopped",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "totalRequests": 22,
+      "successfulRequests": 15,
+      "failedRequests": 7,
+      "timeoutRequests": 0,
+      "networkErrorRequests": 7,
+      "averageLatencyMs": 91.53
+    }
+  },
+  {
+    "id": "evt-recovered-1792870692656-ea5d2a",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:38:12.656Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792870690430-969d2f",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:38:10.000Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "start",
+      "state": "running"
+    }
+  },
+  {
+    "id": "evt-crash-1792870690044-4cfb32",
+    "type": "crash",
+    "description": "Backend container stopped unexpectedly.",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-24T19:38:10.000Z",
+    "source": "Docker observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "die",
+      "state": "stopped"
+    }
+  },
+  {
+    "id": "evt-traffic-started-1792870688912-1f05fa",
+    "type": "traffic-started",
+    "description": "Synthetic traffic run traffic-mvmsx18r-6-vxgxqb started to observe the backend crash (correlation crash-mvmsx18r-s7cd9u).",
+    "message": "Synthetic traffic run traffic-mvmsx18r-6-vxgxqb started to observe the backend crash (correlation crash-mvmsx18r-s7cd9u).",
+    "timestamp": "2026-10-24T19:38:08.912Z",
+    "source": "Synthetic traffic",
+    "outcome": "in_progress",
+    "experimentId": "traffic-mvmsx18r-6-vxgxqb",
+    "details": {
+      "correlationId": "crash-mvmsx18r-s7cd9u",
+      "scenario": "backend-crash",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      }
+    }
+  },
+  {
+    "id": "evt-traffic-stopped-1792870455105-236a38",
+    "type": "traffic-stopped",
+    "description": "Synthetic traffic run traffic-mvmsrv4w-5-qnotfn ended (Backend crash experiment finished) after 7.4s. 22 requests recorded, 14 successful.",
+    "message": "Synthetic traffic run traffic-mvmsrv4w-5-qnotfn ended (Backend crash experiment finished) after 7.4s. 22 requests recorded, 14 successful.",
+    "timestamp": "2026-10-24T19:34:15.105Z",
+    "source": "Synthetic traffic",
+    "outcome": "unverified",
+    "experimentId": "traffic-mvmsrv4w-5-qnotfn",
+    "details": {
+      "experimentId": "traffic-mvmsrv4w-5-qnotfn",
+      "runStatus": "stopped",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "totalRequests": 22,
+      "successfulRequests": 14,
+      "failedRequests": 8,
+      "timeoutRequests": 0,
+      "networkErrorRequests": 8,
+      "averageLatencyMs": 66.29
+    }
+  },
+  {
+    "id": "evt-recovered-1792870451513-27e488",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:34:11.513Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792870449318-77d4f9",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:34:09.000Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "start",
+      "state": "running"
+    }
+  },
+  {
+    "id": "evt-crash-1792870448924-2718a6",
+    "type": "crash",
+    "description": "Backend container stopped unexpectedly.",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-24T19:34:08.000Z",
+    "source": "Docker observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "die",
+      "state": "stopped"
+    }
+  },
+  {
+    "id": "evt-traffic-started-1792870447744-f6e4d4",
+    "type": "traffic-started",
+    "description": "Synthetic traffic run traffic-mvmsrv4w-5-qnotfn started to observe the backend crash (correlation crash-mvmsrv4w-vje5mg).",
+    "message": "Synthetic traffic run traffic-mvmsrv4w-5-qnotfn started to observe the backend crash (correlation crash-mvmsrv4w-vje5mg).",
+    "timestamp": "2026-10-24T19:34:07.744Z",
+    "source": "Synthetic traffic",
+    "outcome": "in_progress",
+    "experimentId": "traffic-mvmsrv4w-5-qnotfn",
+    "details": {
+      "correlationId": "crash-mvmsrv4w-vje5mg",
+      "scenario": "backend-crash",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      }
+    }
+  },
+  {
+    "id": "evt-recovered-1792870405345-cd2aef",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:33:25.345Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792870402220-540984",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T19:33:22.000Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "start",
+      "state": "running"
+    }
+  },
+  {
+    "id": "evt-crash-1792870401154-0b0025",
+    "type": "crash",
+    "description": "Backend container stopped unexpectedly.",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-24T19:33:21.000Z",
+    "source": "Docker observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "die",
+      "state": "stopped"
+    }
+  },
+  {
+    "id": "evt-traffic-stopped-1792867260245-0f98a5",
+    "type": "traffic-stopped",
+    "description": "Synthetic traffic run traffic-mvmqvbrg-4-gz6c4f ended (Backend crash experiment finished) after 10.2s. 29 requests recorded, 16 successful.",
+    "message": "Synthetic traffic run traffic-mvmqvbrg-4-gz6c4f ended (Backend crash experiment finished) after 10.2s. 29 requests recorded, 16 successful.",
+    "timestamp": "2026-10-24T18:41:00.245Z",
+    "source": "Synthetic traffic",
+    "outcome": "unverified",
+    "experimentId": "traffic-mvmqvbrg-4-gz6c4f",
+    "details": {
+      "experimentId": "traffic-mvmqvbrg-4-gz6c4f",
+      "runStatus": "stopped",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "totalRequests": 29,
+      "successfulRequests": 16,
+      "failedRequests": 13,
+      "timeoutRequests": 0,
+      "networkErrorRequests": 13,
+      "averageLatencyMs": 108.69
+    }
+  },
+  {
+    "id": "evt-recovered-1792867256280-9f2ede",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T18:40:56.280Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792867252849-14d6f6",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T18:40:52.000Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "start",
+      "state": "running"
+    }
+  },
+  {
+    "id": "evt-crash-1792867252071-facab9",
+    "type": "crash",
+    "description": "Backend container stopped unexpectedly.",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-24T18:40:52.000Z",
+    "source": "Docker observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "die",
+      "state": "stopped"
+    }
+  },
+  {
+    "id": "evt-traffic-started-1792867250034-aacb3e",
+    "type": "traffic-started",
+    "description": "Synthetic traffic run traffic-mvmqvbrg-4-gz6c4f started to observe the backend crash (correlation crash-mvmqvbrf-eqimjk).",
+    "message": "Synthetic traffic run traffic-mvmqvbrg-4-gz6c4f started to observe the backend crash (correlation crash-mvmqvbrf-eqimjk).",
+    "timestamp": "2026-10-24T18:40:50.033Z",
+    "source": "Synthetic traffic",
+    "outcome": "in_progress",
+    "experimentId": "traffic-mvmqvbrg-4-gz6c4f",
+    "details": {
+      "correlationId": "crash-mvmqvbrf-eqimjk",
+      "scenario": "backend-crash",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      }
+    }
+  },
+  {
+    "id": "evt-traffic-stopped-1792867055245-e5697b",
+    "type": "traffic-stopped",
+    "description": "Synthetic traffic run traffic-mvmqqvzw-3-oprp96 ended (Backend crash experiment finished) after 12.2s. 30 requests recorded, 14 successful.",
+    "message": "Synthetic traffic run traffic-mvmqqvzw-3-oprp96 ended (Backend crash experiment finished) after 12.2s. 30 requests recorded, 14 successful.",
+    "timestamp": "2026-10-24T18:37:35.245Z",
+    "source": "Synthetic traffic",
+    "outcome": "unverified",
+    "experimentId": "traffic-mvmqqvzw-3-oprp96",
+    "details": {
+      "experimentId": "traffic-mvmqqvzw-3-oprp96",
+      "runStatus": "stopped",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "totalRequests": 30,
+      "successfulRequests": 14,
+      "failedRequests": 16,
+      "timeoutRequests": 0,
+      "networkErrorRequests": 15,
+      "averageLatencyMs": 250.36
+    }
+  },
+  {
+    "id": "evt-recovered-1792867052121-10a910",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T18:37:32.121Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792867047083-34be9b",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T18:37:26.000Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "start",
+      "state": "running"
+    }
+  },
+  {
+    "id": "evt-crash-1792867045883-736ab7",
+    "type": "crash",
+    "description": "Backend container stopped unexpectedly.",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-24T18:37:25.000Z",
+    "source": "Docker observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "die",
+      "state": "stopped"
+    }
+  },
+  {
+    "id": "evt-traffic-started-1792867042972-a3be01",
+    "type": "traffic-started",
+    "description": "Synthetic traffic run traffic-mvmqqvzw-3-oprp96 started to observe the backend crash (correlation crash-mvmqqvzw-m0lluc).",
+    "message": "Synthetic traffic run traffic-mvmqqvzw-3-oprp96 started to observe the backend crash (correlation crash-mvmqqvzw-m0lluc).",
+    "timestamp": "2026-10-24T18:37:22.971Z",
+    "source": "Synthetic traffic",
+    "outcome": "in_progress",
+    "experimentId": "traffic-mvmqqvzw-3-oprp96",
+    "details": {
+      "correlationId": "crash-mvmqqvzw-m0lluc",
+      "scenario": "backend-crash",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      }
+    }
+  },
+  {
+    "id": "evt-traffic-stopped-1792866145008-52e8cd",
+    "type": "traffic-stopped",
+    "description": "Synthetic traffic run traffic-mvmq7eb2-2-gnaub1 ended (Backend crash experiment finished) after 11.4s. 30 requests recorded, 16 successful.",
+    "message": "Synthetic traffic run traffic-mvmq7eb2-2-gnaub1 ended (Backend crash experiment finished) after 11.4s. 30 requests recorded, 16 successful.",
+    "timestamp": "2026-10-24T18:22:25.008Z",
+    "source": "Synthetic traffic",
+    "outcome": "unverified",
+    "experimentId": "traffic-mvmq7eb2-2-gnaub1",
+    "details": {
+      "experimentId": "traffic-mvmq7eb2-2-gnaub1",
+      "runStatus": "stopped",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "totalRequests": 30,
+      "successfulRequests": 16,
+      "failedRequests": 14,
+      "timeoutRequests": 0,
+      "networkErrorRequests": 14,
+      "averageLatencyMs": 272.56
+    }
+  },
+  {
+    "id": "evt-recovered-1792866141699-2898d1",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T18:22:21.699Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792866136809-ea3fda",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T18:22:16.000Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "start",
+      "state": "running"
+    }
+  },
+  {
+    "id": "evt-crash-1792866135944-49a082",
+    "type": "crash",
+    "description": "Backend container stopped unexpectedly.",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-24T18:22:15.000Z",
+    "source": "Docker observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "die",
+      "state": "stopped"
+    }
+  },
+  {
+    "id": "evt-traffic-started-1792866133559-c7439b",
+    "type": "traffic-started",
+    "description": "Synthetic traffic run traffic-mvmq7eb2-2-gnaub1 started to observe the backend crash (correlation crash-mvmq7eb2-j60jnq).",
+    "message": "Synthetic traffic run traffic-mvmq7eb2-2-gnaub1 started to observe the backend crash (correlation crash-mvmq7eb2-j60jnq).",
+    "timestamp": "2026-10-24T18:22:13.559Z",
+    "source": "Synthetic traffic",
+    "outcome": "in_progress",
+    "experimentId": "traffic-mvmq7eb2-2-gnaub1",
+    "details": {
+      "correlationId": "crash-mvmq7eb2-j60jnq",
+      "scenario": "backend-crash",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      }
+    }
+  },
+  {
+    "id": "evt-traffic-stopped-1792865848673-897255",
+    "type": "traffic-stopped",
+    "description": "Synthetic traffic run traffic-mvmq0zmq-1-jiumxk ended (Backend crash experiment finished) after 14.0s. 33 requests recorded, 15 successful.",
+    "message": "Synthetic traffic run traffic-mvmq0zmq-1-jiumxk ended (Backend crash experiment finished) after 14.0s. 33 requests recorded, 15 successful.",
+    "timestamp": "2026-10-24T18:17:28.673Z",
+    "source": "Synthetic traffic",
+    "outcome": "unverified",
+    "experimentId": "traffic-mvmq0zmq-1-jiumxk",
+    "details": {
+      "experimentId": "traffic-mvmq0zmq-1-jiumxk",
+      "runStatus": "stopped",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "totalRequests": 33,
+      "successfulRequests": 15,
+      "failedRequests": 18,
+      "timeoutRequests": 0,
+      "networkErrorRequests": 18,
+      "averageLatencyMs": 151.4
+    }
+  },
+  {
+    "id": "evt-recovered-1792865845980-88d449",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T18:17:25.980Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792865840352-8c492e",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-24T18:17:19.000Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "start",
+      "state": "running"
+    }
+  },
+  {
+    "id": "evt-crash-1792865838723-fe5fa4",
+    "type": "crash",
+    "description": "Backend container stopped unexpectedly.",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-24T18:17:18.000Z",
+    "source": "Docker observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "die",
+      "state": "stopped"
+    }
+  },
+  {
+    "id": "evt-traffic-started-1792865835015-7ce669",
+    "type": "traffic-started",
+    "description": "Synthetic traffic run traffic-mvmq0zmq-1-jiumxk started to observe the backend crash (correlation crash-mvmq0zmm-873l0o).",
+    "message": "Synthetic traffic run traffic-mvmq0zmq-1-jiumxk started to observe the backend crash (correlation crash-mvmq0zmm-873l0o).",
+    "timestamp": "2026-10-24T18:17:15.009Z",
+    "source": "Synthetic traffic",
+    "outcome": "in_progress",
+    "experimentId": "traffic-mvmq0zmq-1-jiumxk",
+    "details": {
+      "correlationId": "crash-mvmq0zmm-873l0o",
+      "scenario": "backend-crash",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      }
+    }
+  },
+  {
+    "id": "evt-database-recovered-1792863673718-d4cd82",
     "type": "database-recovered",
     "description": "MongoDB connection restored successfully.",
     "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T15:53:40.236Z",
+    "timestamp": "2026-10-24T17:41:13.634Z",
     "source": "Docker log observation",
     "outcome": "success",
     "experimentId": null,
@@ -14,823 +1158,11 @@
     }
   },
   {
-    "id": "evt-database-disconnected-1792857219873-92c72a",
+    "id": "evt-database-disconnected-1792863668442-3bceab",
     "type": "database-disconnected",
     "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
     "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T15:53:39.858Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792857217350-8a490c",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T15:53:37.346Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792857208806-6a3ec2",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T15:28:06.007Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792855105883-9ae781",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T15:18:25.717Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792855105837-8e5a8f",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T15:18:25.713Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823554782-009366",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:32:34.782Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823554534-2e80d8",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:32:34.520Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823552781-48fce9",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:32:32.780Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823534254-5fc46b",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:32:14.222Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823534216-8ef259",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:32:14.191Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823534130-4a608d",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:32:14.111Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823534112-0f9a5e",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:32:14.108Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823534111-a86937",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:32:14.094Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823534101-ceaaed",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:32:14.091Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823534087-ccee8f",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:32:14.065Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823022274-9c07c7",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:23:42.251Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823022272-b83661",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:23:42.250Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823022246-cefcea",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:23:42.243Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823022236-c75019",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:23:42.234Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823022114-6c5833",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:23:42.112Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823022103-693f9c",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:23:42.100Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823022101-e0edf7",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:23:42.099Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823022057-e2e3a9",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:23:42.055Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823022021-bf1acb",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:23:42.019Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823021972-cce544",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:23:41.969Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823021892-807938",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:23:41.889Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823021883-342840",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:23:41.881Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823021768-f915c4",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:23:41.765Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823021380-8721a1",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:23:41.377Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823015288-227490",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:23:35.279Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823001272-060250",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:23:21.244Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823001246-4a02c2",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:23:21.218Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823001243-6847af",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:23:21.215Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823001218-7f5958",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:23:21.212Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823001215-ee84ab",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:23:21.186Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823001213-99e1ca",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:23:21.162Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823001191-8d6d93",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:23:21.151Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792823001164-0c54e5",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:23:21.147Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792823001158-23c219",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:23:21.139Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792822625588-befd32",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:17:05.589Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connection restored."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792822624693-6ff164",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:17:04.686Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792822624692-80ae71",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:17:04.675Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792822624674-f37871",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:17:04.671Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792822624671-db4182",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:17:04.670Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792822624668-d2c029",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:17:04.669Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792822624610-390f35",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:17:04.611Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792822624589-6bfa95",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:17:04.588Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792822614214-cf5146",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:16:54.192Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792822614200-3e9387",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:16:54.187Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792822614182-bc6a72",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:16:54.150Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792822614163-48104e",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:16:54.128Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792822614144-83a818",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:16:54.127Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792822614127-aa6043",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:16:54.122Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792822614123-1c7e50",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:16:54.096Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792822614103-7a013f",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:16:54.091Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792822614090-f7599b",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:16:54.087Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792822614073-e2258f",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:16:54.067Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792822245765-8779f3",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-24T06:10:45.765Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connection restored."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792822245269-f50ed7",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-24T06:10:45.247Z",
+    "timestamp": "2026-10-24T17:41:08.321Z",
     "source": "Docker log observation",
     "outcome": "failure",
     "experimentId": null,
