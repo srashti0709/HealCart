@@ -143,7 +143,7 @@ export default function Cart() {
                             S
                         </span>
                         <span className="text-2xl font-extrabold tracking-tight text-violet-800">
-                            SHCom
+                            HealCart
                         </span>
                     </Link>
 
@@ -356,7 +356,7 @@ export default function Cart() {
 
                                             <div className="min-w-0 flex-1">
                                                 <p className="text-base font-semibold text-violet-700">
-                                                    SHCom selection
+                                                    HealCart selection
                                                 </p>
 
                                                 <h2 className="mt-2 break-words text-lg font-bold leading-7 text-[#211a3b] sm:text-xl">
@@ -627,7 +627,7 @@ export default function Cart() {
                         to="/user"
                         className="text-xl font-extrabold text-violet-800"
                     >
-                        SHCom
+                        HealCart
                     </Link>
 
                     <div className="flex flex-wrap items-center justify-center gap-2 text-base text-[#625b79]">

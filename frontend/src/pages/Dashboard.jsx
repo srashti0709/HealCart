@@ -12,6 +12,8 @@ import IncidentTimeline from "../components/IncidentTimeline";
 import SyntheticTrafficPanel from "../components/SyntheticTrafficPanel";
 import LiveApiTrafficChart from "../components/LiveApiTrafficChart";
 import PaymentChaosRecoveryChart from "../components/PaymentChaosRecoveryChart";
+import CheckoutRecoveryChart from "../components/CheckoutRecoveryChart";
+import LastItemRaceChart from "../components/LastItemRaceChart";
 import {
   ResponsiveContainer,
   PieChart,
@@ -60,6 +62,53 @@ import {
   Info,
   Package,
 } from "lucide-react";
+
+function getOfflineStatusClass(status, offlineCheckoutFault) {
+  if (
+    status === "failure-detected" ||
+    status === "failure-injected" ||
+    status === "fault-triggered"
+  ) {
+    return "border-[#F5B942]/30 bg-[#F5B942]/10 text-[#F5B942]";
+  }
+  if (status === "connection-restored" || status === "data-restored") {
+    return "border-[#F5B942]/30 bg-[#F5B942]/10 text-[#F5B942]";
+  }
+  if (status === "checkout-completed") {
+    return "border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F]";
+  }
+  if (status === "draft-discarded") {
+    return "border-[#FF5C5C]/30 bg-[#FF5C5C]/10 text-[#FF5C5C]";
+  }
+  if (offlineCheckoutFault) {
+    return "border-[#F5B942]/30 bg-[#F5B942]/10 text-[#F5B942]";
+  }
+  return "border-[#41452F] bg-[#202319] text-[#C8CBAA]";
+}
+
+function getOfflineStatusText(status, offlineCheckoutFault) {
+  if (
+    status === "failure-detected" ||
+    status === "failure-injected" ||
+    status === "fault-triggered"
+  ) {
+    return "Offline";
+  }
+  if (status === "connection-restored" || status === "data-restored") {
+    return "Recovering";
+  }
+  if (status === "checkout-completed") {
+    return "Recovered";
+  }
+  if (status === "draft-discarded") {
+    return "Failed";
+  }
+  if (offlineCheckoutFault) {
+    return "Test armed";
+  }
+  return "Standby";
+}
+
 function Dashboard({ page = "overview" }) {
   const [health, setHealth] = useState(null);
   const [healthError, setHealthError] = useState("");
@@ -99,7 +148,8 @@ function Dashboard({ page = "overview" }) {
   const [paymentChaosMessage, setPaymentChaosMessage] = useState("");
   const [offlineCheckoutFault, setOfflineCheckoutFault] = useState(() => localStorage.getItem("shcomCheckoutTestArmed") === "on");
   const [wifiFailureRunning, setWifiFailureRunning] = useState(false);
-  const [wifiFailureMessage, setWifiFailureMessage] = useState("");
+  const [injectRecoveryClicked, setInjectRecoveryClicked] = useState(false);
+  const [showRaceSections, setShowRaceSections] = useState(false);
   const [checkoutRecoveryEvidence, setCheckoutRecoveryEvidence] = useState(() => {
     try { return JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "null"); }
     catch { return null; }
@@ -111,7 +161,6 @@ function Dashboard({ page = "overview" }) {
   useEffect(() => {
     const refreshCheckoutEvidence = () => {
       try {
-        setCheckoutRecoveryEvidence(JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "null"));
         setCheckoutDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
         setOfflineCheckoutFault(localStorage.getItem("shcomCheckoutTestArmed") === "on");
       } catch { /* ignore */ }
@@ -209,6 +258,7 @@ function Dashboard({ page = "overview" }) {
     experimentLockRef.current = true;
     setRacePreparing(true);
     setRaceError("");
+    setShowRaceSections(true);
     try {
       const response = await axios.post(API_ENDPOINTS.lastItemRacePrepare);
       const data = response.data || {};
@@ -392,9 +442,73 @@ function Dashboard({ page = "overview" }) {
         `${API_BASE_URL}/api/incidents`,
         { timeout: 8000 }
       );
-      setIncidents(response.data.incidents || []);
+      const incidentList = response.data.incidents || [];
+      setIncidents(incidentList);
       setIncidentsUpdatedAt(new Date().toLocaleTimeString());
       setIncidentsError("");
+
+      const recoveryIncident = incidentList
+        .filter((i) => i.incidentType === "offline_checkout_recovery")
+        .sort(
+          (a, b) =>
+            new Date(b.detectedAt || b.createdAt).getTime() -
+            new Date(a.detectedAt || a.createdAt).getTime()
+        )[0];
+
+      if (recoveryIncident) {
+        const statusMap = {
+          detected: "failure-injected",
+          recovering: "data-restored",
+          resolved: "checkout-completed",
+          failed: "draft-discarded",
+        };
+
+        const evidenceStatus = statusMap[recoveryIncident.status] || recoveryIncident.status;
+
+        setCheckoutRecoveryEvidence({
+          status: evidenceStatus,
+          failureDetectedAt:
+            evidenceStatus === "failure-injected"
+              ? recoveryIncident.detectedAt
+              : recoveryIncident.failureDetectedAt,
+          failureInjectedAt:
+            evidenceStatus === "failure-injected"
+              ? recoveryIncident.detectedAt
+              : recoveryIncident.failureInjectedAt,
+          connectionRestoredAt:
+            evidenceStatus === "data-restored" ||
+            evidenceStatus === "checkout-completed"
+              ? recoveryIncident.detectedAt
+              : recoveryIncident.connectionRestoredAt,
+          restoredAt:
+            evidenceStatus === "data-restored" ||
+            evidenceStatus === "checkout-completed"
+              ? recoveryIncident.detectedAt
+              : recoveryIncident.restoredAt,
+          completedAt:
+            evidenceStatus === "checkout-completed"
+              ? recoveryIncident.resolvedAt ||
+                recoveryIncident.detectedAt
+              : recoveryIncident.completedAt,
+          discardedAt:
+            evidenceStatus === "draft-discarded"
+              ? recoveryIncident.resolvedAt ||
+                recoveryIncident.detectedAt
+              : recoveryIncident.discardedAt,
+          message: recoveryIncident.message,
+          recoveryAction: recoveryIncident.recoveryAction,
+          recoveryResult: recoveryIncident.recoveryResult,
+          updatedAt: recoveryIncident.updatedAt || recoveryIncident.detectedAt,
+        });
+
+        localStorage.setItem(
+          "shcomCheckoutRecoveryEvidence",
+          JSON.stringify({
+            status: evidenceStatus,
+            updatedAt: recoveryIncident.updatedAt || recoveryIncident.detectedAt,
+          })
+        );
+      }
     } catch {
       setIncidentsError(
         "Unable to load incidents from the backend."
@@ -731,7 +845,7 @@ function Dashboard({ page = "overview" }) {
         <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#272A26] px-6 py-5 lg:px-10">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#E5F500]">
-              SHCom / Operations
+              HealCart / Operations
             </p>
             <h2 className="mt-2 text-2xl font-bold tracking-tight">
               {page === "incidents" ? "Incidents" : page === "chaos-center" ? "Chaos Center" : "System Overview"}
@@ -770,11 +884,11 @@ function Dashboard({ page = "overview" }) {
               </div>
               <div className="flex-1">
                 <h3 className="text-xl font-semibold tracking-tight text-[#F3F4F1]">
-                  Welcome to SHCom Operations
+                  Welcome to HealCart Operations
                 </h3>
                 <p className="mt-2 max-w-2xl text-base leading-7 text-[#92968F]">
                   Track service availability, investigate incidents and
-                  understand how SHCom responds to failures. Service
+                  understand how HealCart responds to failures. Service
                   status is retrieved from your running backend and
                   recovery monitor.
                 </p>
@@ -876,7 +990,7 @@ function Dashboard({ page = "overview" }) {
                   Incident Log
                 </h3>
                 <p className="mt-1 text-xs leading-5 text-[#92968F]">
-                  Real incidents recorded by the SHCom backend.
+                  Real incidents recorded by the HealCart backend.
                 </p>
               </div>
               {/* Incident Filters */}
@@ -1633,7 +1747,7 @@ function Dashboard({ page = "overview" }) {
                   </h3>
                   <p className="mt-2 max-w-2xl text-xs leading-6 text-[#A0A396]">
                     Trigger controlled failures and observe real-time automatic
-                    recovery orchestration across SHCom services.
+                    recovery orchestration across HealCart services.
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2 rounded-lg border border-[#34382B] bg-[#0D100D] px-3 py-2">
@@ -1848,7 +1962,7 @@ function Dashboard({ page = "overview" }) {
                 </div>
                 <p className="mt-3 text-xs leading-6 text-[#A0A396]">
                   Simulates a payment response timeout after the payment is recorded,
-                  allowing SHCom to verify and reconcile the transaction.
+                  allowing HealCart to verify and reconcile the transaction.
                 </p>
                 <div className="mt-5 rounded-lg border border-[#292D24] bg-[#0C0F0C] p-4">
                   <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-[#85897B]">
@@ -1929,12 +2043,12 @@ function Dashboard({ page = "overview" }) {
                     </p>
                   </div>
                 )}
-                <div className="mt-auto border-t border-[#292D24] pt-5">
+                <div className="mt-auto flex flex-col gap-3 border-t border-[#292D24] pt-5">
                   <button
                     type="button"
                     onClick={injectPaymentChaos}
                     disabled={chaosRunning || paymentChaosLoading}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[#F5B942]/30 bg-[#F5B942]/10 px-4 py-3 text-xs font-semibold text-[#F5B942] transition-colors hover:bg-[#F5B942]/15 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#DEED00]/30 bg-[#DEED00] px-4 py-3 text-xs font-semibold text-[#242700] shadow-[0_0_14px_rgba(222,237,0,0.08)] transition-colors hover:bg-[#EFFA38] disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     {paymentChaosLoading ? (
                       <RefreshCw size={17} className="animate-spin" />
@@ -1948,467 +2062,111 @@ function Dashboard({ page = "overview" }) {
             </div>
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
               {/* Last-Item Race Condition */}
-              <div className="min-w-0 overflow-hidden rounded-xl border border-[#292D24] bg-[#141813]">
-                <div className="border-b border-[#292D24] p-5 sm:p-6">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="max-w-3xl">
-                      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#DEED00]">
-                        Fault Injection 03 · Distributed Concurrency
-                      </p>
-                      <h4 className="mt-2 flex items-center gap-2 text-base font-semibold tracking-tight text-[#F0F1E9]">
-                        <GitBranch size={21} className="shrink-0 text-[#DEED00]" />
-                        Last-Item Race Condition
-                      </h4>
-                      <p className="mt-3 text-xs leading-6 text-[#A0A396]">
-                        Inject a controlled checkout timing fault and create a dedicated
-                        storefront product with exactly one unit. Open it in two browser
-                        sessions, add one unit to each cart, and submit both checkouts
-                        close together.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={createLastItemRace}
-                      disabled={racePreparing || chaosRunning}
-                      className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#DEED00] px-4 py-3 text-xs font-semibold text-[#242700] transition-colors hover:bg-[#EFFA38] disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      {racePreparing ? (
-                        <RefreshCw size={17} className="animate-spin" />
-                      ) : (
-                        <Route size={17} />
-                      )}
-                      {racePreparing ? "Injecting..." : "Create Failure"}
-                    </button>
-                  </div>
-                </div>
-                {raceError && (
-                  <div
-                    role="alert"
-                    className="mx-5 mt-5 flex items-start gap-2 rounded-lg border border-[#FF5C5C]/25 bg-[#FF5C5C]/[0.06] p-3 text-xs leading-5 text-[#FF7777] sm:mx-6"
-                  >
-                    <TriangleAlert size={16} className="mt-0.5 shrink-0" />
-                    {raceError}
-                  </div>
-                )}
-                {raceRun ? (
-                  <div className="space-y-5 p-5 sm:p-6">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-[#F0F1E9]">
-                          {raceRun.product?.name || "Last-Item Race Test"}
-                        </p>
-                        <p className="mt-2 font-mono text-[10px] text-[#85897B]">
-                          Run ID:{" "}
-                          <span className="text-[#DEED00]">{raceRun.runId}</span>
-                        </p>
-                      </div>
-                      <span
-                        className={`w-fit rounded border px-2.5 py-1 font-mono text-[9px] font-semibold uppercase tracking-wider ${raceRun.status === "recovered"
-                          ? "border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F]"
-                          : raceRun.status === "failed"
-                            ? "border-[#FF5C5C]/30 bg-[#FF5C5C]/10 text-[#FF7777]"
-                            : raceRun.status === "recovering"
-                              ? "border-[#F5B942]/30 bg-[#F5B942]/10 text-[#F5B942]"
-                              : "border-[#42462C] bg-[#24271B] text-[#DEED00]"
-                          }`}
-                      >
-                        {raceRun.status === "recovered"
-                          ? "Recovery Verified"
-                          : raceRun.status === "failed"
-                            ? "Verification Failed"
-                            : raceRun.status === "recovering"
-                              ? "Conflict Detected · Verifying"
-                              : "Fault Injected · Ready"}
-                      </span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-                      {[
-                        {
-                          label: "Initial stock",
-                          value: raceRun.initialStock ?? 1,
-                          color: "text-[#F0F1E9]",
-                        },
-                        {
-                          label: "Checkout attempts",
-                          value: `${raceRun.attemptCount ?? 0} / 2`,
-                          color: "text-[#DEED00]",
-                        },
-                        {
-                          label: "Reservations accepted",
-                          value: raceRun.successfulReservations ?? 0,
-                          color: "text-[#35D07F]",
-                        },
-                        {
-                          label: "Competing attempts rejected",
-                          value: raceRun.rejectedAttempts ?? 0,
-                          color: "text-[#F5B942]",
-                        },
-                      ].map((metric) => (
-                        <div
-                          key={metric.label}
-                          className="rounded-lg border border-[#292D24] bg-[#0C0F0C] p-3.5 sm:p-4"
-                        >
-                          <p className="min-h-8 font-mono text-[9px] uppercase leading-4 tracking-wider text-[#85897B]">
-                            {metric.label}
-                          </p>
-                          <p
-                            className={`mt-2 text-2xl font-semibold tabular-nums ${metric.color}`}
-                          >
-                            {metric.value}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                      <div className="rounded-lg border border-[#292D24] bg-[#0C0F0C] p-4">
-                        <p className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em] text-[#85897B]">
-                          <Activity size={14} />
-                          Experiment result
-                        </p>
-                        <p className="mt-3 text-xs leading-6 text-[#D7D9CE]">
-                          {raceRun.message ||
-                            "Waiting for two customer checkout attempts."}
-                        </p>
-                        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[#292D24] pt-3">
-                          <span className="text-[10px] text-[#85897B]">
-                            Current stock
-                          </span>
-                          <span className="font-mono text-xs font-semibold text-[#F0F1E9]">
-                            {raceRun.product?.stock ?? "—"}
-                          </span>
-                          <span className="mx-1 h-3 w-px bg-[#34382B]" />
-                          <span className="text-[10px] text-[#85897B]">
-                            Verified final stock
-                          </span>
-                          <span className="font-mono text-xs font-semibold text-[#DEED00]">
-                            {raceRun.stockAfterRecovery ?? "Not verified"}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="rounded-lg border border-[#292D24] bg-[#0C0F0C] p-4">
-                        <p className="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.12em] text-[#85897B]">
-                          <Clock3 size={14} />
-                          Execution audit
-                        </p>
-                        <div className="mt-3 space-y-3">
-                          {[
-                            {
-                              label: "Fault injected",
-                              value: raceRun.faultInjectedAt
-                                ? new Date(raceRun.faultInjectedAt).toLocaleString()
-                                : "—",
-                            },
-                            {
-                              label: "First checkout",
-                              value: raceRun.firstAttemptAt
-                                ? new Date(raceRun.firstAttemptAt).toLocaleString()
-                                : "Waiting",
-                            },
-                            {
-                              label: "Conflict detected",
-                              value: raceRun.conflictDetectedAt
-                                ? new Date(raceRun.conflictDetectedAt).toLocaleString()
-                                : "Waiting",
-                            },
-                            {
-                              label: "Recovery verified",
-                              value: raceRun.verifiedAt
-                                ? new Date(raceRun.verifiedAt).toLocaleString()
-                                : "Not verified",
-                            },
-                          ].map((event) => (
-                            <div
-                              key={event.label}
-                              className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3"
-                            >
-                              <span className="text-[10px] text-[#85897B]">
-                                {event.label}
-                              </span>
-                              <span className="break-words font-mono text-[10px] text-[#C8CBAA] sm:text-right">
-                                {event.value}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap gap-2 border-t border-[#292D24] pt-4">
-                      <a
-                        href="/user#products"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-2 rounded-md border border-[#34382B] bg-[#20241D] px-3 py-2.5 text-[11px] font-medium text-[#D7D9CE] transition-colors hover:border-[#DEED00]/40 hover:bg-[#292D20] hover:text-[#DEED00]"
-                      >
-                        Open Storefront
-                        <ExternalLink size={14} />
-                      </a>
-                      {raceRun.storefrontPath && (
-                        <a
-                          href={raceRun.storefrontPath}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-2 rounded-md border border-[#34382B] bg-[#20241D] px-3 py-2.5 text-[11px] font-medium text-[#D7D9CE] transition-colors hover:border-[#DEED00]/40 hover:bg-[#292D20] hover:text-[#DEED00]"
-                        >
-                          Open Test Product
-                          <ExternalLink size={14} />
-                        </a>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => refreshLastItemRace(raceRun.runId)}
-                        className="inline-flex items-center gap-2 rounded-md border border-[#34382B] bg-[#20241D] px-3 py-2.5 text-[11px] font-medium text-[#DEED00] transition-colors hover:bg-[#292D20]"
-                      >
-                        <RefreshCw size={14} />
-                        Refresh Result
-                      </button>
-                    </div>
-                    {raceRun.status === "ready" && (
-                      <div className="flex items-start gap-3 rounded-lg border border-[#F5B942]/25 bg-[#F5B942]/[0.06] p-4">
-                        <Info size={18} className="mt-0.5 shrink-0 text-[#F5B942]" />
-                        <p className="text-[11px] leading-6 text-[#F5B942]">
-                          Next: open the test product in two separate browser profiles,
-                          add one unit to each cart, and submit checkout in both sessions
-                          as close together as possible.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:p-6">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#42462C] bg-[#24271B]">
-                      <Package size={20} className="text-[#DEED00]" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-[#E0E4DC]">
-                        No active race experiment
-                      </p>
-                      <p className="mt-1 text-[11px] leading-5 text-[#85897B]">
-                        Create a failure to prepare the dedicated one-unit storefront
-                        test and view its execution telemetry here.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <LastItemRaceChart
+                raceRun={raceRun}
+                showSections={showRaceSections}
+                onInject={createLastItemRace}
+                injectRunning={racePreparing}
+              />
               {/* Offline Checkout Recovery */}
-              <div className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-[#292D24] bg-[#141813]">
-                <div className="border-b border-[#292D24] p-5 sm:p-6">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#DEED00]">
-                        Fault Injection 04 · Connectivity
-                      </p>
-                      <h4 className="mt-2 flex items-center gap-2 text-base font-semibold tracking-tight text-[#F0F1E9]">
-                        <WifiOff size={20} className="shrink-0 text-[#F5B942]" />
-                        Offline Checkout Recovery
-                      </h4>
-                    </div>
-                    <span className="shrink-0 rounded border border-[#42462C] bg-[#24271B] px-2 py-1 font-mono text-[9px] uppercase tracking-wider text-[#DEED00]">
-                      {wifiFailureRunning
-                        ? "Injecting"
-                        : checkoutRecoveryEvidence?.status === "checkout-completed"
-                          ? "Completed"
-                          : checkoutRecoveryEvidence?.status === "data-restored"
-                            ? "Data Restored"
-                            : checkoutRecoveryEvidence?.status === "connection-restored"
-                              ? "Connected"
-                              : checkoutRecoveryEvidence?.status === "failure-detected" ||
-                                checkoutRecoveryEvidence?.status === "failure-injected" ||
-                                checkoutRecoveryEvidence?.status === "fault-triggered"
-                                ? "Failure Detected"
-                                : "Standby"}
-                    </span>
+              <div className="flex min-w-0 flex-col rounded-xl border border-[#292D24] bg-[#141813] p-5 sm:p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#DEED00]">
+                      Fault Injection 04 · Connectivity
+                    </p>
+                    <h4 className="mt-2 flex items-center gap-2 text-base font-semibold tracking-tight text-[#F0F1E9]">
+                      <WifiOff size={20} className="shrink-0 text-[#F5B942]" />
+                      Offline Checkout Recovery
+                    </h4>
+                    <p className="mt-3 text-xs leading-6 text-[#A0A396]">
+                      HealCart saves checkout drafts locally in IndexedDB while
+                      offline and resumes synchronization when connectivity
+                      returns. Drafts can be recovered on the Checkout page
+                      without losing entered details or cart lines.
+                    </p>
                   </div>
-                  <p className="mt-3 text-xs leading-6 text-[#A0A396]">
-                    Test whether checkout details and cart lines can be recovered after
-                    a real connectivity interruption. The local Windows helper temporarily
-                    disables Wi-Fi; it does not crash the backend.
-                  </p>
+                  <span
+                    className={`shrink-0 rounded border px-2 py-1 font-mono text-[9px] uppercase tracking-wider ${getOfflineStatusClass(checkoutRecoveryEvidence?.status, offlineCheckoutFault)}`}
+                  >
+                    {getOfflineStatusText(checkoutRecoveryEvidence?.status, offlineCheckoutFault)}
+                  </span>
                 </div>
-                <div className="flex flex-1 flex-col p-5 sm:p-6">
-                  <div className="rounded-lg border border-[#292D24] bg-[#0C0F0C] p-4">
-                    <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-[#85897B]">
-                      Recovery evidence
-                    </p>
-                    <div className="mt-4 grid grid-cols-2 gap-3">
-                      <div className="rounded-md border border-[#292D24] bg-[#141813] p-3">
-                        <p className="font-mono text-[9px] uppercase tracking-wider text-[#85897B]">
-                          Draft fields
-                        </p>
-                        <p className="mt-2 text-xl font-semibold tabular-nums text-[#DEED00]">
-                          {checkoutDraftMeta?.fields ?? 0}
-                        </p>
-                      </div>
-                      <div className="rounded-md border border-[#292D24] bg-[#141813] p-3">
-                        <p className="font-mono text-[9px] uppercase tracking-wider text-[#85897B]">
-                          Cart lines
-                        </p>
-                        <p className="mt-2 text-xl font-semibold tabular-nums text-[#DEED00]">
-                          {checkoutDraftMeta?.items ?? 0}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-4 border-t border-[#292D24] pt-3">
-                      <p className="text-[10px] text-[#85897B]">Current experiment status</p>
-                      <p className="mt-1 text-xs font-medium leading-5 text-[#E0E4DC]">
-                        {offlineCheckoutFault
-                          ? "Test armed — waiting for real connectivity loss"
-                          : checkoutRecoveryEvidence?.status === "data-restored"
-                            ? "Data restored — awaiting customer checkout"
-                            : checkoutRecoveryEvidence?.status === "connection-restored"
-                              ? "Connection restored — awaiting customer choice"
-                              : checkoutRecoveryEvidence?.status === "failure-detected" ||
-                                checkoutRecoveryEvidence?.status === "failure-injected" ||
-                                checkoutRecoveryEvidence?.status === "fault-triggered"
-                                ? "Offline failure detected"
-                                : checkoutRecoveryEvidence?.status === "checkout-completed"
-                                  ? "Checkout completed"
-                                  : checkoutRecoveryEvidence?.status === "draft-discarded"
-                                    ? "Draft discarded"
-                                    : "Ready for experiment"}
-                      </p>
-                    </div>
-                  </div>
-                  {wifiFailureMessage && (
-                    <p
-                      role="status"
-                      className="mt-3 rounded-lg border border-[#F5B942]/20 bg-[#F5B942]/[0.06] p-3 text-xs leading-5 text-[#F5B942]"
-                    >
-                      {wifiFailureMessage}
-                    </p>
-                  )}
-                  {(() => {
-                    const status = checkoutRecoveryEvidence?.status;
-                    const event =
-                      status === "checkout-completed"
-                        ? {
-                          title: "Offline recovery completed",
-                          message: "Checkout data was recovered and the order was completed.",
-                          at: checkoutRecoveryEvidence?.completedAt,
-                        }
-                        : status === "data-restored"
-                          ? {
-                            title: "Checkout data restored",
-                            message: `Recovered ${checkoutRecoveryEvidence.fieldsRestored ?? 0} checkout fields and ${checkoutRecoveryEvidence.cartLinesRestored ?? 0} cart lines. Review the details before placing the order.`,
-                            at: checkoutRecoveryEvidence?.restoredAt,
-                          }
-                          : status === "connection-restored"
-                            ? {
-                              title: "Connection restored",
-                              message: "The saved checkout draft is available. Recover it or discard it on the Checkout page.",
-                              at: checkoutRecoveryEvidence?.connectionRestoredAt,
-                            }
-                            : status === "failure-detected" ||
-                              status === "fault-triggered" ||
-                              status === "failure-injected"
-                              ? {
-                                title: "Offline failure detected",
-                                message: "SHCom is monitoring connectivity. Checkout progress should be saved on this device.",
-                                at:
-                                  checkoutRecoveryEvidence?.failureDetectedAt ||
-                                  checkoutRecoveryEvidence?.failureInjectedAt,
-                              }
-                              : status === "draft-discarded"
-                                ? {
-                                  title: "Saved draft discarded",
-                                  message: "The saved checkout draft was discarded. Your cart and confirmed orders are handled separately.",
-                                  at: checkoutRecoveryEvidence?.discardedAt,
-                                }
-                                : null;
-                    if (!event) return null;
-                    return (
-                      <div className="mt-3 rounded-lg border border-[#292D24] bg-[#0C0F0C] p-3">
-                        <p className="flex items-center gap-2 text-xs font-semibold text-[#E0E4DC]">
-                          {status === "checkout-completed" ||
-                            status === "data-restored" ? (
-                            <CheckCircle2 size={16} className="shrink-0 text-[#35D07F]" />
-                          ) : (
-                            <Activity size={16} className="shrink-0 text-[#F5B942]" />
-                          )}
-                          {event.title}
-                        </p>
-                        <p className="mt-2 text-[11px] leading-5 text-[#A0A396]">
-                          {event.message}
-                        </p>
-                        {event.at && (
-                          <p className="mt-2 font-mono text-[9px] text-[#85897B]">
-                            {new Date(event.at).toLocaleString()}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })()}
-                  <div className="mt-auto pt-5">
-                    <p className="mb-3 text-[10px] leading-5 text-[#85897B]">
-                      Open Checkout in another tab and enter test details before starting
-                      the experiment. This test temporarily affects internet connectivity
-                      for the laptop.
+                <CheckoutRecoveryChart
+                    evidence={checkoutRecoveryEvidence}
+                    draftMeta={checkoutDraftMeta}
+                    showSections={injectRecoveryClicked}
+                />
+                <div className="mt-auto flex flex-col gap-3 border-t border-[#292D24] pt-5">
+                    <p className="mb-0 text-[10px] leading-5 text-[#85897B]">
+                        Open Checkout in another tab and enter test details before starting
+                        the experiment. This test temporarily affects internet connectivity
+                        for the laptop.
                     </p>
                     <button
-                      type="button"
-                      disabled={wifiFailureRunning}
-                      onClick={async () => {
-                        setWifiFailureRunning(true);
-                        setWifiFailureMessage("");
-                        try {
-                          const response = await fetch("http://127.0.0.1:5004/inject", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ durationSeconds: 5 }),
-                          });
-                          const result = await response.json();
-                          if (!response.ok || !result.success) {
-                            throw new Error(
-                              result.message || "Could not inject the Wi-Fi failure."
-                            );
-                          }
-                          setWifiFailureMessage(
-                            "Wi-Fi failure injected. Windows will restore the adapter automatically."
-                          );
-                          localStorage.setItem("shcomCheckoutTestArmed", "on");
-                          const current = (() => {
+                        type="button"
+                        disabled={wifiFailureRunning}
+                        onClick={async () => {
+                            setWifiFailureRunning(true);
                             try {
-                              return JSON.parse(
-                                localStorage.getItem("shcomCheckoutRecoveryEvidence") || "{}"
-                              );
+                                const response = await fetch("http://127.0.0.1:5004/inject", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ durationSeconds: 5 }),
+                                });
+                                const result = await response.json();
+                                if (!response.ok || !result.success) {
+                                    throw new Error(
+                                        result.message || "Could not inject the Wi-Fi failure."
+                                    );
+                                }
+                                setInjectRecoveryClicked(true);
+                                localStorage.setItem("shcomCheckoutTestArmed", "on");
+                                const current = (() => {
+                                    try {
+                                        return JSON.parse(
+                                            localStorage.getItem("shcomCheckoutRecoveryEvidence") || "{}"
+                                        );
+                                    } catch {
+                                        return {};
+                                    }
+                                })();
+                                localStorage.setItem(
+                                    "shcomCheckoutRecoveryEvidence",
+                                    JSON.stringify({
+                                        ...current,
+                                        status: "failure-injected",
+                                        failureInjectedAt: new Date().toISOString(),
+                                        updatedAt: new Date().toISOString(),
+                                        completedAt: null,
+                                        restoredAt: null,
+                                        connectionRestoredAt: null,
+                                        fieldsRestored: null,
+                                        cartLinesRestored: null,
+                                        discardedAt: null,
+                                    })
+                                );
+                                setOfflineCheckoutFault(true);
+                                setCheckoutRecoveryEvidence(
+                                    JSON.parse(
+                                        localStorage.getItem("shcomCheckoutRecoveryEvidence") ||
+                                        "null"
+                                    )
+                                );
                             } catch {
-                              return {};
+                            } finally {
+                                setWifiFailureRunning(false);
                             }
-                          })();
-                          localStorage.setItem(
-                            "shcomCheckoutRecoveryEvidence",
-                            JSON.stringify({
-                              ...current,
-                              status: "failure-injected",
-                              failureInjectedAt: new Date().toISOString(),
-                            })
-                          );
-                          setOfflineCheckoutFault(true);
-                          setCheckoutRecoveryEvidence(
-                            JSON.parse(
-                              localStorage.getItem("shcomCheckoutRecoveryEvidence") ||
-                              "null"
-                            )
-                          );
-                        } catch (error) {
-                          setWifiFailureMessage(
-                            error.message ||
-                            "Wi-Fi helper is unavailable. Start it as Administrator, then retry."
-                          );
-                        } finally {
-                          setWifiFailureRunning(false);
-                        }
-                      }}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[#F5B942]/30 bg-[#F5B942]/10 px-4 py-3 text-xs font-semibold text-[#F5B942] transition-colors hover:bg-[#F5B942]/15 disabled:cursor-not-allowed disabled:opacity-40"
+                        }}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[#DEED00]/30 bg-[#DEED00] px-4 py-3 text-xs font-semibold text-[#242700] shadow-[0_0_14px_rgba(222,237,0,0.08)] transition-colors hover:bg-[#EFFA38] disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      {wifiFailureRunning ? (
-                        <RefreshCw size={17} className="animate-spin" />
-                      ) : (
-                        <WifiOff size={17} />
-                      )}
-                      {wifiFailureRunning ? "Injecting Wi-Fi Failure..." : "Inject Offline Failure"}
+                        {wifiFailureRunning ? (
+                            <RefreshCw size={17} className="animate-spin" />
+                        ) : (
+                            <WifiOff size={17} />
+                        )}
+                        {wifiFailureRunning ? "Injecting Wi-Fi Failure..." : "Inject Offline Failure"}
                     </button>
-                  </div>
                 </div>
               </div>
             </div>
@@ -2544,7 +2302,7 @@ function Dashboard({ page = "overview" }) {
             )}
           </section>
           <footer className="border-t border-[#272A26] pt-6 text-[10px] text-[#92968F]">
-            SHCom · Self-Healing Commerce
+            HealCart · Self-Healing Commerce
           </footer>
         </div>
       </main>

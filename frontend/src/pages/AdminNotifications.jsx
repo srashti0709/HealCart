@@ -178,7 +178,7 @@ export default function AdminNotifications() {
 
             <span>
               <span className="block text-xl font-bold tracking-tight text-slate-900">
-                SHCom Admin
+                HealCart Admin
               </span>
               <span className="mt-0.5 block text-base text-slate-600">
                 Product management

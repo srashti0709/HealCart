@@ -83,7 +83,7 @@ export default function IncidentTimeline({ events = [], loading = false, error =
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold text-white">Incident Timeline</h3>
-          <p className="mt-1 text-sm text-slate-500">Observed recovery and verification events from the live SHCom stack.</p>
+          <p className="mt-1 text-sm text-slate-500">Observed recovery and verification events from the live HealCart stack.</p>
         </div>
 
         <div className="flex items-center gap-3 text-xs text-slate-400">

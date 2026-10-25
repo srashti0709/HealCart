@@ -164,7 +164,7 @@ const OrderHistory = () => {
               <span>Your purchases</span>
               <span className="h-1.5 w-1.5 rounded-full bg-[#c6c0ff]" />
               <span className="font-semibold normal-case tracking-normal text-[#787586]">
-                SHCom Store
+                HealCart Store
               </span>
             </div>
 

@@ -235,9 +235,11 @@ export default function ServiceDependencyMap({
 
     const backendState = (() => {
       if (backendHealthy) {
-        return formatFreshness(backendTimestamp, 45000) === "Fresh"
-          ? "healthy"
-          : "unknown";
+        return backendTimestamp
+          ? formatFreshness(backendTimestamp, 45000) === "Fresh"
+            ? "healthy"
+            : "unknown"
+          : "healthy";
       }
 
       if (
@@ -260,9 +262,11 @@ export default function ServiceDependencyMap({
 
     const paymentState = (() => {
       if (paymentHealthy) {
-        return formatFreshness(paymentTimestamp, 45000) === "Fresh"
-          ? "healthy"
-          : "unknown";
+        return paymentTimestamp
+          ? formatFreshness(paymentTimestamp, 45000) === "Fresh"
+            ? "healthy"
+            : "unknown"
+          : "healthy";
       }
 
       if (
@@ -326,7 +330,7 @@ export default function ServiceDependencyMap({
         dependencies: ["Backend API"],
         containerStatus: "Running in browser",
         description:
-          "The SHCom customer-facing storefront. This browser-side status does not independently verify the frontend server.",
+          "The HealCart customer-facing storefront. This browser-side status does not independently verify the frontend server.",
         icon: Globe,
       },
       backend: {

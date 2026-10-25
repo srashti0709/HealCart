@@ -20,7 +20,7 @@ const RECOVERY_MONITOR_URL = "http://localhost:5002/api/recovery";
 const CHAOS_CONTROLLER_URL = "http://localhost:5003";
 
 /**
- * Command Center — reused SHCom dashboard logic (service health, incident log,
+ * Command Center — reused HealCart dashboard logic (service health, incident log,
  * recovery analytics, chaos experiments, recovery metrics). Wrapped in a
  * separate technical Command Center layout for distinct identity from the
  * customer storefront. No changes to recovery/experiment behavior.
@@ -435,7 +435,7 @@ function CommandCenter() {
     <div className="min-h-screen bg-[#090d16] text-slate-100">
       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 px-6 py-5 lg:px-10">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-cyan-400">SHCom / Operations</p>
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-cyan-400">HealCart / Operations</p>
             <h2 className="mt-2 text-2xl font-bold tracking-tight">System Overview</h2>
             <p className="mt-1 text-sm text-slate-400">Self-healing infrastructure monitoring</p>
           </div>
@@ -455,9 +455,9 @@ function CommandCenter() {
                 <Activity size={25} />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-semibold">Welcome to SHCom Operations</h3>
+                <h3 className="text-xl font-semibold">Welcome to HealCart Operations</h3>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-                  Track service availability, investigate incidents and understand how SHCom responds to failures.
+                  Track service availability, investigate incidents and understand how HealCart responds to failures.
                   Service status is retrieved from your running backend and recovery monitor.
                 </p>
               </div>
@@ -516,7 +516,7 @@ function CommandCenter() {
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 className="text-lg font-semibold text-white">Incident Log</h3>
-                <p className="mt-1 text-sm text-slate-500">Real incidents recorded by the SHCom backend.</p>
+                <p className="mt-1 text-sm text-slate-500">Real incidents recorded by the HealCart backend.</p>
               </div>
               <div className="mb-6 grid gap-3 sm:grid-cols-3">
                 <div>
@@ -644,7 +644,7 @@ function CommandCenter() {
             <div className="mb-6">
               <p className="text-xs font-medium uppercase tracking-wider text-cyan-400">Performance Insights</p>
               <h3 className="mt-2 text-lg font-semibold text-white">Recovery Analytics</h3>
-              <p className="mt-1 text-sm text-slate-500">Calculated from real incidents recorded by SHCom.</p>
+              <p className="mt-1 text-sm text-slate-500">Calculated from real incidents recorded by HealCart.</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <article className="rounded-xl border border-slate-800 bg-[#101827] p-4">
@@ -976,7 +976,7 @@ function CommandCenter() {
           </section>
 
           <footer className="border-t border-slate-800 px-6 py-5 text-xs text-slate-500">
-            SHCom · Self-Healing Commerce — Resilience Command Center
+            HealCart · Self-Healing Commerce — Resilience Command Center
           </footer>
         </div>
     </div>

@@ -3,10 +3,10 @@ export const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 export const PAYMENT_SERVICE_URL =
-  import.meta.env.VITE_PAYMENT_SERVICE_URL || "http://localhost:5001";
+  import.meta.env.VITE_PAYMENT_SERVICE_URL || "http://localhost:5173/proxy-payment";
 
 export const RECOVERY_MONITOR_URL =
-  import.meta.env.VITE_RECOVERY_MONITOR_URL || "http://localhost:5002";
+  import.meta.env.VITE_RECOVERY_MONITOR_URL || "http://localhost:5173/proxy-recovery";
 
 export const CHAOS_CONTROLLER_URL =
   import.meta.env.VITE_CHAOS_CONTROLLER_URL || "http://localhost:5003";

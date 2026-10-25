@@ -128,7 +128,7 @@ export default function AdminGate({ children }) {
 
               <div>
                 <h2 className="text-2xl font-bold tracking-tight">
-                  SHCom Admin
+                  HealCart Admin
                 </h2>
                 <p className="mt-1 text-base text-violet-200">
                   Self-Healing Commerce
@@ -184,7 +184,7 @@ export default function AdminGate({ children }) {
 
               <div>
                 <p className="text-xl font-bold tracking-tight text-slate-950">
-                  SHCom Admin
+                  HealCart Admin
                 </p>
                 <p className="mt-1 text-base text-slate-600">
                   Self-Healing Commerce

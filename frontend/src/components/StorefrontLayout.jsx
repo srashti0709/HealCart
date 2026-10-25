@@ -352,7 +352,7 @@ function StorefrontShell({ children }) {
                 </div>
 
                 <span className="text-xl font-bold tracking-tight text-[#211a3b]">
-                  SHCom
+                  HealCart
                 </span>
               </Link>
 
@@ -450,7 +450,7 @@ function StorefrontShell({ children }) {
             </div>
 
             <p className="text-base text-slate-600">
-              © {new Date().getFullYear()} SHCom. All rights reserved.
+              © {new Date().getFullYear()} HealCart. All rights reserved.
             </p>
           </div>
         </div>

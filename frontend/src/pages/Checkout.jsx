@@ -229,7 +229,7 @@ export default function Checkout() {
                         );
                     } catch {
                         setDraftMessage(
-                            "Connection interrupted. SHCom could not confirm that the checkout draft was saved."
+                            "Connection interrupted. HealCart could not confirm that the checkout draft was saved."
                         );
                     }
                 }
@@ -712,7 +712,7 @@ export default function Checkout() {
                         </span>
                         <span>
                             <span className="block text-xl font-extrabold tracking-tight text-[#35236c]">
-                                SHCom
+                                HealCart
                             </span>
                             <span className="block text-base font-semibold text-[#756b91]">
                                 Resilient commerce
@@ -748,7 +748,7 @@ export default function Checkout() {
                         </div>
 
                         <span className="mb-4 rounded-full bg-[#eee8ff] px-5 py-2 text-base font-bold uppercase tracking-wide text-[#5c45c4]">
-                            SHCom offline mode
+                            HealCart offline mode
                         </span>
 
                         <h1 className="text-3xl font-extrabold tracking-tight text-[#2c204e] sm:text-4xl">
@@ -756,7 +756,7 @@ export default function Checkout() {
                         </h1>
 
                         <p className="mt-4 max-w-xl text-base leading-7 text-[#716787] sm:text-lg">
-                            We cannot currently reach the SHCom backend.
+                            We cannot currently reach the HealCart backend.
                             Your checkout progress and cart are saved on
                             this device where possible. No new order has
                             been submitted by this screen.
@@ -772,7 +772,7 @@ export default function Checkout() {
                                         Waiting for a connection
                                     </h2>
                                     <p className="mt-1 text-base leading-6 text-[#756b91]">
-                                        SHCom checks the connection
+                                        HealCart checks the connection
                                         automatically. You can return to
                                         checkout once the backend is
                                         reachable.
@@ -815,12 +815,12 @@ export default function Checkout() {
                                             );
                                         } else {
                                             setDraftMessage(
-                                                "The SHCom backend is still unavailable. We will keep checking automatically."
+                                                "The HealCart backend is still unavailable. We will keep checking automatically."
                                             );
                                         }
                                     } catch {
                                         setDraftMessage(
-                                            "The SHCom backend is still unavailable. We will keep checking automatically."
+                                            "The HealCart backend is still unavailable. We will keep checking automatically."
                                         );
                                     }
                                 }}
@@ -1052,7 +1052,7 @@ export default function Checkout() {
                                             Checkout draft protection
                                         </p>
                                         <p className="mt-1 text-base leading-6 text-[#756b91]">
-                                            SHCom saves your form progress
+                                            HealCart saves your form progress
                                             locally so you can recover it
                                             after an interruption.
                                         </p>
@@ -1177,7 +1177,7 @@ export default function Checkout() {
 
                                 <p className="mt-4 flex items-center justify-center gap-2 text-center text-base leading-6 text-[#756b91]">
                                     <ShieldCheck size={19} className="shrink-0 text-[#6048d8]" />
-                                    Your order is submitted only after the checkout request reaches SHCom.
+                                    Your order is submitted only after the checkout request reaches HealCart.
                                 </p>
                             </form>
 
@@ -1233,7 +1233,7 @@ export default function Checkout() {
                                         Built for interruptions
                                     </h2>
                                     <p className="mt-2 text-base leading-7 text-[#655981]">
-                                        If the connection drops, SHCom checks
+                                        If the connection drops, HealCart checks
                                         again automatically. When connectivity
                                         returns, you can choose whether to
                                         restore your saved checkout data.
@@ -1260,7 +1260,7 @@ export default function Checkout() {
                         </span>
                         <div>
                             <p className="text-base font-bold text-[#35275c]">
-                                SHCom Resilient Checkout
+                                HealCart Resilient Checkout
                             </p>
                             <p className="mt-1 text-base text-[#756b91]">
                                 Designed to handle interruptions gracefully.

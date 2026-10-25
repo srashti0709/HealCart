@@ -112,7 +112,7 @@ function ProductImage({ product }) {
 
       <span className="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/90 px-3 py-2 text-base font-semibold text-violet-800 shadow-sm backdrop-blur">
         <Sparkles size={16} />
-        SHCom pick
+        HealCart pick
       </span>
     </div>
   );
@@ -417,7 +417,7 @@ export default function Storefront() {
 
                     <div className="mt-5 flex items-center gap-2 rounded-xl bg-violet-50 px-4 py-3 text-base font-semibold text-violet-800">
                       <CheckCircle2 size={19} />
-                      Live product data from SHCom
+                      Live product data from HealCart
                     </div>
                   </>
                 ) : (
@@ -567,7 +567,7 @@ export default function Storefront() {
               <div>
                 <p className="text-base font-bold text-amber-950">
                   {isRecovering
-                    ? "SHCom is recovering"
+                    ? "HealCart is recovering"
                     : "The store backend is unavailable"}
                 </p>
                 <p className="mt-1 text-base leading-7 text-amber-900">
@@ -717,7 +717,7 @@ export default function Storefront() {
 
               <p className="mx-auto mt-3 max-w-xl text-base leading-7 text-slate-600">
                 {isRecovering
-                  ? "The backend is restarting after a failure. SHCom continues checking availability so the catalog can return when the service recovers."
+                  ? "The backend is restarting after a failure. HealCart continues checking availability so the catalog can return when the service recovers."
                   : "We could not reach the store backend, so products cannot be loaded right now. This page can check again without requiring you to reload it manually."}
               </p>
 
@@ -752,7 +752,7 @@ export default function Storefront() {
 
               <p className="mx-auto mt-3 max-w-lg text-base leading-7 text-slate-600">
                 No products are currently available in the catalog. Products
-                will appear here when they are added to SHCom.
+                will appear here when they are added to HealCart.
               </p>
 
               <button
@@ -929,13 +929,13 @@ export default function Storefront() {
         <section className="mt-16 overflow-hidden rounded-3xl border border-violet-100 bg-gradient-to-br from-violet-100 via-purple-50 to-fuchsia-100 p-6 sm:p-10 lg:p-12">
           <div className="mb-8 max-w-3xl">
             <p className="text-base font-bold uppercase tracking-widest text-violet-700">
-              The SHCom advantage
+              The HealCart advantage
             </p>
             <h2 className="mt-3 text-3xl font-bold leading-tight tracking-tight text-violet-950 sm:text-4xl">
               A storefront designed to recover, not give up.
             </h2>
             <p className="mt-4 text-base leading-7 text-slate-700 sm:text-lg">
-              SHCom combines a practical shopping experience with availability
+              HealCart combines a practical shopping experience with availability
               checks and recovery-aware messaging, helping customers understand
               when the store needs a moment to recover.
             </p>
@@ -977,7 +977,7 @@ export default function Storefront() {
               </h3>
               <p className="mt-3 text-base leading-7 text-slate-600">
                 Browse products, open details, check availability, and add
-                items using your existing SHCom cart integration.
+                items using your existing HealCart cart integration.
               </p>
             </div>
           </div>
@@ -985,7 +985,7 @@ export default function Storefront() {
 
         <footer className="mt-12 flex flex-col gap-4 border-t border-violet-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-lg font-bold text-violet-950">SHCom</p>
+            <p className="text-lg font-bold text-violet-950">HealCart</p>
             <p className="mt-1 text-base leading-6 text-slate-600">
               Self-Healing Commerce
             </p>

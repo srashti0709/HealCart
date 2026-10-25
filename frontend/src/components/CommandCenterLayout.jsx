@@ -38,7 +38,7 @@ export default function CommandCenterLayout({ children }) {
           </div>
 
           <div>
-            <h1 className="text-xl font-bold tracking-wide text-primary">SHCom</h1>
+            <h1 className="text-xl font-bold tracking-wide text-primary">HealCart</h1>
             <p className="mt-1 text-xs text-secondary">
               Self-Healing Commerce
             </p>

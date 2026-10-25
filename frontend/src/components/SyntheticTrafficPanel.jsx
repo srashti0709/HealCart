@@ -390,7 +390,7 @@ export default function SyntheticTrafficPanel() {
               Synthetic Traffic
             </h3>
             <p className="mt-1 text-sm text-slate-500">
-              Sends real, read-only GET requests to the SHCom backend and
+              Sends real, read-only GET requests to the HealCart backend and
               records the outcome of every request.
             </p>
           </div>

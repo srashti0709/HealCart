@@ -227,7 +227,7 @@ export default function ProductDetails() {
                   </div>
                   <div>
                     <p className="text-base font-bold text-[#1d1737]">
-                      SHCom
+                      HealCart
                     </p>
                     <p className="mt-1 text-base text-[#69647d]">
                       Resilient store
@@ -432,7 +432,7 @@ export default function ProductDetails() {
                   className="mt-0.5 shrink-0 text-[#5441db]"
                 />
                 <p>
-                  SHCom checks available stock before adding items and keeps
+                  HealCart checks available stock before adding items and keeps
                   your cart synchronized with the store.
                 </p>
               </div>
