@@ -1,5 +1,33 @@
 [
   {
+    "id": "evt-database-recovered-1792899688789-a89785",
+    "type": "database-recovered",
+    "description": "MongoDB connection restored successfully.",
+    "message": "MongoDB connection restored successfully.",
+    "timestamp": "2026-10-25T03:41:28.775Z",
+    "source": "Docker log observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "database": "mongodb",
+      "message": "[Database Recovery] MongoDB connected successfully."
+    }
+  },
+  {
+    "id": "evt-database-disconnected-1792899686407-3295ad",
+    "type": "database-disconnected",
+    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "timestamp": "2026-10-25T03:35:59.211Z",
+    "source": "Docker log observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "database": "mongodb",
+      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
+    }
+  },
+  {
     "id": "evt-traffic-stopped-1792877029413-552016",
     "type": "traffic-stopped",
     "description": "Synthetic traffic run traffic-mvmwop5o-8-5th6ya ended (Backend crash experiment finished) after 10.9s. 30 requests recorded, 14 successful.",
@@ -1157,46 +1185,6 @@
       "container": "shcom-backend",
       "action": "start",
       "state": "running"
-    }
-  },
-  {
-    "id": "evt-crash-1792871487953-5c8103",
-    "type": "crash",
-    "description": "Backend container stopped unexpectedly.",
-    "message": "Backend container stopped unexpectedly.",
-    "timestamp": "2026-10-24T19:51:27.000Z",
-    "source": "Docker observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "container": "shcom-backend",
-      "action": "die",
-      "state": "stopped"
-    }
-  },
-  {
-    "id": "evt-traffic-started-1792871486918-80f0d5",
-    "type": "traffic-started",
-    "description": "Synthetic traffic run traffic-mvmte4zx-2-r8l5nn started to observe the backend crash (correlation crash-mvmte4zx-ed1l20).",
-    "message": "Synthetic traffic run traffic-mvmte4zx-2-r8l5nn started to observe the backend crash (correlation crash-mvmte4zx-ed1l20).",
-    "timestamp": "2026-10-24T19:51:26.918Z",
-    "source": "Synthetic traffic",
-    "outcome": "in_progress",
-    "experimentId": "traffic-mvmte4zx-2-r8l5nn",
-    "details": {
-      "correlationId": "crash-mvmte4zx-ed1l20",
-      "scenario": "backend-crash",
-      "config": {
-        "ratePerSecond": 3,
-        "concurrency": 2,
-        "durationSeconds": 120,
-        "requestTimeoutMs": 3000,
-        "endpoints": [
-          "products-list",
-          "health"
-        ],
-        "maxRequests": 360
-      }
     }
   }
 ]

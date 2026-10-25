@@ -3,10 +3,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import {
     Activity,
-    AlertTriangle,
     CheckCircle2,
     Radio,
-    ServerCrash,
     ShieldCheck,
 } from "lucide-react";
 import {
@@ -18,11 +16,7 @@ import {
     XAxis,
     YAxis,
 } from "recharts";
-import {
-    API_BASE_URL,
-    API_ENDPOINTS,
-    CHAOS_CONTROLLER_URL,
-} from "../config/api";
+import { API_BASE_URL } from "../config/api";
 
 const WINDOW_SECONDS = 30;
 const POLL_INTERVAL = 1000;
@@ -44,38 +38,9 @@ function emptyTimeline() {
             }),
             attempted: 0,
             successful: 0,
-            failed: 0,
             backendReceived: 0,
         };
     });
-}
-
-function readRecords(response) {
-    const data = response?.data;
-
-    if (Array.isArray(data?.requests)) return data.requests;
-    if (Array.isArray(data?.records)) return data.records;
-    if (Array.isArray(data)) return data;
-
-    return [];
-}
-
-function readTimestamp(record) {
-    const value =
-        record?.timestamp ??
-        record?.startedAt ??
-        record?.createdAt;
-
-    if (typeof value === "number") {
-        return value < 1e12 ? value * 1000 : value;
-    }
-
-    if (typeof value === "string") {
-        const parsed = Date.parse(value);
-        return Number.isNaN(parsed) ? null : parsed;
-    }
-
-    return null;
 }
 
 function Metric({ label, value, detail, icon: Icon, color }) {
@@ -98,46 +63,22 @@ function Metric({ label, value, detail, icon: Icon, color }) {
 export default function LiveApiTrafficChart() {
     const [points, setPoints] = useState(emptyTimeline);
     const [backendOnline, setBackendOnline] = useState(null);
-    const [controllerOnline, setControllerOnline] = useState(null);
-    const [trafficRunActive, setTrafficRunActive] = useState(false);
     const [updatedAt, setUpdatedAt] = useState(null);
-    const [hasTrafficData, setHasTrafficData] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
         let timer;
 
         async function refresh() {
-            const [metricsResult, requestsResult, statusResult] =
-                await Promise.allSettled([
-                    axios.get(`${API_BASE_URL}/api/metrics/traffic`, {
-                        timeout: 1800,
-                    }),
-                    axios.get(API_ENDPOINTS.trafficRequests, {
-                        timeout: 4000,
-                        params: { limit: 200 },
-                    }),
-                    axios.get(API_ENDPOINTS.trafficStatus, {
-                        timeout: 4000,
-                    }),
-                ]);
+            const metricsResult = await axios.get(
+                `${API_BASE_URL}/api/metrics/traffic`,
+                { timeout: 4000 }
+            );
 
             if (cancelled) return;
 
             const backendAvailable = metricsResult.status === "fulfilled";
-            const controllerAvailable = requestsResult.status === "fulfilled";
-
             setBackendOnline(backendAvailable);
-            setControllerOnline(controllerAvailable);
-
-            if (statusResult.status === "fulfilled") {
-                const status = statusResult.value.data;
-                setTrafficRunActive(status.running === true);
-            }
-
-            const records = controllerAvailable
-                ? readRecords(requestsResult.value)
-                : [];
 
             const now = Date.now();
             const currentSecond = secondOf(now);
@@ -157,43 +98,10 @@ export default function LiveApiTrafficChart() {
                     }),
                     attempted: 0,
                     successful: 0,
-                    failed: 0,
                     backendReceived: 0,
                 });
             }
 
-            // Count each synthetic request by its recorded start time.
-            // Do not depend on the backend being alive to count attempts.
-            for (const record of records) {
-                const timestamp = readTimestamp(record);
-
-                if (
-                    timestamp === null ||
-                    timestamp < oldestSecond ||
-                    timestamp > now
-                ) {
-                    continue;
-                }
-
-                if (record.outcome === "aborted") continue;
-
-                const bucket = buckets.get(secondOf(timestamp));
-                if (!bucket) continue;
-
-                bucket.attempted += 1;
-
-                if (
-                    record.success === true ||
-                    record.outcome === "success"
-                ) {
-                    bucket.successful += 1;
-                } else {
-                    bucket.failed += 1;
-                }
-            }
-
-            // Actual requests that reached the Express backend.
-            // This series can fall to zero during a backend crash.
             if (backendAvailable) {
                 const backendPoints =
                     metricsResult.value.data?.points ?? [];
@@ -203,17 +111,17 @@ export default function LiveApiTrafficChart() {
                     if (Number.isNaN(parsed)) continue;
 
                     const bucket = buckets.get(secondOf(parsed));
+
                     if (bucket) {
+                        bucket.attempted = Number(item.requests) || 0;
+                        bucket.successful = Number(item.successful) || 0;
                         bucket.backendReceived =
                             Number(item.requests) || 0;
                     }
                 }
             }
 
-            const nextPoints = Array.from(buckets.values());
-
-            setPoints(nextPoints);
-            setHasTrafficData(records.length > 0);
+            setPoints(Array.from(buckets.values()));
             setUpdatedAt(new Date());
             timer = setTimeout(refresh, POLL_INTERVAL);
         }
@@ -230,49 +138,35 @@ export default function LiveApiTrafficChart() {
         (result, point) => ({
             attempted: result.attempted + point.attempted,
             successful: result.successful + point.successful,
-            failed: result.failed + point.failed,
             backendReceived:
                 result.backendReceived + point.backendReceived,
         }),
         {
             attempted: 0,
             successful: 0,
-            failed: 0,
             backendReceived: 0,
         }
     );
 
-    const peak = Math.max(
-        0,
-        ...points.map((point) => point.attempted)
-    );
-
-    const incidentDetected =
-        totals.failed > 0 || backendOnline === false;
+    const incidentDetected = backendOnline === false;
 
     const incidentStatus = incidentDetected
-        ? backendOnline === false
-            ? "BACKEND UNAVAILABLE"
-            : "REQUEST FAILURES DETECTED"
-        : trafficRunActive
-            ? "TRAFFIC RUNNING"
-            : hasTrafficData
-                ? "TRAFFIC RECORDED"
-                : "WAITING FOR TRAFFIC";
+        ? "BACKEND UNAVAILABLE"
+        : totals.attempted > 0
+            ? "TRAFFIC ACTIVE"
+            : "WAITING FOR TRAFFIC";
 
     const incidentColor = incidentDetected
         ? "#FF5C5C"
-        : trafficRunActive
-            ? "#F5B942"
-            : "#35D07F";
+        : totals.attempted > 0
+            ? "#35D07F"
+            : "#92968F";
 
     const explanation = incidentDetected
-        ? "SHCom is detecting failed requests or an unavailable backend. Watch the failed-request line and confirm recovery using the service health indicators."
-        : trafficRunActive
-            ? "Synthetic requests are being sent to the backend. A failure will appear here when the controller records an unsuccessful request."
-            : hasTrafficData
-                ? "Previous synthetic traffic is available. Start a traffic run to observe live request counts."
-                : "No synthetic request records are available yet. Start a synthetic traffic run from the Chaos Center.";
+        ? "SHCom has detected an unavailable backend. Check service health and monitor recovery."
+        : totals.attempted > 0
+            ? "Live storefront API requests are flowing. Watch for spikes when experiments run."
+            : "Waiting for storefront API traffic. Activity will appear here as requests hit the backend.";
 
     const formatTime = (value) =>
         new Date(value).toLocaleTimeString([], {
@@ -291,7 +185,7 @@ export default function LiveApiTrafficChart() {
                         </h2>
                     </div>
                     <p className="mt-1 text-sm text-[#92968F]">
-                        Live request outcomes · rolling 30-second window
+                        Live storefront API requests · rolling 30-second window
                     </p>
                 </div>
 
@@ -319,11 +213,11 @@ export default function LiveApiTrafficChart() {
                 }}
             >
                 {incidentDetected ? (
-                    <ServerCrash
+                    <ShieldCheck
                         size={21}
                         style={{ color: incidentColor }}
                     />
-                ) : trafficRunActive ? (
+                ) : totals.attempted > 0 ? (
                     <Radio
                         size={21}
                         style={{ color: incidentColor }}
@@ -349,7 +243,7 @@ export default function LiveApiTrafficChart() {
                 <Metric
                     label="Requests attempted"
                     value={totals.attempted}
-                    detail="Synthetic requests in 30 seconds"
+                    detail="Storefront API requests in 30s"
                     icon={Radio}
                     color="#DEED00"
                 />
@@ -359,13 +253,6 @@ export default function LiveApiTrafficChart() {
                     detail="Completed successfully"
                     icon={CheckCircle2}
                     color="#35D07F"
-                />
-                <Metric
-                    label="Failed requests"
-                    value={totals.failed}
-                    detail="Unsuccessful synthetic requests"
-                    icon={AlertTriangle}
-                    color="#FF5C5C"
                 />
                 <Metric
                     label="Backend received"
@@ -395,10 +282,6 @@ export default function LiveApiTrafficChart() {
                     <span className="flex items-center gap-2">
                         <span className="h-0.5 w-4 bg-[#35D07F]" />
                         Successful
-                    </span>
-                    <span className="flex items-center gap-2">
-                        <span className="h-0.5 w-4 bg-[#FF5C5C]" />
-                        Failed
                     </span>
                     <span className="flex items-center gap-2">
                         <span className="h-0.5 w-4 bg-[#A78BFA]" />
@@ -453,7 +336,6 @@ export default function LiveApiTrafficChart() {
                                     {
                                         attempted: "Requests attempted",
                                         successful: "Successful requests",
-                                        failed: "Failed requests",
                                         backendReceived: "Reached backend",
                                     }[name] ?? name,
                                 ]}
@@ -488,17 +370,6 @@ export default function LiveApiTrafficChart() {
 
                             <Line
                                 type="monotone"
-                                dataKey="failed"
-                                name="failed"
-                                stroke="#FF5C5C"
-                                strokeWidth={2.5}
-                                dot={false}
-                                activeDot={{ r: 4 }}
-                                isAnimationActive={false}
-                            />
-
-                            <Line
-                                type="monotone"
                                 dataKey="backendReceived"
                                 name="backendReceived"
                                 stroke="#A78BFA"
@@ -518,20 +389,13 @@ export default function LiveApiTrafficChart() {
                             : "Connecting to traffic sources…"}
                     </span>
                     <span>
-                        {controllerOnline === false
-                            ? "Traffic controller disconnected"
-                            : controllerOnline === true
-                                ? "Traffic controller connected"
-                                : "Checking controller"}
+                        {backendOnline === false
+                            ? "Backend disconnected"
+                            : backendOnline === true
+                                ? "Backend connected"
+                                : "Checking backend"}
                     </span>
                 </div>
-
-                {controllerOnline === false && (
-                    <p className="mt-3 text-sm text-[#FF5C5C]">
-                        The controller is unreachable. Failed requests cannot be
-                        displayed until the controller endpoint is available.
-                    </p>
-                )}
             </div>
         </section>
     );
