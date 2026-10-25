@@ -76,6 +76,9 @@ export const classifyPaymentAttempt = (response) => {
       state: PAYMENT_ATTEMPT_STATE.PAID,
       attempt,
       order: response.data.order || null,
+      simulatedTimeout:
+        response.data.simulatedTimeout === true ||
+        attempt?.simulatedTimeout === true,
     };
   }
 
@@ -204,7 +207,7 @@ export const createPaymentPoller = ({
 
       clearTimer();
       timer = schedule(() => {
-        runCheck().catch(() => {});
+        runCheck().catch(() => { });
       }, intervalMs);
 
       return result;
@@ -222,7 +225,7 @@ export const createPaymentPoller = ({
 
     startedAt = now();
     timer = schedule(() => {
-      runCheck().catch(() => {});
+      runCheck().catch(() => { });
     }, 0);
   };
 

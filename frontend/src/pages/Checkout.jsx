@@ -97,6 +97,7 @@ export default function Checkout() {
     const [recoveryResult, setRecoveryResult] = useState(null);
     const [verification, setVerification] = useState(null);
     const [checkingStatus, setCheckingStatus] = useState(false);
+    const [isChaosTimeout, setIsChaosTimeout] = useState(false);
     const [connectionLost, setConnectionLost] = useState(false);
     const [recoveryPrompt, setRecoveryPrompt] = useState(false);
     const [draftMessage, setDraftMessage] = useState("");
@@ -161,10 +162,9 @@ export default function Checkout() {
         let alive = true;
 
         const checkConnectivity = async () => {
-            const forced = false;
             let reachable = false;
 
-            if (!forced && navigator.onLine) {
+            if (navigator.onLine) {
                 try {
                     const response = await fetch(API_ENDPOINTS.health, {
                         cache: "no-store",
@@ -176,8 +176,7 @@ export default function Checkout() {
 
             if (!alive) return;
 
-            const unavailable =
-                forced || !navigator.onLine || !reachable;
+            const unavailable = !navigator.onLine || !reachable;
             const isInitialCheck = initialConnectivityCheckRef.current;
             initialConnectivityCheckRef.current = false;
 
@@ -209,12 +208,7 @@ export default function Checkout() {
                                 existingDraft.customer || {}
                             ).some(Boolean) || existingDraft.cart?.length);
 
-                        if (hasCurrentProgress) {
-                            await saveCheckoutDraft(
-                                customerRef.current,
-                                currentCart
-                            );
-                        } else if (!hasSavedProgress) {
+                        if (hasCurrentProgress || !hasSavedProgress) {
                             await saveCheckoutDraft(
                                 customerRef.current,
                                 currentCart
@@ -347,30 +341,41 @@ export default function Checkout() {
 
             setOrderResult((current) => ({
                 ...(current || {}),
-                orderId: result.order?.id || current?.orderId || null,
+                orderId:
+                    result.order?.id ||
+                    result.order?._id ||
+                    current?.orderId ||
+                    null,
                 transactionId:
                     result.attempt?.transactionId ||
                     current?.transactionId,
-                message:
-                    "The payment was confirmed and your order is placed.",
+                message: "Order placed successfully",
                 pending: false,
+                failed: false,
             }));
 
-            setRecoveryResult({
-                type: "payment_timeout_recovery",
-                detected: true,
-                status: "resolved",
-                action: "Verified the existing payment transaction",
-                result: "Payment confirmed; the order was finalized",
-            });
+            // Only display recovery when explicitly confirmed by the backend.
+            const confirmedRecovery =
+                result.recovery?.type === "payment_timeout_recovery" &&
+                result.recovery?.status === "resolved";
+
+            setRecoveryResult(
+                confirmedRecovery ? result.recovery : null
+            );
 
             return;
         }
 
         if (result.state === PAYMENT_ATTEMPT_STATE.FAILED) {
+            setRecoveryResult(null);
+
             setOrderResult((current) => ({
                 ...(current || {}),
-                orderId: result.order?.id || current?.orderId || null,
+                orderId:
+                    result.order?.id ||
+                    result.order?._id ||
+                    current?.orderId ||
+                    null,
                 message:
                     "The payment was declined, so the order was cancelled and no stock was reserved.",
                 pending: false,
@@ -399,7 +404,7 @@ export default function Checkout() {
         try {
             await pollerRef.current.checkNow();
         } catch {
-            // The poller keeps the result inconclusive.
+            // Keep an inconclusive result inconclusive.
         } finally {
             setCheckingStatus(false);
         }
@@ -410,6 +415,8 @@ export default function Checkout() {
         setError("");
         setOrderResult(null);
         setRecoveryResult(null);
+        setVerification(null);
+        setIsChaosTimeout(false);
 
         if (processing) return;
 
@@ -502,8 +509,14 @@ export default function Checkout() {
 
             if (backendData.success === false && isPendingPayment) {
                 const attemptId =
-                    backendData.orderId || backendData.order?._id || null;
+                    backendData.orderId ||
+                    backendData.order?._id ||
+                    null;
 
+                const chaosTimeout =
+                    backendData.simulatedTimeout === true;
+
+                setIsChaosTimeout(chaosTimeout);
                 setOrderResult({
                     orderId: attemptId,
                     message:
@@ -511,6 +524,7 @@ export default function Checkout() {
                         "Payment is being verified. Do not retry checkout or pay again yet.",
                     pending: true,
                 });
+                setRecoveryResult(null);
                 setError("");
 
                 if (attemptId) {
@@ -533,13 +547,21 @@ export default function Checkout() {
                 completedAt: new Date().toISOString(),
             });
 
-            setRecoveryResult(backendData.recovery || null);
+            // A normal successful response must not invent a recovery timeline.
+            const confirmedRecovery =
+                backendData.recovery?.type === "payment_timeout_recovery" &&
+                backendData.recovery?.status === "resolved";
+
+            setRecoveryResult(
+                confirmedRecovery ? backendData.recovery : null
+            );
 
             setOrderResult({
                 orderId: backendData.order._id,
                 transactionId: backendData.payment?.transactionId,
-                message: backendData.message,
+                message: backendData.message || "Order placed successfully",
                 pending: false,
+                failed: false,
             });
         } catch (err) {
             const backendMessage =
@@ -556,11 +578,16 @@ export default function Checkout() {
             if (paymentIsUnknown) {
                 const attemptId = err.response?.data?.orderId || null;
 
+                setIsChaosTimeout(
+                    err.response?.data?.simulatedTimeout === true
+                );
+
                 setOrderResult({
                     orderId: attemptId,
                     message: backendMessage,
                     pending: true,
                 });
+                setRecoveryResult(null);
                 setError("");
 
                 if (attemptId && checkoutAttemptRef.current?.id) {
@@ -679,10 +706,7 @@ export default function Checkout() {
         <div className="lavender-commerce min-h-screen bg-[#f7f4ff] text-[#241b43]">
             <header className="sticky top-0 z-40 border-b border-[#e9e2f8] bg-white/95 shadow-[0_2px_16px_rgba(51,35,91,0.04)] backdrop-blur-xl">
                 <div className="mx-auto flex min-h-[76px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-8 lg:px-12">
-                    <Link
-                        to="/user"
-                        className="flex items-center gap-3"
-                    >
+                    <Link to="/user" className="flex items-center gap-3">
                         <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#7663ef] to-[#4e36c7] text-white shadow-md shadow-violet-200">
                             <PackageCheck size={25} />
                         </span>
@@ -697,10 +721,7 @@ export default function Checkout() {
                     </Link>
 
                     <div className="hidden items-center gap-2 rounded-full border border-[#e5def6] bg-[#f8f5ff] px-4 py-2.5 sm:flex">
-                        <LockKeyhole
-                            size={19}
-                            className="text-[#6550d8]"
-                        />
+                        <LockKeyhole size={19} className="text-[#6550d8]" />
                         <span className="text-base font-semibold text-[#493d70]">
                             Secure checkout
                         </span>
@@ -783,9 +804,7 @@ export default function Checkout() {
                                             API_ENDPOINTS.health,
                                             {
                                                 cache: "no-store",
-                                                signal: AbortSignal.timeout(
-                                                    1800
-                                                ),
+                                                signal: AbortSignal.timeout(1800),
                                             }
                                         );
 
@@ -832,10 +851,7 @@ export default function Checkout() {
                             </Link>
 
                             <div className="inline-flex items-center gap-2 rounded-full border border-[#e3dcf6] bg-white px-4 py-2.5">
-                                <ShieldCheck
-                                    size={20}
-                                    className="text-[#6048d8]"
-                                />
+                                <ShieldCheck size={20} className="text-[#6048d8]" />
                                 <span className="text-base font-semibold text-[#4e416f]">
                                     Protected checkout
                                 </span>
@@ -861,10 +877,7 @@ export default function Checkout() {
                         {draftMessage && (
                             <div className="mb-6 rounded-2xl border border-[#d9d0fa] bg-white p-4 text-base leading-6 text-[#514187]">
                                 <div className="flex items-start gap-3">
-                                    <Cloud
-                                        size={22}
-                                        className="mt-0.5 shrink-0 text-[#6550d8]"
-                                    />
+                                    <Cloud size={22} className="mt-0.5 shrink-0 text-[#6550d8]" />
                                     <p>{draftMessage}</p>
                                 </div>
                             </div>
@@ -893,11 +906,9 @@ export default function Checkout() {
 
                                         {draftMeta && (
                                             <p className="mt-3 text-base">
-                                                Saved fields:{" "}
-                                                {draftMeta.fields || 0}
+                                                Saved fields: {draftMeta.fields || 0}
                                                 {" · "}
-                                                Cart lines:{" "}
-                                                {draftMeta.items || 0}
+                                                Cart lines: {draftMeta.items || 0}
                                             </p>
                                         )}
 
@@ -934,7 +945,6 @@ export default function Checkout() {
                                     <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#eee8ff] text-[#6048d8]">
                                         <MapPin size={27} />
                                     </span>
-
                                     <div>
                                         <h2 className="text-xl font-extrabold text-[#30234f] sm:text-2xl">
                                             Delivery information
@@ -1036,10 +1046,7 @@ export default function Checkout() {
                                 </div>
 
                                 <div className="mt-7 flex items-start gap-3 rounded-2xl border border-[#e7e0f6] bg-[#faf8ff] p-4">
-                                    <Cloud
-                                        size={23}
-                                        className="mt-0.5 shrink-0 text-[#6550d8]"
-                                    />
+                                    <Cloud size={23} className="mt-0.5 shrink-0 text-[#6550d8]" />
                                     <div>
                                         <p className="text-base font-bold text-[#40316f]">
                                             Checkout draft protection
@@ -1053,21 +1060,14 @@ export default function Checkout() {
                                 </div>
 
                                 {error && (
-                                    <StatusPanel
-                                        variant={
-                                            connectionLost ? "warning" : "error"
-                                        }
-                                    >
-                                        <div className="flex items-start gap-3">
-                                            <AlertCircle
-                                                size={23}
-                                                className="mt-0.5 shrink-0"
-                                            />
-                                            <p className="text-base leading-6">
-                                                {error}
-                                            </p>
-                                        </div>
-                                    </StatusPanel>
+                                    <div className="mt-6">
+                                        <StatusPanel variant={connectionLost ? "warning" : "error"}>
+                                            <div className="flex items-start gap-3">
+                                                <AlertCircle size={23} className="mt-0.5 shrink-0" />
+                                                <p className="text-base leading-6">{error}</p>
+                                            </div>
+                                        </StatusPanel>
+                                    </div>
                                 )}
 
                                 {orderResult && (
@@ -1106,18 +1106,14 @@ export default function Checkout() {
 
                                                 {orderResult.orderId && (
                                                     <p className="mt-3 break-all text-base">
-                                                        <span className="font-bold">
-                                                            Order ID:
-                                                        </span>{" "}
+                                                        <span className="font-bold">Order ID:</span>{" "}
                                                         {orderResult.orderId}
                                                     </p>
                                                 )}
 
                                                 {orderResult.transactionId && (
                                                     <p className="mt-2 break-all text-base">
-                                                        <span className="font-bold">
-                                                            Transaction ID:
-                                                        </span>{" "}
+                                                        <span className="font-bold">Transaction ID:</span>{" "}
                                                         {orderResult.transactionId}
                                                     </p>
                                                 )}
@@ -1125,34 +1121,15 @@ export default function Checkout() {
                                                 {orderResult.pending && (
                                                     <>
                                                         <div className="mt-4 flex items-start gap-3 rounded-xl bg-white/80 p-4 text-base leading-6">
-                                                            <LoaderCircle
-                                                                size={21}
-                                                                className="mt-0.5 shrink-0 animate-spin"
-                                                            />
+                                                            <LoaderCircle size={21} className="mt-0.5 shrink-0 animate-spin" />
                                                             <span>
-                                                                Checking this
-                                                                payment every{" "}
-                                                                {Math.round(
-                                                                    PAYMENT_POLL_INTERVAL_MS /
-                                                                        1000
-                                                                )}{" "}
-                                                                seconds for
-                                                                up to{" "}
-                                                                {Math.round(
-                                                                    PAYMENT_POLL_MAX_DURATION_MS /
-                                                                        1000
-                                                                )}{" "}
-                                                                seconds.
-                                                                {verification
-                                                                    ?.state ===
-                                                                    PAYMENT_ATTEMPT_STATE.INCONCLUSIVE &&
-                                                                verification
-                                                                    ?.reason ===
-                                                                    "limit_reached"
+                                                                Checking this payment every{" "}
+                                                                {Math.round(PAYMENT_POLL_INTERVAL_MS / 1000)} seconds for up to{" "}
+                                                                {Math.round(PAYMENT_POLL_MAX_DURATION_MS / 1000)} seconds.
+                                                                {verification?.state === PAYMENT_ATTEMPT_STATE.INCONCLUSIVE &&
+                                                                verification?.reason === "limit_reached"
                                                                     ? " The result is still unconfirmed. Please check again later."
-                                                                    : verification
-                                                                            ?.state ===
-                                                                        PAYMENT_ATTEMPT_STATE.INCONCLUSIVE
+                                                                    : verification?.state === PAYMENT_ATTEMPT_STATE.INCONCLUSIVE
                                                                       ? " The status could not be reached, so the result remains unconfirmed."
                                                                       : ""}
                                                             </span>
@@ -1161,40 +1138,22 @@ export default function Checkout() {
                                                         <button
                                                             type="button"
                                                             onClick={checkPaymentStatus}
-                                                            disabled={
-                                                                checkingStatus ||
-                                                                !orderResult.orderId
-                                                            }
+                                                            disabled={checkingStatus || !orderResult.orderId}
                                                             className="mt-4 inline-flex min-h-12 items-center gap-2 rounded-xl border border-[#e4cf9f] bg-white px-4 py-3 text-base font-bold transition hover:bg-[#fff4d7] disabled:cursor-not-allowed disabled:opacity-60"
                                                         >
-                                                            <RefreshCw
-                                                                size={19}
-                                                                className={
-                                                                    checkingStatus
-                                                                        ? "animate-spin"
-                                                                        : ""
-                                                                }
-                                                            />
-                                                            {checkingStatus
-                                                                ? "Checking..."
-                                                                : "Check payment status"}
+                                                            <RefreshCw size={19} className={checkingStatus ? "animate-spin" : ""} />
+                                                            {checkingStatus ? "Checking..." : "Check payment status"}
                                                         </button>
                                                     </>
                                                 )}
 
                                                 <div className="mt-5 flex flex-wrap gap-4">
                                                     {orderResult.pending && (
-                                                        <Link
-                                                            to="/user/orders"
-                                                            className="text-base font-bold underline underline-offset-4"
-                                                        >
+                                                        <Link to="/user/orders" className="text-base font-bold underline underline-offset-4">
                                                             Check existing order
                                                         </Link>
                                                     )}
-                                                    <Link
-                                                        to="/user"
-                                                        className="text-base font-bold underline underline-offset-4"
-                                                    >
+                                                    <Link to="/user" className="text-base font-bold underline underline-offset-4">
                                                         Continue shopping
                                                     </Link>
                                                 </div>
@@ -1203,111 +1162,22 @@ export default function Checkout() {
                                     </div>
                                 )}
 
-                                {recoveryResult && (
-                                    <div className="mt-6 rounded-2xl border border-[#d9d0fa] bg-[#f6f2ff] p-5 sm:p-6">
-                                        <div className="flex items-center gap-3">
-                                            <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#e8e0ff] text-[#6048d8]">
-                                                <ShieldCheck size={27} />
-                                            </span>
-                                            <div>
-                                                <h3 className="text-xl font-extrabold text-[#35275c]">
-                                                    Self-Healing Payment Recovery
-                                                </h3>
-                                                <p className="mt-1 text-base text-[#756b91]">
-                                                    Existing transaction
-                                                    verification
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <p className="mt-4 text-base leading-7 text-[#514575]">
-                                            A payment timeout was detected.
-                                            SHCom verified the existing
-                                            transaction instead of
-                                            attempting another payment.
-                                        </p>
-
-                                        <ol className="mt-5 space-y-4">
-                                            <li className="flex items-start gap-3">
-                                                <CheckCircle2
-                                                    size={22}
-                                                    className="mt-0.5 shrink-0 text-[#6048d8]"
-                                                />
-                                                <div>
-                                                    <p className="text-base font-bold text-[#35275c]">
-                                                        Timeout detected
-                                                    </p>
-                                                    <p className="mt-1 text-base leading-6 text-[#756b91]">
-                                                        The payment response
-                                                        was uncertain.
-                                                    </p>
-                                                </div>
-                                            </li>
-                                            <li className="flex items-start gap-3">
-                                                <CheckCircle2
-                                                    size={22}
-                                                    className="mt-0.5 shrink-0 text-[#6048d8]"
-                                                />
-                                                <div>
-                                                    <p className="text-base font-bold text-[#35275c]">
-                                                        Transaction verified
-                                                    </p>
-                                                    <p className="mt-1 text-base leading-6 text-[#756b91]">
-                                                        {recoveryResult.action}
-                                                    </p>
-                                                </div>
-                                            </li>
-                                            <li className="flex items-start gap-3">
-                                                <CheckCircle2
-                                                    size={22}
-                                                    className="mt-0.5 shrink-0 text-[#6048d8]"
-                                                />
-                                                <div>
-                                                    <p className="text-base font-bold text-[#35275c]">
-                                                        Recovery completed
-                                                    </p>
-                                                    <p className="mt-1 text-base leading-6 text-[#756b91]">
-                                                        {recoveryResult.result}
-                                                    </p>
-                                                </div>
-                                            </li>
-                                        </ol>
-
-                                        <div className="mt-5 flex items-center gap-3 rounded-xl border border-[#cce8d8] bg-white p-4 text-base font-bold text-[#17613f]">
-                                            <CheckCircle2 size={22} />
-                                            Payment verified — order recovered
-                                            successfully.
-                                        </div>
-                                    </div>
-                                )}
-
                                 <button
                                     type="submit"
-                                    disabled={
-                                        processing || Boolean(orderResult)
-                                    }
+                                    disabled={processing || Boolean(orderResult)}
                                     className="mt-7 flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-[#7059e8] to-[#5238ca] px-6 py-4 text-lg font-extrabold text-white shadow-lg shadow-violet-200 transition hover:-translate-y-0.5 hover:from-[#6048d8] hover:to-[#442bb9] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                                 >
                                     {processing ? (
-                                        <LoaderCircle
-                                            size={22}
-                                            className="animate-spin"
-                                        />
+                                        <LoaderCircle size={22} className="animate-spin" />
                                     ) : (
                                         <CreditCard size={22} />
                                     )}
-                                    {processing
-                                        ? "Processing payment..."
-                                        : "Place order & pay"}
+                                    {processing ? "Processing payment..." : "Place order & pay"}
                                 </button>
 
                                 <p className="mt-4 flex items-center justify-center gap-2 text-center text-base leading-6 text-[#756b91]">
-                                    <ShieldCheck
-                                        size={19}
-                                        className="shrink-0 text-[#6048d8]"
-                                    />
-                                    Your order is submitted only after the
-                                    checkout request reaches SHCom.
+                                    <ShieldCheck size={19} className="shrink-0 text-[#6048d8]" />
+                                    Your order is submitted only after the checkout request reaches SHCom.
                                 </p>
                             </form>
 
@@ -1324,54 +1194,31 @@ export default function Checkout() {
 
                                     <div className="mt-6 space-y-5">
                                         <div className="flex items-start gap-3">
-                                            <CheckCircle2
-                                                size={22}
-                                                className="mt-0.5 shrink-0 text-[#6048d8]"
-                                            />
+                                            <CheckCircle2 size={22} className="mt-0.5 shrink-0 text-[#6048d8]" />
                                             <div>
-                                                <p className="text-base font-bold text-[#35275c]">
-                                                    Draft recovery
-                                                </p>
+                                                <p className="text-base font-bold text-[#35275c]">Draft recovery</p>
                                                 <p className="mt-1 text-base leading-6 text-[#756b91]">
-                                                    Save and recover
-                                                    checkout details on this
-                                                    device.
+                                                    Save and recover checkout details on this device.
                                                 </p>
                                             </div>
                                         </div>
 
                                         <div className="flex items-start gap-3">
-                                            <RefreshCw
-                                                size={22}
-                                                className="mt-0.5 shrink-0 text-[#6048d8]"
-                                            />
+                                            <RefreshCw size={22} className="mt-0.5 shrink-0 text-[#6048d8]" />
                                             <div>
-                                                <p className="text-base font-bold text-[#35275c]">
-                                                    Payment verification
-                                                </p>
+                                                <p className="text-base font-bold text-[#35275c]">Payment verification</p>
                                                 <p className="mt-1 text-base leading-6 text-[#756b91]">
-                                                    Check an existing
-                                                    uncertain payment
-                                                    instead of blindly
-                                                    submitting again.
+                                                    Check an existing uncertain payment instead of blindly submitting again.
                                                 </p>
                                             </div>
                                         </div>
 
                                         <div className="flex items-start gap-3">
-                                            <LockKeyhole
-                                                size={22}
-                                                className="mt-0.5 shrink-0 text-[#6048d8]"
-                                            />
+                                            <LockKeyhole size={22} className="mt-0.5 shrink-0 text-[#6048d8]" />
                                             <div>
-                                                <p className="text-base font-bold text-[#35275c]">
-                                                    Checkout safeguards
-                                                </p>
+                                                <p className="text-base font-bold text-[#35275c]">Checkout safeguards</p>
                                                 <p className="mt-1 text-base leading-6 text-[#756b91]">
-                                                    The checkout attempt
-                                                    identifier is reused
-                                                    according to your
-                                                    existing checkout logic.
+                                                    The checkout attempt identifier is reused according to your existing checkout logic.
                                                 </p>
                                             </div>
                                         </div>
@@ -1386,13 +1233,11 @@ export default function Checkout() {
                                         Built for interruptions
                                     </h2>
                                     <p className="mt-2 text-base leading-7 text-[#655981]">
-                                        If the connection drops, SHCom
-                                        checks again automatically. When
-                                        connectivity returns, you can
-                                        choose whether to restore your
-                                        saved checkout data.
+                                        If the connection drops, SHCom checks
+                                        again automatically. When connectivity
+                                        returns, you can choose whether to
+                                        restore your saved checkout data.
                                     </p>
-
                                     <Link
                                         to="/user/cart"
                                         className="mt-5 inline-flex items-center gap-2 text-base font-bold text-[#5c45c4] transition hover:text-[#3f2aa8]"
@@ -1422,10 +1267,8 @@ export default function Checkout() {
                             </p>
                         </div>
                     </div>
-
                     <p className="text-base text-[#756b91]">
-                        Your order status is determined by the checkout
-                        service.
+                        Your order status is determined by the checkout service.
                     </p>
                 </div>
             </footer>

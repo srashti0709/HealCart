@@ -11,6 +11,7 @@ import ServiceDependencyMap from "../components/ServiceDependencyMap";
 import IncidentTimeline from "../components/IncidentTimeline";
 import SyntheticTrafficPanel from "../components/SyntheticTrafficPanel";
 import LiveApiTrafficChart from "../components/LiveApiTrafficChart";
+import PaymentChaosRecoveryChart from "../components/PaymentChaosRecoveryChart";
 import {
   ResponsiveContainer,
   PieChart,
@@ -1082,518 +1083,517 @@ function Dashboard({ page = "overview" }) {
             )}
           </section>
 
-          
-<section
-  id="recovery-analytics"
-  className="dashboard-incidents-only scroll-mt-6 overflow-hidden rounded-2xl border border-[#292D24] bg-[#0D0F0D] p-4 sm:p-6"
->
-  <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-    <div>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#E5F500]">
-        Performance Insights / 01
-      </p>
-      <h3 className="mt-2 text-xl font-semibold tracking-tight text-[#F3F4F1]">
-        Recovery Analytics
-      </h3>
-      <p className="mt-1 text-xs text-[#92968F]">
-        Real incident data · Recovery performance and system resilience
-      </p>
-    </div>
-    <div className="flex items-center gap-2 rounded-full border border-[#292D24] bg-[#141813] px-3 py-1.5">
-      <span
-        className={`h-1.5 w-1.5 rounded-full ${
-          incidentsAreStale ? "bg-[#F5B942]" : "bg-[#35D07F]"
-        }`}
-      />
-      <span className="text-[10px] font-medium uppercase tracking-wider text-[#92968F]">
-        {incidentsAreStale ? "Data may be stale" : "Incident metrics"}
-      </span>
-    </div>
-  </div>
 
-  <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-    {[
-      {
-        label: "Total incidents",
-        value: totalIncidents,
-        color: "#E5F500",
-        index: "01",
-      },
-      {
-        label: "Resolved",
-        value: resolvedIncidents,
-        color: "#35D07F",
-        index: "02",
-      },
-      {
-        label: "Failed",
-        value: failedIncidents,
-        color: "#FF5C5C",
-        index: "03",
-      },
-      {
-        label: "Active incidents",
-        value: activeIncidents,
-        color: "#F5B942",
-        index: "04",
-      },
-    ].map((item) => (
-      <article
-        key={item.label}
-        className="group relative overflow-hidden rounded-xl border border-[#292D24] bg-[#141813] p-4 transition-colors duration-200 hover:border-[#414638] sm:p-5"
-      >
-        <div className="mb-5 flex items-center justify-between gap-2">
-          <span className="text-[10px] font-medium uppercase tracking-[0.13em] text-[#92968F]">
-            {item.label}
-          </span>
-          <span className="font-mono text-[10px] text-[#656B60]">
-            {item.index}
-          </span>
-        </div>
-        <div
-          className="text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl"
-          style={{ color: item.color }}
-        >
-          {item.value}
-        </div>
-        <div
-          className="absolute bottom-0 left-0 h-[2px] w-full origin-left scale-x-30 opacity-70 transition-transform duration-300 group-hover:scale-x-100"
-          style={{ backgroundColor: item.color }}
-        />
-      </article>
-    ))}
-  </div>
-
-  {incidentsAreStale ? (
-    <div className="mt-4 flex items-start gap-2 rounded-lg border border-[#F5B942]/20 bg-[#F5B942]/[0.06] px-3 py-2.5 text-xs text-[#F5B942]">
-      <AlertTriangle size={14} className="mt-0.5 shrink-0" />
-      <span>
-        These are the last figures loaded at{" "}
-        {incidentsUpdatedAtValue || "an earlier time"}. The backend
-        could not be reached, so the numbers may be out of date.
-      </span>
-    </div>
-  ) : incidentsUpdatedAt ? (
-    <p className="mt-3 text-[10px] text-[#92968F]">
-      Last updated at {incidentsUpdatedAt}
-    </p>
-  ) : null}
-
-  <div className="mt-5 grid gap-4 xl:grid-cols-2">
-    {/* Resolution donut chart */}
-    <article className="rounded-xl border border-[#292D24] bg-[#111410] p-4 sm:p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h4 className="text-sm font-semibold text-[#F3F4F1]">
-            Resolution Rate
-          </h4>
-          <p className="mt-1 text-[11px] text-[#92968F]">
-            Resolved vs. remaining incidents
-          </p>
-        </div>
-        <span className="rounded-md border border-[#E5F500]/15 bg-[#E5F500]/[0.06] px-2 py-1 text-[10px] text-[#E5F500]">
-          {recoverySuccessRate}%
-        </span>
-      </div>
-
-      <div className="mt-3 flex flex-col items-center gap-3 sm:flex-row sm:gap-6">
-        <div className="relative h-[190px] w-full max-w-[240px] shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={[
-                  { name: "Resolved", value: resolvedIncidents },
-                  {
-                    name: "Unresolved",
-                    value: Math.max(totalIncidents - resolvedIncidents, 0),
-                  },
-                ]}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                innerRadius={61}
-                outerRadius={83}
-                paddingAngle={totalIncidents > 0 ? 4 : 0}
-                stroke="none"
-                cornerRadius={4}
-              >
-                <Cell fill="#DEED00" />
-                <Cell fill="#292D24" />
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "#141813",
-                  border: "1px solid #414638",
-                  borderRadius: "10px",
-                  color: "#F3F4F1",
-                  fontSize: "12px",
-                }}
-                itemStyle={{ color: "#E5F500" }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-3xl font-semibold tabular-nums text-[#F3F4F1]">
-              {recoverySuccessRate}%
-            </span>
-            <span className="mt-1 text-[9px] uppercase tracking-[0.16em] text-[#92968F]">
-              Resolved
-            </span>
-          </div>
-        </div>
-
-        <div className="w-full space-y-4">
-          {[
-            {
-              label: "Resolved",
-              value: resolvedIncidents,
-              color: "#DEED00",
-            },
-            {
-              label: "Unresolved",
-              value: Math.max(totalIncidents - resolvedIncidents, 0),
-              color: "#414638",
-            },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center gap-3">
-              <span
-                className="h-2.5 w-2.5 shrink-0 rounded-sm"
-                style={{ backgroundColor: item.color }}
-              />
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-[#92968F]">{item.label}</p>
-              </div>
-              <span className="text-sm font-semibold tabular-nums text-[#F3F4F1]">
-                {item.value}
-              </span>
-            </div>
-          ))}
-          <div className="border-t border-[#292D24] pt-3">
-            <p className="text-[10px] leading-5 text-[#92968F]">
-              Share of all recorded incidents currently marked resolved.
-            </p>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    {/* Severity horizontal bar chart */}
-    <article className="rounded-xl border border-[#292D24] bg-[#111410] p-4 sm:p-5">
-      <div>
-        <h4 className="text-sm font-semibold text-[#F3F4F1]">
-          Incidents by Severity
-        </h4>
-        <p className="mt-1 text-[11px] text-[#92968F]">
-          Distribution by recorded severity level
-        </p>
-      </div>
-
-      <div className="mt-5 h-[220px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={incidentsBySeverity}
-            layout="vertical"
-            margin={{ top: 4, right: 20, bottom: 4, left: 0 }}
-            barCategoryGap="35%"
+          <section
+            id="recovery-analytics"
+            className="dashboard-incidents-only scroll-mt-6 overflow-hidden rounded-2xl border border-[#292D24] bg-[#0D0F0D] p-4 sm:p-6"
           >
-            <CartesianGrid
-              horizontal={false}
-              stroke="#292D24"
-              strokeDasharray="3 5"
-            />
-            <XAxis
-              type="number"
-              allowDecimals={false}
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: "#92968F", fontSize: 10 }}
-            />
-            <YAxis
-              type="category"
-              dataKey="label"
-              width={70}
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: "#C5C9BF", fontSize: 11 }}
-            />
-            <Tooltip
-              cursor={{ fill: "#292D24", opacity: 0.35 }}
-              contentStyle={{
-                backgroundColor: "#141813",
-                border: "1px solid #414638",
-                borderRadius: "10px",
-                color: "#F3F4F1",
-                fontSize: "12px",
-              }}
-            />
-            <Bar dataKey="count" name="Incidents" radius={[0, 5, 5, 0]}>
-              {incidentsBySeverity.map((item) => (
-                <Cell
-                  key={item.label}
-                  fill={
-                    {
-                      Critical: "#FF5C5C",
-                      High: "#FF8A4C",
-                      Medium: "#F5B942",
-                      Low: "#DEED00",
-                    }[item.label] || "#92968F"
-                  }
-                />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </article>
-
-    {/* Incident types donut chart with legend */}
-    <article className="rounded-xl border border-[#292D24] bg-[#111410] p-4 sm:p-5">
-      <div>
-        <h4 className="text-sm font-semibold text-[#F3F4F1]">
-          Incidents by Type
-        </h4>
-        <p className="mt-1 text-[11px] text-[#92968F]">
-          Which failure categories occur most often
-        </p>
-      </div>
-
-      {incidentsByType.length === 0 ? (
-        <div className="flex h-[230px] flex-col items-center justify-center text-center">
-          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full border border-[#292D24] bg-[#141813] text-[#92968F]">
-            <Activity size={18} />
-          </div>
-          <p className="text-sm text-[#F3F4F1]">No incidents recorded yet</p>
-          <p className="mt-1 text-[11px] text-[#92968F]">
-            Type distribution will appear when data is available.
-          </p>
-        </div>
-      ) : (
-        <div className="mt-2 grid items-center gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-          <div className="relative h-[220px] min-w-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={incidentsByType}
-                  dataKey="count"
-                  nameKey="label"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={54}
-                  outerRadius={83}
-                  paddingAngle={3}
-                  stroke="none"
-                  cornerRadius={3}
-                >
-                  {incidentsByType.map((item, index) => (
-                    <Cell
-                      key={item.label}
-                      fill={
-                        [
-                          "#DEED00",
-                          "#35D07F",
-                          "#69B7FF",
-                          "#B49AFF",
-                          "#F5B942",
-                          "#FF7E8A",
-                          "#42D6C5",
-                          "#92968F",
-                        ][index % 8]
-                      }
-                    />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#141813",
-                    border: "1px solid #414638",
-                    borderRadius: "10px",
-                    color: "#F3F4F1",
-                    fontSize: "12px",
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-semibold tabular-nums text-[#F3F4F1]">
-                {totalIncidents}
-              </span>
-              <span className="mt-1 text-[9px] uppercase tracking-wider text-[#92968F]">
-                Total
-              </span>
-            </div>
-          </div>
-
-          <div className="max-h-[220px] space-y-3 overflow-y-auto pr-1">
-            {incidentsByType.map((item, index) => (
-              <div key={item.label} className="flex items-start gap-2.5">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#E5F500]">
+                  Performance Insights / 01
+                </p>
+                <h3 className="mt-2 text-xl font-semibold tracking-tight text-[#F3F4F1]">
+                  Recovery Analytics
+                </h3>
+                <p className="mt-1 text-xs text-[#92968F]">
+                  Real incident data · Recovery performance and system resilience
+                </p>
+              </div>
+              <div className="flex items-center gap-2 rounded-full border border-[#292D24] bg-[#141813] px-3 py-1.5">
                 <span
-                  className="mt-1 h-2 w-2 shrink-0 rounded-full"
-                  style={{
-                    backgroundColor: [
-                      "#DEED00",
-                      "#35D07F",
-                      "#69B7FF",
-                      "#B49AFF",
-                      "#F5B942",
-                      "#FF7E8A",
-                      "#42D6C5",
-                      "#92968F",
-                    ][index % 8],
-                  }}
+                  className={`h-1.5 w-1.5 rounded-full ${incidentsAreStale ? "bg-[#F5B942]" : "bg-[#35D07F]"
+                    }`}
                 />
-                <span className="min-w-0 flex-1 break-words text-[11px] leading-4 text-[#B9BDB3]">
-                  {item.label}
-                </span>
-                <span className="text-xs font-medium tabular-nums text-[#F3F4F1]">
-                  {item.count}
+                <span className="text-[10px] font-medium uppercase tracking-wider text-[#92968F]">
+                  {incidentsAreStale ? "Data may be stale" : "Incident metrics"}
                 </span>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </article>
+            </div>
 
-    
-{/* Recovery actions ranked bar chart */}
-<article className="rounded-xl border border-[#292D24] bg-[#111410] p-4 sm:p-5">
-  <div>
-    <h4 className="text-sm font-semibold text-[#F3F4F1]">
-      Recovery Action Summary
-    </h4>
-    <p className="mt-1 text-[11px] text-[#92968F]">
-      Recorded recovery actions, ranked by frequency
-    </p>
-  </div>
-
-  {recoveryActionsSummary.length === 0 ? (
-    <div className="flex h-[230px] flex-col items-center justify-center text-center">
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full border border-[#292D24] bg-[#141813] text-[#92968F]">
-        <Activity size={18} />
-      </div>
-      <p className="text-sm text-[#F3F4F1]">
-        No recovery actions recorded yet
-      </p>
-      <p className="mt-1 text-[11px] text-[#92968F]">
-        Recorded actions will appear here.
-      </p>
-    </div>
-  ) : (
-    <div className="mt-4 h-[260px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={recoveryActionsSummary
-            .slice()
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 6)}
-          layout="vertical"
-          margin={{ top: 6, right: 16, bottom: 6, left: 4 }}
-          barCategoryGap="24%"
-        >
-          <CartesianGrid
-            horizontal={false}
-            stroke="#292D24"
-            strokeDasharray="3 5"
-          />
-
-          <XAxis
-            type="number"
-            allowDecimals={false}
-            axisLine={false}
-            tickLine={false}
-            tick={{ fill: "#92968F", fontSize: 10 }}
-          />
-
-          <YAxis
-            type="category"
-            dataKey="action"
-            width={150}
-            interval={0}
-            axisLine={false}
-            tickLine={false}
-            tick={({ x, y, payload }) => {
-              const words = String(payload.value || "").split(/\s+/);
-              const lines = [];
-              let currentLine = "";
-
-              words.forEach((word) => {
-                const candidate = currentLine
-                  ? `${currentLine} ${word}`
-                  : word;
-
-                if (candidate.length > 19 && currentLine) {
-                  lines.push(currentLine);
-                  currentLine = word;
-                } else {
-                  currentLine = candidate;
-                }
-              });
-
-              if (currentLine) lines.push(currentLine);
-
-              return (
-                <text
-                  x={x - 8}
-                  y={y}
-                  fill="#C5C9BF"
-                  fontSize={10}
-                  textAnchor="end"
-                  dominantBaseline="central"
+            <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+              {[
+                {
+                  label: "Total incidents",
+                  value: totalIncidents,
+                  color: "#E5F500",
+                  index: "01",
+                },
+                {
+                  label: "Resolved",
+                  value: resolvedIncidents,
+                  color: "#35D07F",
+                  index: "02",
+                },
+                {
+                  label: "Failed",
+                  value: failedIncidents,
+                  color: "#FF5C5C",
+                  index: "03",
+                },
+                {
+                  label: "Active incidents",
+                  value: activeIncidents,
+                  color: "#F5B942",
+                  index: "04",
+                },
+              ].map((item) => (
+                <article
+                  key={item.label}
+                  className="group relative overflow-hidden rounded-xl border border-[#292D24] bg-[#141813] p-4 transition-colors duration-200 hover:border-[#414638] sm:p-5"
                 >
-                  {lines.slice(0, 2).map((line, index) => (
-                    <tspan
-                      key={`${line}-${index}`}
-                      x={x - 8}
-                      dy={
-                        index === 0
-                          ? lines.length > 1
-                            ? "-0.35em"
-                            : "0"
-                          : "1.15em"
-                      }
+                  <div className="mb-5 flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-medium uppercase tracking-[0.13em] text-[#92968F]">
+                      {item.label}
+                    </span>
+                    <span className="font-mono text-[10px] text-[#656B60]">
+                      {item.index}
+                    </span>
+                  </div>
+                  <div
+                    className="text-3xl font-semibold tracking-tight tabular-nums sm:text-4xl"
+                    style={{ color: item.color }}
+                  >
+                    {item.value}
+                  </div>
+                  <div
+                    className="absolute bottom-0 left-0 h-[2px] w-full origin-left scale-x-30 opacity-70 transition-transform duration-300 group-hover:scale-x-100"
+                    style={{ backgroundColor: item.color }}
+                  />
+                </article>
+              ))}
+            </div>
+
+            {incidentsAreStale ? (
+              <div className="mt-4 flex items-start gap-2 rounded-lg border border-[#F5B942]/20 bg-[#F5B942]/[0.06] px-3 py-2.5 text-xs text-[#F5B942]">
+                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
+                <span>
+                  These are the last figures loaded at{" "}
+                  {incidentsUpdatedAtValue || "an earlier time"}. The backend
+                  could not be reached, so the numbers may be out of date.
+                </span>
+              </div>
+            ) : incidentsUpdatedAt ? (
+              <p className="mt-3 text-[10px] text-[#92968F]">
+                Last updated at {incidentsUpdatedAt}
+              </p>
+            ) : null}
+
+            <div className="mt-5 grid gap-4 xl:grid-cols-2">
+              {/* Resolution donut chart */}
+              <article className="rounded-xl border border-[#292D24] bg-[#111410] p-4 sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h4 className="text-sm font-semibold text-[#F3F4F1]">
+                      Resolution Rate
+                    </h4>
+                    <p className="mt-1 text-[11px] text-[#92968F]">
+                      Resolved vs. remaining incidents
+                    </p>
+                  </div>
+                  <span className="rounded-md border border-[#E5F500]/15 bg-[#E5F500]/[0.06] px-2 py-1 text-[10px] text-[#E5F500]">
+                    {recoverySuccessRate}%
+                  </span>
+                </div>
+
+                <div className="mt-3 flex flex-col items-center gap-3 sm:flex-row sm:gap-6">
+                  <div className="relative h-[190px] w-full max-w-[240px] shrink-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: "Resolved", value: resolvedIncidents },
+                            {
+                              name: "Unresolved",
+                              value: Math.max(totalIncidents - resolvedIncidents, 0),
+                            },
+                          ]}
+                          dataKey="value"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={61}
+                          outerRadius={83}
+                          paddingAngle={totalIncidents > 0 ? 4 : 0}
+                          stroke="none"
+                          cornerRadius={4}
+                        >
+                          <Cell fill="#DEED00" />
+                          <Cell fill="#292D24" />
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "#141813",
+                            border: "1px solid #414638",
+                            borderRadius: "10px",
+                            color: "#F3F4F1",
+                            fontSize: "12px",
+                          }}
+                          itemStyle={{ color: "#E5F500" }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-3xl font-semibold tabular-nums text-[#F3F4F1]">
+                        {recoverySuccessRate}%
+                      </span>
+                      <span className="mt-1 text-[9px] uppercase tracking-[0.16em] text-[#92968F]">
+                        Resolved
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="w-full space-y-4">
+                    {[
+                      {
+                        label: "Resolved",
+                        value: resolvedIncidents,
+                        color: "#DEED00",
+                      },
+                      {
+                        label: "Unresolved",
+                        value: Math.max(totalIncidents - resolvedIncidents, 0),
+                        color: "#414638",
+                      },
+                    ].map((item) => (
+                      <div key={item.label} className="flex items-center gap-3">
+                        <span
+                          className="h-2.5 w-2.5 shrink-0 rounded-sm"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-[#92968F]">{item.label}</p>
+                        </div>
+                        <span className="text-sm font-semibold tabular-nums text-[#F3F4F1]">
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="border-t border-[#292D24] pt-3">
+                      <p className="text-[10px] leading-5 text-[#92968F]">
+                        Share of all recorded incidents currently marked resolved.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              {/* Severity horizontal bar chart */}
+              <article className="rounded-xl border border-[#292D24] bg-[#111410] p-4 sm:p-5">
+                <div>
+                  <h4 className="text-sm font-semibold text-[#F3F4F1]">
+                    Incidents by Severity
+                  </h4>
+                  <p className="mt-1 text-[11px] text-[#92968F]">
+                    Distribution by recorded severity level
+                  </p>
+                </div>
+
+                <div className="mt-5 h-[220px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={incidentsBySeverity}
+                      layout="vertical"
+                      margin={{ top: 4, right: 20, bottom: 4, left: 0 }}
+                      barCategoryGap="35%"
                     >
-                      {line}
-                    </tspan>
-                  ))}
-                </text>
-              );
-            }}
-          />
+                      <CartesianGrid
+                        horizontal={false}
+                        stroke="#292D24"
+                        strokeDasharray="3 5"
+                      />
+                      <XAxis
+                        type="number"
+                        allowDecimals={false}
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "#92968F", fontSize: 10 }}
+                      />
+                      <YAxis
+                        type="category"
+                        dataKey="label"
+                        width={70}
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "#C5C9BF", fontSize: 11 }}
+                      />
+                      <Tooltip
+                        cursor={{ fill: "#292D24", opacity: 0.35 }}
+                        contentStyle={{
+                          backgroundColor: "#141813",
+                          border: "1px solid #414638",
+                          borderRadius: "10px",
+                          color: "#F3F4F1",
+                          fontSize: "12px",
+                        }}
+                      />
+                      <Bar dataKey="count" name="Incidents" radius={[0, 5, 5, 0]}>
+                        {incidentsBySeverity.map((item) => (
+                          <Cell
+                            key={item.label}
+                            fill={
+                              {
+                                Critical: "#FF5C5C",
+                                High: "#FF8A4C",
+                                Medium: "#F5B942",
+                                Low: "#DEED00",
+                              }[item.label] || "#92968F"
+                            }
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </article>
 
-          <Tooltip
-            cursor={{ fill: "#292D24", opacity: 0.35 }}
-            contentStyle={{
-              backgroundColor: "#141813",
-              border: "1px solid #414638",
-              borderRadius: "10px",
-              color: "#F3F4F1",
-              fontSize: "12px",
-            }}
-            labelStyle={{ color: "#F3F4F1" }}
-          />
+              {/* Incident types donut chart with legend */}
+              <article className="rounded-xl border border-[#292D24] bg-[#111410] p-4 sm:p-5">
+                <div>
+                  <h4 className="text-sm font-semibold text-[#F3F4F1]">
+                    Incidents by Type
+                  </h4>
+                  <p className="mt-1 text-[11px] text-[#92968F]">
+                    Which failure categories occur most often
+                  </p>
+                </div>
 
-          <Bar
-            dataKey="count"
-            name="Recorded actions"
-            fill="#35D07F"
-            radius={[0, 5, 5, 0]}
-            maxBarSize={24}
-          />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  )}
+                {incidentsByType.length === 0 ? (
+                  <div className="flex h-[230px] flex-col items-center justify-center text-center">
+                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full border border-[#292D24] bg-[#141813] text-[#92968F]">
+                      <Activity size={18} />
+                    </div>
+                    <p className="text-sm text-[#F3F4F1]">No incidents recorded yet</p>
+                    <p className="mt-1 text-[11px] text-[#92968F]">
+                      Type distribution will appear when data is available.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-2 grid items-center gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                    <div className="relative h-[220px] min-w-0">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={incidentsByType}
+                            dataKey="count"
+                            nameKey="label"
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={54}
+                            outerRadius={83}
+                            paddingAngle={3}
+                            stroke="none"
+                            cornerRadius={3}
+                          >
+                            {incidentsByType.map((item, index) => (
+                              <Cell
+                                key={item.label}
+                                fill={
+                                  [
+                                    "#DEED00",
+                                    "#35D07F",
+                                    "#69B7FF",
+                                    "#B49AFF",
+                                    "#F5B942",
+                                    "#FF7E8A",
+                                    "#42D6C5",
+                                    "#92968F",
+                                  ][index % 8]
+                                }
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: "#141813",
+                              border: "1px solid #414638",
+                              borderRadius: "10px",
+                              color: "#F3F4F1",
+                              fontSize: "12px",
+                            }}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-2xl font-semibold tabular-nums text-[#F3F4F1]">
+                          {totalIncidents}
+                        </span>
+                        <span className="mt-1 text-[9px] uppercase tracking-wider text-[#92968F]">
+                          Total
+                        </span>
+                      </div>
+                    </div>
 
-  {recoveryActionsSummary.length > 6 && (
-    <p className="mt-1 text-[10px] text-[#656B60]">
-      Showing the top 6 actions by frequency.
-    </p>
-  )}
-</article>
+                    <div className="max-h-[220px] space-y-3 overflow-y-auto pr-1">
+                      {incidentsByType.map((item, index) => (
+                        <div key={item.label} className="flex items-start gap-2.5">
+                          <span
+                            className="mt-1 h-2 w-2 shrink-0 rounded-full"
+                            style={{
+                              backgroundColor: [
+                                "#DEED00",
+                                "#35D07F",
+                                "#69B7FF",
+                                "#B49AFF",
+                                "#F5B942",
+                                "#FF7E8A",
+                                "#42D6C5",
+                                "#92968F",
+                              ][index % 8],
+                            }}
+                          />
+                          <span className="min-w-0 flex-1 break-words text-[11px] leading-4 text-[#B9BDB3]">
+                            {item.label}
+                          </span>
+                          <span className="text-xs font-medium tabular-nums text-[#F3F4F1]">
+                            {item.count}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </article>
 
-  </div>
-</section>
+
+              {/* Recovery actions ranked bar chart */}
+              <article className="rounded-xl border border-[#292D24] bg-[#111410] p-4 sm:p-5">
+                <div>
+                  <h4 className="text-sm font-semibold text-[#F3F4F1]">
+                    Recovery Action Summary
+                  </h4>
+                  <p className="mt-1 text-[11px] text-[#92968F]">
+                    Recorded recovery actions, ranked by frequency
+                  </p>
+                </div>
+
+                {recoveryActionsSummary.length === 0 ? (
+                  <div className="flex h-[230px] flex-col items-center justify-center text-center">
+                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full border border-[#292D24] bg-[#141813] text-[#92968F]">
+                      <Activity size={18} />
+                    </div>
+                    <p className="text-sm text-[#F3F4F1]">
+                      No recovery actions recorded yet
+                    </p>
+                    <p className="mt-1 text-[11px] text-[#92968F]">
+                      Recorded actions will appear here.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-4 h-[260px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={recoveryActionsSummary
+                          .slice()
+                          .sort((a, b) => b.count - a.count)
+                          .slice(0, 6)}
+                        layout="vertical"
+                        margin={{ top: 6, right: 16, bottom: 6, left: 4 }}
+                        barCategoryGap="24%"
+                      >
+                        <CartesianGrid
+                          horizontal={false}
+                          stroke="#292D24"
+                          strokeDasharray="3 5"
+                        />
+
+                        <XAxis
+                          type="number"
+                          allowDecimals={false}
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: "#92968F", fontSize: 10 }}
+                        />
+
+                        <YAxis
+                          type="category"
+                          dataKey="action"
+                          width={150}
+                          interval={0}
+                          axisLine={false}
+                          tickLine={false}
+                          tick={({ x, y, payload }) => {
+                            const words = String(payload.value || "").split(/\s+/);
+                            const lines = [];
+                            let currentLine = "";
+
+                            words.forEach((word) => {
+                              const candidate = currentLine
+                                ? `${currentLine} ${word}`
+                                : word;
+
+                              if (candidate.length > 19 && currentLine) {
+                                lines.push(currentLine);
+                                currentLine = word;
+                              } else {
+                                currentLine = candidate;
+                              }
+                            });
+
+                            if (currentLine) lines.push(currentLine);
+
+                            return (
+                              <text
+                                x={x - 8}
+                                y={y}
+                                fill="#C5C9BF"
+                                fontSize={10}
+                                textAnchor="end"
+                                dominantBaseline="central"
+                              >
+                                {lines.slice(0, 2).map((line, index) => (
+                                  <tspan
+                                    key={`${line}-${index}`}
+                                    x={x - 8}
+                                    dy={
+                                      index === 0
+                                        ? lines.length > 1
+                                          ? "-0.35em"
+                                          : "0"
+                                        : "1.15em"
+                                    }
+                                  >
+                                    {line}
+                                  </tspan>
+                                ))}
+                              </text>
+                            );
+                          }}
+                        />
+
+                        <Tooltip
+                          cursor={{ fill: "#292D24", opacity: 0.35 }}
+                          contentStyle={{
+                            backgroundColor: "#141813",
+                            border: "1px solid #414638",
+                            borderRadius: "10px",
+                            color: "#F3F4F1",
+                            fontSize: "12px",
+                          }}
+                          labelStyle={{ color: "#F3F4F1" }}
+                        />
+
+                        <Bar
+                          dataKey="count"
+                          name="Recorded actions"
+                          fill="#35D07F"
+                          radius={[0, 5, 5, 0]}
+                          maxBarSize={24}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+
+                {recoveryActionsSummary.length > 6 && (
+                  <p className="mt-1 text-[10px] text-[#656B60]">
+                    Showing the top 6 actions by frequency.
+                  </p>
+                )}
+              </article>
+
+            </div>
+          </section>
 
           {/* //chaos control */}
           <section
@@ -1611,12 +1611,12 @@ function Dashboard({ page = "overview" }) {
                     </span>
                     <span
                       className={`rounded border px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider ${chaosRunning
-                          ? "border-[#F5B942]/30 bg-[#F5B942]/10 text-[#F5B942]"
-                          : chaosError
-                            ? "border-[#FF5C5C]/30 bg-[#FF5C5C]/10 text-[#FF7777]"
-                            : chaosResult
-                              ? "border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F]"
-                              : "border-[#41452F] bg-[#202319] text-[#C8CBAA]"
+                        ? "border-[#F5B942]/30 bg-[#F5B942]/10 text-[#F5B942]"
+                        : chaosError
+                          ? "border-[#FF5C5C]/30 bg-[#FF5C5C]/10 text-[#FF7777]"
+                          : chaosResult
+                            ? "border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F]"
+                            : "border-[#41452F] bg-[#202319] text-[#C8CBAA]"
                         }`}
                     >
                       {chaosRunning
@@ -1639,10 +1639,10 @@ function Dashboard({ page = "overview" }) {
                 <div className="flex shrink-0 items-center gap-2 rounded-lg border border-[#34382B] bg-[#0D100D] px-3 py-2">
                   <span
                     className={`h-2 w-2 rounded-full ${chaosRunning
-                        ? "animate-pulse bg-[#F5B942]"
-                        : chaosError
-                          ? "bg-[#FF5C5C]"
-                          : "bg-[#35D07F]"
+                      ? "animate-pulse bg-[#F5B942]"
+                      : chaosError
+                        ? "bg-[#FF5C5C]"
+                        : "bg-[#35D07F]"
                       }`}
                   />
                   <span className="font-mono text-[10px] uppercase tracking-wider text-[#B8BBA8]">
@@ -1715,12 +1715,12 @@ function Dashboard({ page = "overview" }) {
                   </div>
                   <span
                     className={`shrink-0 rounded border px-2 py-1 font-mono text-[9px] uppercase tracking-wider ${chaosRunning
-                        ? "border-[#F5B942]/30 bg-[#F5B942]/10 text-[#F5B942]"
-                        : chaosError
-                          ? "border-[#FF5C5C]/30 bg-[#FF5C5C]/10 text-[#FF7777]"
-                          : chaosResult
-                            ? "border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F]"
-                            : "border-[#41452F] bg-[#202319] text-[#C8CBAA]"
+                      ? "border-[#F5B942]/30 bg-[#F5B942]/10 text-[#F5B942]"
+                      : chaosError
+                        ? "border-[#FF5C5C]/30 bg-[#FF5C5C]/10 text-[#FF7777]"
+                        : chaosResult
+                          ? "border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F]"
+                          : "border-[#41452F] bg-[#202319] text-[#C8CBAA]"
                       }`}
                   >
                     {chaosRunning
@@ -1833,10 +1833,10 @@ function Dashboard({ page = "overview" }) {
                   </div>
                   <span
                     className={`shrink-0 rounded border px-2 py-1 font-mono text-[9px] uppercase tracking-wider ${paymentRecovery.status === "recovered"
-                        ? "border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F]"
-                        : paymentRecovery.running
-                          ? "border-[#F5B942]/30 bg-[#F5B942]/10 text-[#F5B942]"
-                          : "border-[#41452F] bg-[#202319] text-[#C8CBAA]"
+                      ? "border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F]"
+                      : paymentRecovery.running
+                        ? "border-[#F5B942]/30 bg-[#F5B942]/10 text-[#F5B942]"
+                        : "border-[#41452F] bg-[#202319] text-[#C8CBAA]"
                       }`}
                   >
                     {paymentRecovery.status === "recovered"
@@ -1888,10 +1888,10 @@ function Dashboard({ page = "overview" }) {
                           </div>
                           <span
                             className={`shrink-0 font-mono text-[9px] uppercase ${s.status === "recovered"
-                                ? "text-[#35D07F]"
-                                : s.status === "error"
-                                  ? "text-[#FF7777]"
-                                  : "text-[#F5B942]"
+                              ? "text-[#35D07F]"
+                              : s.status === "error"
+                                ? "text-[#FF7777]"
+                                : "text-[#F5B942]"
                               }`}
                           >
                             {s.status}
@@ -1909,6 +1909,10 @@ function Dashboard({ page = "overview" }) {
                     </div>
                   )}
                 </div>
+                <PaymentChaosRecoveryChart
+                  recovery={paymentRecovery}
+                  incidents={incidents}
+                />
                 {paymentChaosMessage && (
                   <p
                     role="status"
@@ -2000,12 +2004,12 @@ function Dashboard({ page = "overview" }) {
                       </div>
                       <span
                         className={`w-fit rounded border px-2.5 py-1 font-mono text-[9px] font-semibold uppercase tracking-wider ${raceRun.status === "recovered"
-                            ? "border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F]"
-                            : raceRun.status === "failed"
-                              ? "border-[#FF5C5C]/30 bg-[#FF5C5C]/10 text-[#FF7777]"
-                              : raceRun.status === "recovering"
-                                ? "border-[#F5B942]/30 bg-[#F5B942]/10 text-[#F5B942]"
-                                : "border-[#42462C] bg-[#24271B] text-[#DEED00]"
+                          ? "border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F]"
+                          : raceRun.status === "failed"
+                            ? "border-[#FF5C5C]/30 bg-[#FF5C5C]/10 text-[#FF7777]"
+                            : raceRun.status === "recovering"
+                              ? "border-[#F5B942]/30 bg-[#F5B942]/10 text-[#F5B942]"
+                              : "border-[#42462C] bg-[#24271B] text-[#DEED00]"
                           }`}
                       >
                         {raceRun.status === "recovered"
@@ -2453,10 +2457,10 @@ function Dashboard({ page = "overview" }) {
                         </p>
                         <span
                           className={`rounded-full px-2.5 py-1 text-[10px] font-medium ${experiment.status === "passed"
-                              ? "bg-[#35D07F]/10 text-[#35D07F]"
-                              : experiment.status === "stopped"
-                                ? "bg-[#F5B942]/10 text-[#F5B942]"
-                                : "bg-[#FF5C5C]/10 text-[#FF5C5C]"
+                            ? "bg-[#35D07F]/10 text-[#35D07F]"
+                            : experiment.status === "stopped"
+                              ? "bg-[#F5B942]/10 text-[#F5B942]"
+                              : "bg-[#FF5C5C]/10 text-[#FF5C5C]"
                             }`}
                         >
                           {experiment.status || "Unknown"}

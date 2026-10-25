@@ -9,5 +9,6 @@ const {
 
 router.get("/", getIncidents);
 router.post("/", createIncident);
+router.delete("/payment-timeout", clearPaymentTimeoutIncidents);
 
 module.exports = router;

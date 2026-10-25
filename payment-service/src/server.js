@@ -12,8 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 const CHAOS_TEST_TOKEN = process.env.CHAOS_TEST_TOKEN;
 
-let simulateTimeoutEnabled =
-  process.env.SIMULATE_PAYMENT_TIMEOUT === "true";
+let simulateTimeoutEnabled = false;
 
 app.use(express.json());
 

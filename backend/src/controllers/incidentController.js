@@ -60,4 +60,24 @@ const createIncident = async (req, res) => {
   }
 };
 
-module.exports = { getIncidents, createIncident };
+const clearPaymentTimeoutIncidents = async (req, res) => {
+  try {
+    const result = await Incident.deleteMany({
+      incidentType: "payment_timeout_recovery",
+    });
+
+    res.status(200).json({
+      success: true,
+      message: `Cleared ${result.deletedCount} payment timeout recovery incidents.`,
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to clear payment timeout incidents",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { getIncidents, createIncident, clearPaymentTimeoutIncidents };
