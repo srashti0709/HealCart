@@ -842,20 +842,20 @@ function Dashboard({ page = "overview" }) {
         }
       `}</style>
       <main className="min-w-0 flex-1">
-        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-surface-container-high px-6 py-5 lg:px-10 bg-[rgba(11,15,11,0.8)] backdrop-blur-md sticky top-0 z-20">
+        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#272A26] px-6 py-5 lg:px-10 bg-[#080908] sticky top-0 z-20 shadow-sm shadow-black/40">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary-fixed">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#DEED00]">
               HealCart / Operations
             </p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-on-surface">
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-[#E1E3DA]">
               {page === "incidents" ? "Incidents" : page === "chaos-center" ? "Chaos Center" : "System Overview"}
             </h2>
-            <p className="mt-1 text-sm text-on-surface-variant">
+            <p className="mt-1 text-sm text-[#85897B]">
               {page === "incidents" ? "Incident history, diagnosis and recovery outcomes" : page === "chaos-center" ? "Run controlled failures and verify self-healing behavior" : "Live service health and recovery overview"}
             </p>
           </div>
           <div className="flex flex-col gap-2">
-            <span className="text-xs text-[#92968F]">
+            <span className="text-xs text-[#85897B]">
               {lastChecked
                 ? `Last checked: ${lastChecked}`
                 : "Waiting for first health check"}
@@ -863,7 +863,7 @@ function Dashboard({ page = "overview" }) {
             <button
               onClick={refreshAllStatuses}
               disabled={checking}
-              className="flex items-center justify-center gap-2 rounded-lg border border-[#272A26] px-3 py-2 text-xs text-[#F3F4F1] hover:bg-[#171917] disabled:opacity-50 transition-colors"
+              className="flex items-center justify-center gap-2 rounded-lg border border-[#DEED00]/30 bg-[#DEED00] px-3 py-2 text-xs font-semibold text-[#242700] shadow-[0_0_14px_rgba(222,237,0,0.08)] transition-colors hover:bg-[#EFFA38] disabled:opacity-50"
             >
               <RefreshCw
                 size={14}
@@ -874,45 +874,45 @@ function Dashboard({ page = "overview" }) {
           </div>
         </header>
         <div className="dashboard-content space-y-8 p-6 lg:p-10">
-          <section id="overview" className="dashboard-overview-only scroll-mt-6 overflow-hidden rounded-[2rem] border border-surface-container-high bg-surface-container-low/60 backdrop-blur-md p-6 lg:p-8 shadow-xl shadow-black/20">
-            <div className="relative overflow-hidden rounded-[1.5rem] bg-surface-container-lowest/80 backdrop-blur-sm border border-surface-container-high p-6 lg:p-8 mb-8 shadow-lg shadow-black/10">
+          <section id="overview" className="dashboard-overview-only scroll-mt-6 overflow-hidden rounded-[2rem] border border-[#272A26] bg-[#080908]/80 backdrop-blur-md p-6 lg:p-8 shadow-xl shadow-black/20">
+            <div className="relative overflow-hidden rounded-[1.5rem] bg-[#0c0f0c]/60 backdrop-blur-sm border border-[#272A26] p-6 lg:p-8 mb-8 shadow-lg shadow-black/10">
               <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-start gap-4 max-w-3xl">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-primary-fixed/10 text-primary-fixed shrink-0 shadow-[0_0_12px_rgba(222,237,0,0.25)]">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[#DEED00]/10 text-[#DEED00] shrink-0 shadow-[0_0_12px_rgba(222,237,0,0.25)]">
                     <Activity size={26} />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <h3 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">
-                      Welcome to <span className="font-editorial-accent italic text-primary-fixed font-normal">HealCart</span> <span className="font-editorial-accent italic text-primary-fixed font-normal">Operations</span>
+                    <h3 className="font-headline-lg text-headline-lg text-[#E1E3DA] tracking-tight">
+                      Welcome to <span className="font-editorial-accent italic text-[#DEED00] font-normal">HealCart</span> <span className="font-editorial-accent italic text-[#DEED00] font-normal">Operations</span>
                     </h3>
-                    <p className="font-body-default text-body-default text-on-surface-variant leading-relaxed">
+                    <p className="font-body-default text-body-default text-[#85897B] leading-relaxed">
                       Track service availability, investigate incidents, and understand how HealCart responds to failures. Service status is retrieved directly from your running backend telemetry stream and recovery monitor.
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 shrink-0 self-start md:self-auto bg-surface-container-low/60 backdrop-blur-md px-4 py-3 rounded-xl border border-surface-container-high">
+                <div className="flex items-center gap-3 shrink-0 self-start md:self-auto bg-[#0c0f0c]/60 backdrop-blur-md px-4 py-3 rounded-xl border border-[#272A26]">
                   <div className="flex flex-col">
-                    <span className="font-code-xs text-code-xs text-outline uppercase tracking-wider">Topology Health</span>
-                    <span className="font-status-pill text-status-pill text-secondary flex items-center gap-1.5 mt-0.5">
-                      <span className="w-2 h-2 rounded-full bg-secondary shadow-[0_0_6px_rgba(74,224,141,0.8)]"></span>
+                    <span className="font-code-xs text-code-xs uppercase text-[#85897B] tracking-wider">Topology Health</span>
+                    <span className="font-status-pill text-status-pill text-[#F5B942] flex items-center gap-1.5 mt-0.5">
+                      <span className="w-2 h-2 rounded-full bg-[#F5B942] shadow-[0_0_6px_rgba(74,224,141,0.8)]"></span>
                       ALL SYSTEMS NOMINAL
                     </span>
                   </div>
-                  <div className="h-6 w-px bg-surface-container-highest mx-3"></div>
+                  <div className="h-6 w-px bg-[#272A26] mx-3"></div>
                   <div className="flex flex-col">
-                    <span className="font-code-xs text-code-xs text-outline uppercase tracking-wider">Mesh Ingress</span>
-                    <span className="font-code-xs text-code-xs text-primary-fixed mt-0.5 font-semibold">1,420 req/s</span>
+                    <span className="font-code-xs text-code-xs uppercase text-[#85897B] tracking-wider">Mesh Ingress</span>
+                    <span className="font-code-xs text-code-xs text-[#DEED00] mt-0.5 font-semibold">1,420 req/s</span>
                   </div>
                 </div>
               </div>
             </div>
           </section>
-          <section id="service-health" className="dashboard-overview-only scroll-mt-6 overflow-hidden rounded-[2rem] border border-surface-container-high bg-surface-container-low/60 backdrop-blur-md p-6 lg:p-8 shadow-xl shadow-black/20">
+          <section id="service-health" className="dashboard-overview-only scroll-mt-6 overflow-hidden rounded-[2rem] border border-[#272A26] bg-[#080908]/80 backdrop-blur-md p-6 lg:p-8 shadow-xl shadow-black/20">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold tracking-tight text-[#F3F4F1]">
+              <h3 className="text-lg font-semibold tracking-tight text-[#E1E3DA]">
                 Service Health
               </h3>
-              <p className="mt-1 text-xs leading-5 text-[#92968F]">
+              <p className="mt-1 text-xs leading-5 text-[#85897B]">
                 Live backend, database and recovery-monitor status.
               </p>
             </div>
@@ -920,10 +920,10 @@ function Dashboard({ page = "overview" }) {
               {services.map(({ name, detail, icon: Icon, status }) => (
                 <article
                   key={name}
-                  className="rounded-[1.5rem] border border-surface-container-high bg-surface-container-low/80 backdrop-blur-md p-6 shadow-lg shadow-black/20 transition-all hover:border-primary-fixed/50"
+                  className="rounded-[1.5rem] border border-[#272A26] bg-[#0c0f0c]/80 backdrop-blur-md p-6 shadow-lg shadow-black/20 transition-all hover:border-[#DEED00]/50 hover:bg-[#0c0f0c]"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <div className="rounded-lg bg-surface-container-low p-2.5 border border-surface-container-high/50 text-primary-fixed">
+                    <div className="rounded-lg bg-[#0c0f0c] p-2.5 border border-[#272A26]/50 text-[#DEED00]">
                       <Icon size={19} />
                     </div>
                     <span
@@ -933,30 +933,30 @@ function Dashboard({ page = "overview" }) {
                           status === "Disconnected" ||
                           status === "Degraded"
                           ? "border-[#FF5C5C]/30 bg-[#FF5C5C]/10 text-[#FF5C5C]"
-                          : "border-[#272A26] text-[#F3F4F1]"}`}
+                          : "border-[#DEED00]/30 bg-[#DEED00]/10 text-[#DEED00]"}`}
                     >
                       {status}
                     </span>
                   </div>
-                  <h4 className="mt-6 font-semibold text-[#F3F4F1]">{name}</h4>
-                  <p className="mt-1 text-xs leading-5 text-[#92968F]">{detail}</p>
+                  <h4 className="mt-6 font-semibold text-[#E1E3DA]">{name}</h4>
+                  <p className="mt-1 text-xs leading-5 text-[#85897B]">{detail}</p>
             {name === "Recovery Monitor" && recoveryInfo && (
-              <div className="mt-5 space-y-2 border-t border-surface-container-high pt-3 text-xs">
+              <div className="mt-5 space-y-2 border-t border-[#272A26] pt-3 text-xs">
                 <div className="flex justify-between gap-3">
-                  <span className="text-[#92968F]">Container</span>
-                  <span className="text-[#F3F4F1]">
+                  <span className="text-[#85897B]">Container</span>
+                  <span className="text-[#E1E3DA]">
                     {recoveryInfo.container}
                   </span>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <span className="text-[#92968F]">Docker status</span>
-                  <span className="text-[#F3F4F1]">
+                  <span className="text-[#85897B]">Docker status</span>
+                  <span className="text-[#E1E3DA]">
                     {recoveryInfo.status}
                   </span>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <span className="text-[#92968F]">Restart count</span>
-                  <span className="text-[#F3F4F1]">
+                  <span className="text-[#85897B]">Restart count</span>
+                  <span className="text-[#E1E3DA]">
                     {recoveryInfo.restartCount ?? "Unknown"}
                   </span>
                 </div>
@@ -972,21 +972,21 @@ function Dashboard({ page = "overview" }) {
             </div>
           </section>
           <div className="dashboard-overview-only">
-            <div className="rounded-[1.5rem] border border-surface-container-high bg-surface-container-low/60 backdrop-blur-md p-6 lg:p-8 shadow-lg shadow-black/20">
+            <div className="rounded-[1.5rem] border border-[#272A26] bg-[#0c0f0c]/60 backdrop-blur-md p-6 lg:p-8 shadow-lg shadow-black/20">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-primary-fixed"></span>
-                  <h2 className="text-lg font-semibold tracking-tight text-on-surface">Service Topology &amp; Heartbeat Mesh</h2>
-                  <span className="font-code-xs text-code-xs uppercase text-on-surface-variant bg-surface-container-high px-2 py-0.5 rounded">AUTO-RESOLVED</span>
+                  <span className="w-2 h-2 rounded-full bg-[#DEED00]"></span>
+                  <h2 className="text-lg font-semibold tracking-tight text-[#E1E3DA]">Service Topology &amp; Heartbeat Mesh</h2>
+                  <span className="font-code-xs text-code-xs uppercase text-[#85897B] bg-[#171917] px-2 py-0.5 rounded">AUTO-RESOLVED</span>
                 </div>
-                <div className="flex items-center gap-3 text-on-surface-variant font-code-xs text-code-xs">
+                <div className="flex items-center gap-3 text-[#85897B] font-code-xs text-code-xs">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-secondary"></span>Direct Pipeline
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#4ae08d]"></span>Direct Pipeline
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary-fixed"></span>Daemon Sync
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#DEED00]"></span>Daemon Sync
                   </span>
-                  <span className="text-outline">Heartbeat: 1000ms</span>
+                  <span className="text-[#85897B]">Heartbeat: 1000ms</span>
                 </div>
               </div>
               <ServiceDependencyMap
@@ -999,34 +999,34 @@ function Dashboard({ page = "overview" }) {
               />
             </div>
           </div>
-          <section id="recovery-metrics" className="dashboard-overview-only scroll-mt-6 overflow-hidden rounded-[2rem] border border-surface-container-high bg-surface-container-low/60 backdrop-blur-md p-6 lg:p-8 shadow-xl shadow-black/20">
+          <section id="recovery-metrics" className="dashboard-overview-only scroll-mt-6 overflow-hidden rounded-[2rem] border border-[#272A26] bg-[#080908]/80 backdrop-blur-md p-6 lg:p-8 shadow-xl shadow-black/20">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-primary-fixed"></span>
-                <h2 className="text-lg font-semibold tracking-tight text-on-surface">Recovery Metrics</h2>
+                <span className="w-2 h-2 rounded-full bg-[#DEED00]"></span>
+                <h2 className="text-lg font-semibold tracking-tight text-[#E1E3DA]">Recovery Metrics</h2>
               </div>
-              <p className="text-xs leading-5 text-[#92968F]">
+              <p className="text-xs leading-5 text-[#85897B]">
                 Recovery metrics calculated from real incidents recorded by HealCart.
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="rounded-lg border border-surface-container-high bg-surface-container-low/60 backdrop-blur-md p-4">
-                <p className="text-[9px] uppercase tracking-[0.12em] text-[#92968F]">Drafts saved locally</p>
-                <p className="mt-2 text-lg font-semibold text-[#F3F4F1]">{checkoutDraftMeta?.fields ?? 0}</p>
+              <div className="rounded-lg border border-[#272A26] bg-[#0c0f0c]/80 backdrop-blur-md p-4">
+                <p className="text-[9px] uppercase tracking-[0.12em] text-[#85897B]">Drafts saved locally</p>
+                <p className="mt-2 text-lg font-semibold text-[#DEED00]">{checkoutDraftMeta?.fields ?? 0}</p>
                 <p className="mt-1 text-[10px] text-[#85897B]">IndexedDB checkout drafts</p>
               </div>
-              <div className="rounded-lg border border-surface-container-high bg-surface-container-low/60 backdrop-blur-md p-4">
-                <p className="text-[9px] uppercase tracking-[0.12em] text-[#92968F]">Synchronization attempts</p>
-                <p className="mt-2 text-lg font-semibold text-[#F3F4F1]">Not available</p>
+              <div className="rounded-lg border border-[#272A26] bg-[#0c0f0c]/80 backdrop-blur-md p-4">
+                <p className="text-[9px] uppercase tracking-[0.12em] text-[#85897B]">Synchronization attempts</p>
+                <p className="mt-2 text-lg font-semibold text-[#F5B942]">Not available</p>
                 <p className="mt-1 text-[10px] text-[#85897B]">Not tracked by offline recovery</p>
               </div>
-              <div className="rounded-lg border border-surface-container-high bg-surface-container-low/60 backdrop-blur-md p-4">
-                <p className="text-[9px] uppercase tracking-[0.12em] text-[#92968F]">Successfully recovered</p>
+              <div className="rounded-lg border border-[#272A26] bg-[#0c0f0c]/80 backdrop-blur-md p-4">
+                <p className="text-[9px] uppercase tracking-[0.12em] text-[#85897B]">Successfully recovered</p>
                 <p className="mt-2 text-lg font-semibold text-[#35D07F]">{checkoutRecoveryEvidence?.status === "checkout-completed" ? 1 : 0}</p>
                 <p className="mt-1 text-[10px] text-[#85897B]">Completed checkouts after recovery</p>
               </div>
-              <div className="rounded-lg border border-surface-container-high bg-surface-container-low/60 backdrop-blur-md p-4">
-                <p className="text-[9px] uppercase tracking-[0.12em] text-[#92968F]">Pending / failed recoveries</p>
+              <div className="rounded-lg border border-[#272A26] bg-[#0c0f0c]/80 backdrop-blur-md p-4">
+                <p className="text-[9px] uppercase tracking-[0.12em] text-[#85897B]">Pending / failed recoveries</p>
                 <p className="mt-2 text-lg font-semibold text-[#F5B942]">
                   {checkoutRecoveryEvidence?.status === "failure-detected" ||
                   checkoutRecoveryEvidence?.status === "failure-injected" ||
