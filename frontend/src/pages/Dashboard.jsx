@@ -40,6 +40,7 @@ import {
   buildPaymentHealthDetail,
 } from "../lib/paymentHealthStatus";
 import {
+  Database,
   Activity,
   AlertTriangle,
   CheckCircle2,
@@ -477,23 +478,23 @@ function Dashboard({ page = "overview" }) {
               : recoveryIncident.failureInjectedAt,
           connectionRestoredAt:
             evidenceStatus === "data-restored" ||
-            evidenceStatus === "checkout-completed"
+              evidenceStatus === "checkout-completed"
               ? recoveryIncident.detectedAt
               : recoveryIncident.connectionRestoredAt,
           restoredAt:
             evidenceStatus === "data-restored" ||
-            evidenceStatus === "checkout-completed"
+              evidenceStatus === "checkout-completed"
               ? recoveryIncident.detectedAt
               : recoveryIncident.restoredAt,
           completedAt:
             evidenceStatus === "checkout-completed"
               ? recoveryIncident.resolvedAt ||
-                recoveryIncident.detectedAt
+              recoveryIncident.detectedAt
               : recoveryIncident.completedAt,
           discardedAt:
             evidenceStatus === "draft-discarded"
               ? recoveryIncident.resolvedAt ||
-                recoveryIncident.detectedAt
+              recoveryIncident.detectedAt
               : recoveryIncident.discardedAt,
           message: recoveryIncident.message,
           recoveryAction: recoveryIncident.recoveryAction,
@@ -842,202 +843,551 @@ function Dashboard({ page = "overview" }) {
         }
       `}</style>
       <main className="min-w-0 flex-1">
-        <header className="flex flex-wrap items-center justify-between gap-4 border-b border-[#272A26] px-6 py-5 lg:px-10 bg-[#080908] sticky top-0 z-20 shadow-sm shadow-black/40">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-[#DEED00]">
-              HealCart / Operations
-            </p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-[#E1E3DA]">
-              {page === "incidents" ? "Incidents" : page === "chaos-center" ? "Chaos Center" : "System Overview"}
-            </h2>
-            <p className="mt-1 text-sm text-[#85897B]">
-              {page === "incidents" ? "Incident history, diagnosis and recovery outcomes" : page === "chaos-center" ? "Run controlled failures and verify self-healing behavior" : "Live service health and recovery overview"}
-            </p>
+
+        
+<header className="sticky top-0 z-50 flex flex-wrap items-center justify-between gap-4 border-b border-[#474832]/70 bg-[#0B0F0B]/95 px-5 py-4 shadow-lg shadow-black/20 backdrop-blur-md lg:px-10">
+  <div className="min-w-0">
+    <div className="flex items-center gap-2">
+      <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-[#DEED00] shadow-[0_0_8px_rgba(222,237,0,0.7)]" />
+      <p className="font-code-xs text-[10px] uppercase tracking-[0.17em] text-[#DEED00]">
+        HealCart / Operations
+      </p>
+    </div>
+    <h2 className="mt-2 text-xl font-semibold tracking-tight text-[#E0E4DC]">
+      {page === "incidents"
+        ? "Incidents"
+        : page === "chaos-center"
+          ? "Chaos Center"
+          : "System Overview"}
+    </h2>
+    <p className="mt-1 text-xs leading-5 text-[#929278]">
+      {page === "incidents"
+        ? "Incident history, diagnosis and recovery outcomes"
+        : page === "chaos-center"
+          ? "Run controlled failures and verify self-healing behavior"
+          : "Live service health and recovery overview"}
+    </p>
+  </div>
+
+  <div className="flex flex-wrap items-center gap-3">
+    <div className="flex flex-col gap-1 sm:items-end">
+      <span className="font-code-xs text-[10px] text-[#929278]">
+        {lastChecked
+          ? `Last checked: ${lastChecked}`
+          : "Waiting for first health check"}
+      </span>
+      <span className="hidden font-code-xs text-[9px] uppercase tracking-[0.12em] text-[#6BFDA7] sm:block">
+        Operations / Live telemetry
+      </span>
+    </div>
+
+    <button
+      onClick={refreshAllStatuses}
+      disabled={checking}
+      className="flex items-center justify-center gap-2 rounded-md border border-[#DEED00]/30 bg-[#DEED00] px-4 py-2.5 text-xs font-semibold text-[#242700] transition-colors hover:bg-[#EFFA38] disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      <RefreshCw
+        size={14}
+        className={checking ? "animate-spin" : ""}
+      />
+      {checking ? "Checking..." : "Refresh status"}
+    </button>
+  </div>
+</header>
+
+<div className="dashboard-content space-y-6 p-4 sm:p-6 lg:space-y-7 lg:p-10">
+  {/* Overview / Welcome */}
+  <section
+    id="overview"
+    className="dashboard-overview-only scroll-mt-24 overflow-hidden rounded-xl border border-[#474832]/60 bg-[#0B0F0B] shadow-lg shadow-black/10"
+  >
+    <div className="relative p-5 sm:p-7 lg:p-8">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-40"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, rgba(71,72,50,0.13) 1px, transparent 1px), linear-gradient(to bottom, rgba(71,72,50,0.13) 1px, transparent 1px)",
+          backgroundSize: "32px 32px",
+        }}
+      />
+
+      <div className="relative z-10 flex flex-col justify-between gap-7 xl:flex-row xl:items-center">
+        <div className="flex max-w-3xl items-start gap-4">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-[#DEED00]/20 bg-[#DEED00]/10 text-[#DEED00] shadow-[0_0_16px_rgba(222,237,0,0.08)]">
+            <Activity size={23} />
           </div>
-          <div className="flex flex-col gap-2">
-            <span className="text-xs text-[#85897B]">
-              {lastChecked
-                ? `Last checked: ${lastChecked}`
-                : "Waiting for first health check"}
+
+          <div className="min-w-0">
+            <p className="mb-2 font-code-xs text-[10px] uppercase tracking-[0.15em] text-[#929278]">
+              System intelligence / Overview
+            </p>
+
+            <h3 className="text-xl font-semibold tracking-tight text-[#E0E4DC] sm:text-2xl">
+              Welcome to HealCart{" "}
+              <span className="font-editorial-accent text-[32px] font-normal italic text-[#DEED00] sm:text-[36px]">
+                Operations
+              </span>
+            </h3>
+
+            <p className="mt-3 max-w-2xl text-[13px] leading-6 text-[#A6AA96]">
+              Track service availability, investigate incidents, and
+              understand how HealCart responds to failures. Service status
+              is retrieved from your backend health checks and recovery
+              monitor.
+            </p>
+
+            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-[#474832]/50 pt-4">
+              <span className="flex items-center gap-2 font-code-xs text-[10px] text-[#929278]">
+                <Activity size={13} className="text-[#DEED00]" />
+                Service observability
+              </span>
+              <span className="flex items-center gap-2 font-code-xs text-[10px] text-[#929278]">
+                <ShieldCheck size={13} className="text-[#6BFDA7]" />
+                Recovery verification
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid shrink-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:min-w-[390px]">
+          <div className="rounded-lg border border-[#474832]/60 bg-[#191D18]/95 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-code-xs text-[10px] uppercase tracking-[0.12em] text-[#929278]">
+                Topology health
+              </span>
+              <Activity size={14} className="text-[#929278]" />
+            </div>
+
+            <span className="mt-3 flex items-center gap-2 font-code-xs text-[10px] font-semibold uppercase tracking-wide text-[#A6AA96]">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#929278]" />
+              Awaiting assessment
             </span>
-            <button
-              onClick={refreshAllStatuses}
-              disabled={checking}
-              className="flex items-center justify-center gap-2 rounded-lg border border-[#DEED00]/30 bg-[#DEED00] px-3 py-2 text-xs font-semibold text-[#242700] shadow-[0_0_14px_rgba(222,237,0,0.08)] transition-colors hover:bg-[#EFFA38] disabled:opacity-50"
-            >
-              <RefreshCw
-                size={14}
-                className={checking ? "animate-spin" : ""}
-              />
-              {checking ? "Checking..." : "Refresh status"}
-            </button>
+
+            <p className="mt-2 text-[10px] leading-4 text-[#777B6B]">
+              Refer to the live service status cards below.
+            </p>
           </div>
-        </header>
-        <div className="dashboard-content space-y-8 p-6 lg:p-10">
-          <section id="overview" className="dashboard-overview-only scroll-mt-6 overflow-hidden rounded-[2rem] border border-[#272A26] bg-[#080908]/80 backdrop-blur-md p-6 lg:p-8 shadow-xl shadow-black/20">
-            <div className="relative overflow-hidden rounded-[1.5rem] bg-[#0c0f0c]/60 backdrop-blur-sm border border-[#272A26] p-6 lg:p-8 mb-8 shadow-lg shadow-black/10">
-              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                <div className="flex items-start gap-4 max-w-3xl">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-[#DEED00]/10 text-[#DEED00] shrink-0 shadow-[0_0_12px_rgba(222,237,0,0.25)]">
-                    <Activity size={26} />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <h3 className="font-headline-lg text-headline-lg text-[#E1E3DA] tracking-tight">
-                      Welcome to <span className="font-editorial-accent italic text-[#DEED00] font-normal">HealCart</span> <span className="font-editorial-accent italic text-[#DEED00] font-normal">Operations</span>
-                    </h3>
-                    <p className="font-body-default text-body-default text-[#85897B] leading-relaxed">
-                      Track service availability, investigate incidents, and understand how HealCart responds to failures. Service status is retrieved directly from your running backend telemetry stream and recovery monitor.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 shrink-0 self-start md:self-auto bg-[#0c0f0c]/60 backdrop-blur-md px-4 py-3 rounded-xl border border-[#272A26]">
-                  <div className="flex flex-col">
-                    <span className="font-code-xs text-code-xs uppercase text-[#85897B] tracking-wider">Topology Health</span>
-                    <span className="font-status-pill text-status-pill text-[#F5B942] flex items-center gap-1.5 mt-0.5">
-                      <span className="w-2 h-2 rounded-full bg-[#F5B942] shadow-[0_0_6px_rgba(74,224,141,0.8)]"></span>
-                      ALL SYSTEMS NOMINAL
-                    </span>
-                  </div>
-                  <div className="h-6 w-px bg-[#272A26] mx-3"></div>
-                  <div className="flex flex-col">
-                    <span className="font-code-xs text-code-xs uppercase text-[#85897B] tracking-wider">Mesh Ingress</span>
-                    <span className="font-code-xs text-code-xs text-[#DEED00] mt-0.5 font-semibold">1,420 req/s</span>
-                  </div>
-                </div>
-              </div>
+
+          <div className="rounded-lg border border-[#474832]/60 bg-[#191D18]/95 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-code-xs text-[10px] uppercase tracking-[0.12em] text-[#929278]">
+                Last health check
+              </span>
+              <RefreshCw size={14} className="text-[#DEED00]" />
             </div>
-          </section>
-          <section id="service-health" className="dashboard-overview-only scroll-mt-6 overflow-hidden rounded-[2rem] border border-[#272A26] bg-[#080908]/80 backdrop-blur-md p-6 lg:p-8 shadow-xl shadow-black/20">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold tracking-tight text-[#E1E3DA]">
-                Service Health
-              </h3>
-              <p className="mt-1 text-xs leading-5 text-[#85897B]">
-                Live backend, database and recovery-monitor status.
-              </p>
-            </div>
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-              {services.map(({ name, detail, icon: Icon, status }) => (
-                <article
-                  key={name}
-                  className="rounded-[1.5rem] border border-[#272A26] bg-[#0c0f0c]/80 backdrop-blur-md p-6 shadow-lg shadow-black/20 transition-all hover:border-[#DEED00]/50 hover:bg-[#0c0f0c]"
+
+            <p className="mt-3 break-words font-code-xs text-sm font-semibold text-[#DEED00]">
+              {lastChecked || "Not checked"}
+            </p>
+
+            <p className="mt-2 text-[10px] leading-4 text-[#777B6B]">
+              {checking ? "Health check in progress" : "Backend status timestamp"}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/* Service Health */}
+  <section
+    id="service-health"
+    className="dashboard-overview-only scroll-mt-24 overflow-hidden rounded-xl border border-[#474832]/60 bg-[#0B0F0B] p-5 shadow-lg shadow-black/10 sm:p-7 lg:p-8"
+  >
+    <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+      <div>
+        <div className="mb-2 flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#DEED00]" />
+          <span className="font-code-xs text-[10px] uppercase tracking-[0.15em] text-[#929278]">
+            Infrastructure / Diagnostics
+          </span>
+        </div>
+
+        <h3 className="text-lg font-semibold tracking-tight text-[#E0E4DC]">
+          Node Diagnostic Telemetry
+        </h3>
+
+        <p className="mt-1 text-xs leading-5 text-[#929278]">
+          Live backend, database and recovery-monitor status.
+        </p>
+      </div>
+
+      <span className="w-fit rounded border border-[#474832]/60 bg-[#191D18] px-2.5 py-1.5 font-code-xs text-[10px] uppercase tracking-wide text-[#A6AA96]">
+        Service diagnostics
+      </span>
+    </div>
+
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {services.map(({ name, detail, icon: Icon, status }) => {
+        const isHealthy = status === "Healthy" || status === "Connected";
+        const isError =
+          status === "Unavailable" ||
+          status === "Disconnected" ||
+          status === "Degraded";
+
+        const accent = isHealthy
+          ? "#4AE08D"
+          : isError
+            ? "#FF5C5C"
+            : "#DEED00";
+
+        return (
+          <article
+            key={name}
+            className="group relative flex min-w-0 flex-col overflow-hidden rounded-lg border border-[#323631] bg-[#191D18] transition-all duration-200 hover:border-[#626348] hover:bg-[#1C211C]"
+          >
+            <div
+              className="absolute inset-x-0 top-0 h-px opacity-50 transition-opacity group-hover:opacity-100"
+              style={{
+                background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
+              }}
+            />
+
+            <div className="flex flex-1 flex-col p-4 sm:p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#474832]/60 bg-[#0B0F0B] transition-colors group-hover:border-[#626348]"
+                  style={{ color: accent }}
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="rounded-lg bg-[#0c0f0c] p-2.5 border border-[#272A26]/50 text-[#DEED00]">
-                      <Icon size={19} />
-                    </div>
-                    <span
-                      className={`rounded-full border px-2.5 py-1 text-[10px] font-medium ${status === "Healthy" || status === "Connected"
-                        ? "border-[#35D07F]/30 bg-[#35D07F]/10 text-[#35D07F]"
-                        : status === "Unavailable" ||
-                          status === "Disconnected" ||
-                          status === "Degraded"
-                          ? "border-[#FF5C5C]/30 bg-[#FF5C5C]/10 text-[#FF5C5C]"
-                          : "border-[#DEED00]/30 bg-[#DEED00]/10 text-[#DEED00]"}`}
-                    >
-                      {status}
+                  <Icon size={19} />
+                </div>
+
+                <span
+                  className="inline-flex max-w-[65%] items-center gap-1.5 rounded border px-2 py-1 font-code-xs text-[9px] font-semibold uppercase tracking-wide"
+                  style={{
+                    color: accent,
+                    borderColor: `${accent}40`,
+                    backgroundColor: `${accent}10`,
+                  }}
+                >
+                  <span
+                    className="h-1.5 w-1.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: accent }}
+                  />
+                  {status}
+                </span>
+              </div>
+
+              <div className="mt-5">
+                <h4 className="text-sm font-semibold tracking-tight text-[#E0E4DC]">
+                  {name}
+                </h4>
+                <p className="mt-2 min-h-[40px] text-xs leading-5 text-[#929278]">
+                  {detail}
+                </p>
+              </div>
+
+              {name === "Recovery Monitor" && recoveryInfo ? (
+                <div className="mt-5 space-y-3 border-t border-[#474832]/60 pt-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-[11px] text-[#929278]">
+                      Container
+                    </span>
+                    <span className="max-w-[60%] break-all text-right font-code-xs text-[10px] text-[#E0E4DC]">
+                      {recoveryInfo.container}
                     </span>
                   </div>
-                  <h4 className="mt-6 font-semibold text-[#E1E3DA]">{name}</h4>
-                  <p className="mt-1 text-xs leading-5 text-[#85897B]">{detail}</p>
-            {name === "Recovery Monitor" && recoveryInfo && (
-              <div className="mt-5 space-y-2 border-t border-[#272A26] pt-3 text-xs">
-                <div className="flex justify-between gap-3">
-                  <span className="text-[#85897B]">Container</span>
-                  <span className="text-[#E1E3DA]">
-                    {recoveryInfo.container}
-                  </span>
+
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="text-[11px] text-[#929278]">
+                      Docker status
+                    </span>
+                    <span className="max-w-[60%] break-words text-right font-code-xs text-[10px] text-[#E0E4DC]">
+                      {recoveryInfo.status}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[11px] text-[#929278]">
+                      Restart count
+                    </span>
+                    <span className="font-code-xs text-xs font-semibold text-[#DEED00]">
+                      {recoveryInfo.restartCount ?? "Unknown"}
+                    </span>
+                  </div>
+
+                  {recoveryError && (
+                    <p className="border-t border-[#FF5C5C]/20 pt-3 text-[11px] leading-5 text-[#FF8A80]">
+                      {recoveryError}
+                    </p>
+                  )}
                 </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-[#85897B]">Docker status</span>
-                  <span className="text-[#E1E3DA]">
-                    {recoveryInfo.status}
-                  </span>
+              ) : (
+                <div className="mt-5 border-t border-[#474832]/60 pt-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] uppercase tracking-wide text-[#777B6B]">
+                      Current state
+                    </span>
+                    <span
+                      className="font-code-xs text-[10px] font-medium"
+                      style={{ color: accent }}
+                    >
+                      {isHealthy
+                        ? "Operational"
+                        : isError
+                          ? "Attention required"
+                          : "Check status"}
+                    </span>
+                  </div>
+                  <div className="mt-3 h-1 overflow-hidden rounded-full bg-[#323631]">
+                    <div
+                      className="h-full w-full rounded-full opacity-70"
+                      style={{ backgroundColor: accent }}
+                    />
+                  </div>
                 </div>
-                <div className="flex justify-between gap-3">
-                  <span className="text-[#85897B]">Restart count</span>
-                  <span className="text-[#E1E3DA]">
-                    {recoveryInfo.restartCount ?? "Unknown"}
-                  </span>
-                </div>
-              </div>
-            )}
-            {name === "Recovery Monitor" && recoveryError && (
-              <p className="mt-3 text-xs text-[#FF5C5C]">
-                {recoveryError}
-              </p>
-            )}
+              )}
+            </div>
+
+            <div className="flex items-center justify-between gap-2 border-t border-[#323631] bg-[#101410]/70 px-4 py-3 sm:px-5">
+              <span className="font-code-xs text-[9px] uppercase tracking-wide text-[#777B6B]">
+                Health telemetry
+              </span>
+              <span className="flex items-center gap-1.5 font-code-xs text-[9px] text-[#929278]">
+                <span
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: accent }}
+                />
+                {isHealthy
+                  ? "Connected"
+                  : isError
+                    ? "Attention"
+                    : "Unverified"}
+              </span>
+            </div>
           </article>
-              ))}
-            </div>
-          </section>
-          <div className="dashboard-overview-only">
-            <div className="rounded-[1.5rem] border border-[#272A26] bg-[#0c0f0c]/60 backdrop-blur-md p-6 lg:p-8 shadow-lg shadow-black/20">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#DEED00]"></span>
-                  <h2 className="text-lg font-semibold tracking-tight text-[#E1E3DA]">Service Topology &amp; Heartbeat Mesh</h2>
-                  <span className="font-code-xs text-code-xs uppercase text-[#85897B] bg-[#171917] px-2 py-0.5 rounded">AUTO-RESOLVED</span>
-                </div>
-                <div className="flex items-center gap-3 text-[#85897B] font-code-xs text-code-xs">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#4ae08d]"></span>Direct Pipeline
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#DEED00]"></span>Daemon Sync
-                  </span>
-                  <span className="text-[#85897B]">Heartbeat: 1000ms</span>
-                </div>
-              </div>
-              <ServiceDependencyMap
-                health={health}
-                paymentHealth={paymentHealth}
-                recoveryInfo={recoveryInfo}
-                recoveryError={recoveryError}
-                healthError={healthError}
-                paymentHealthError={paymentHealthError}
-              />
-            </div>
-          </div>
-          <section id="recovery-metrics" className="dashboard-overview-only scroll-mt-6 overflow-hidden rounded-[2rem] border border-[#272A26] bg-[#080908]/80 backdrop-blur-md p-6 lg:p-8 shadow-xl shadow-black/20">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#DEED00]"></span>
-                <h2 className="text-lg font-semibold tracking-tight text-[#E1E3DA]">Recovery Metrics</h2>
-              </div>
-              <p className="text-xs leading-5 text-[#85897B]">
-                Recovery metrics calculated from real incidents recorded by HealCart.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="rounded-lg border border-[#272A26] bg-[#0c0f0c]/80 backdrop-blur-md p-4">
-                <p className="text-[9px] uppercase tracking-[0.12em] text-[#85897B]">Drafts saved locally</p>
-                <p className="mt-2 text-lg font-semibold text-[#DEED00]">{checkoutDraftMeta?.fields ?? 0}</p>
-                <p className="mt-1 text-[10px] text-[#85897B]">IndexedDB checkout drafts</p>
-              </div>
-              <div className="rounded-lg border border-[#272A26] bg-[#0c0f0c]/80 backdrop-blur-md p-4">
-                <p className="text-[9px] uppercase tracking-[0.12em] text-[#85897B]">Synchronization attempts</p>
-                <p className="mt-2 text-lg font-semibold text-[#F5B942]">Not available</p>
-                <p className="mt-1 text-[10px] text-[#85897B]">Not tracked by offline recovery</p>
-              </div>
-              <div className="rounded-lg border border-[#272A26] bg-[#0c0f0c]/80 backdrop-blur-md p-4">
-                <p className="text-[9px] uppercase tracking-[0.12em] text-[#85897B]">Successfully recovered</p>
-                <p className="mt-2 text-lg font-semibold text-[#35D07F]">{checkoutRecoveryEvidence?.status === "checkout-completed" ? 1 : 0}</p>
-                <p className="mt-1 text-[10px] text-[#85897B]">Completed checkouts after recovery</p>
-              </div>
-              <div className="rounded-lg border border-[#272A26] bg-[#0c0f0c]/80 backdrop-blur-md p-4">
-                <p className="text-[9px] uppercase tracking-[0.12em] text-[#85897B]">Pending / failed recoveries</p>
-                <p className="mt-2 text-lg font-semibold text-[#F5B942]">
-                  {checkoutRecoveryEvidence?.status === "failure-detected" ||
-                  checkoutRecoveryEvidence?.status === "failure-injected" ||
-                  checkoutRecoveryEvidence?.status === "data-restored"
-                    ? 1
-                    : 0}
-                </p>
-                <p className="mt-1 text-[10px] text-[#85897B]">Not yet resolved or discarded</p>
-              </div>
-            </div>
-          </section>
+        );
+      })}
+    </div>
+  </section>
+
+  {/* Service Topology */}
+  <section className="dashboard-overview-only overflow-hidden rounded-xl border border-[#474832]/60 bg-[#0B0F0B] p-5 shadow-lg shadow-black/10 sm:p-7 lg:p-8">
+    <div className="mb-6 flex flex-col justify-between gap-4 xl:flex-row xl:items-center">
+      <div>
+        <div className="mb-2 flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#DEED00]" />
+          <span className="font-code-xs text-[10px] uppercase tracking-[0.15em] text-[#929278]">
+            Architecture / Dependencies
+          </span>
+        </div>
+
+        <h2 className="text-lg font-semibold tracking-tight text-[#E0E4DC]">
+          Service Topology{" "}
+          <span className="font-editorial-accent text-2xl font-normal italic text-[#DEED00]">
+            &amp; Heartbeat Mesh
+          </span>
+        </h2>
+
+        <p className="mt-1 text-xs leading-5 text-[#929278]">
+          Visualize service relationships and inspect health and recovery signals.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 font-code-xs text-[10px] text-[#929278]">
+        <span className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#4AE08D]" />
+          Direct Pipeline
+        </span>
+        <span className="flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#DEED00]" />
+          Daemon Sync
+        </span>
+        <span className="border-l border-[#474832] pl-3">
+          Heartbeat: 1000ms
+        </span>
+      </div>
+    </div>
+
+    <div className="overflow-hidden rounded-lg border border-[#323631] bg-[#101410] p-2 sm:p-4">
+      <ServiceDependencyMap
+        health={health}
+        paymentHealth={paymentHealth}
+        recoveryInfo={recoveryInfo}
+        recoveryError={recoveryError}
+        healthError={healthError}
+        paymentHealthError={paymentHealthError}
+      />
+    </div>
+
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#323631] pt-4">
+      <span className="font-code-xs text-[10px] uppercase tracking-wide text-[#777B6B]">
+        Dependency visualization
+      </span>
+      <span className="flex items-center gap-2 font-code-xs text-[10px] text-[#929278]">
+        <Activity size={13} className="text-[#DEED00]" />
+        Based on available service telemetry
+      </span>
+    </div>
+  </section>
+
+  {/* Recovery Metrics */}
+  <section
+    id="recovery-metrics"
+    className="dashboard-overview-only scroll-mt-24 overflow-hidden rounded-xl border border-[#474832]/60 bg-[#0B0F0B] p-5 shadow-lg shadow-black/10 sm:p-7 lg:p-8"
+  >
+    <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+      <div>
+        <div className="mb-2 flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-[#DEED00]" />
+          <span className="font-code-xs text-[10px] uppercase tracking-[0.15em] text-[#929278]">
+            Resilience / Recovery evidence
+          </span>
+        </div>
+
+        <h2 className="text-lg font-semibold tracking-tight text-[#E0E4DC]">
+          Recovery Metrics
+        </h2>
+        <p className="mt-1 max-w-2xl text-xs leading-5 text-[#929278]">
+          Evidence from local checkout drafts and the latest recorded recovery
+          outcome.
+        </p>
+      </div>
+
+      <span className="w-fit rounded border border-[#474832]/60 bg-[#191D18] px-2.5 py-1.5 font-code-xs text-[10px] uppercase tracking-wide text-[#A6AA96]">
+        Checkout recovery
+      </span>
+    </div>
+
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="group relative flex min-h-[190px] flex-col overflow-hidden rounded-lg border border-[#323631] bg-[#191D18] p-5 transition-colors hover:border-[#626348] hover:bg-[#1C211C]">
+        <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-full bg-[#DEED00]/[0.04]" />
+        <div className="relative flex items-center justify-between gap-2">
+          <p className="text-[10px] uppercase tracking-[0.12em] text-[#929278]">
+            Drafts saved locally
+          </p>
+          <span className="flex h-8 w-8 items-center justify-center rounded-md border border-[#DEED00]/20 bg-[#DEED00]/[0.06] text-[#DEED00]">
+            <Database size={15} />
+          </span>
+        </div>
+
+        <p className="mt-5 font-code-xs text-3xl font-semibold tracking-tight text-[#DEED00]">
+          {checkoutDraftMeta?.fields ?? 0}
+        </p>
+        <p className="mt-2 text-[11px] leading-5 text-[#929278]">
+          IndexedDB checkout drafts
+        </p>
+
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-[#323631] pt-4">
+          <span className="text-[10px] text-[#777B6B]">
+            Local storage evidence
+          </span>
+          <span className="font-code-xs text-[9px] uppercase text-[#DEED00]">
+            Drafts
+          </span>
+        </div>
+      </div>
+
+      <div className="group relative flex min-h-[190px] flex-col overflow-hidden rounded-lg border border-[#323631] bg-[#191D18] p-5 transition-colors hover:border-[#626348] hover:bg-[#1C211C]">
+        <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-full bg-[#F5B942]/[0.04]" />
+        <div className="relative flex items-center justify-between gap-2">
+          <p className="text-[10px] uppercase tracking-[0.12em] text-[#929278]">
+            Synchronization attempts
+          </p>
+          <span className="flex h-8 w-8 items-center justify-center rounded-md border border-[#F5B942]/20 bg-[#F5B942]/[0.06] text-[#F5B942]">
+            <RefreshCw size={15} />
+          </span>
+        </div>
+
+        <p className="mt-5 text-lg font-semibold tracking-tight text-[#F5B942]">
+          Not available
+        </p>
+        <p className="mt-2 text-[11px] leading-5 text-[#929278]">
+          Synchronization attempts are not currently tracked by offline recovery.
+        </p>
+
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-[#323631] pt-4">
+          <span className="text-[10px] text-[#777B6B]">
+            Metric availability
+          </span>
+          <span className="font-code-xs text-[9px] uppercase text-[#F5B942]">
+            Not tracked
+          </span>
+        </div>
+      </div>
+
+      <div className="group relative flex min-h-[190px] flex-col overflow-hidden rounded-lg border border-[#323631] bg-[#191D18] p-5 transition-colors hover:border-[#626348] hover:bg-[#1C211C]">
+        <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-full bg-[#4AE08D]/[0.04]" />
+        <div className="relative flex items-center justify-between gap-2">
+          <p className="text-[10px] uppercase tracking-[0.12em] text-[#929278]">
+            Successfully recovered
+          </p>
+          <span className="flex h-8 w-8 items-center justify-center rounded-md border border-[#4AE08D]/20 bg-[#4AE08D]/[0.06] text-[#6BFDA7]">
+            <ShieldCheck size={15} />
+          </span>
+        </div>
+
+        <p className="mt-5 font-code-xs text-3xl font-semibold tracking-tight text-[#6BFDA7]">
+          {checkoutRecoveryEvidence?.status === "checkout-completed" ? 1 : 0}
+        </p>
+        <p className="mt-2 text-[11px] leading-5 text-[#929278]">
+          Completed checkouts after recovery
+        </p>
+
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-[#323631] pt-4">
+          <span className="text-[10px] text-[#777B6B]">
+            Latest recorded evidence
+          </span>
+          <span className="font-code-xs text-[9px] uppercase text-[#6BFDA7]">
+            {checkoutRecoveryEvidence?.status === "checkout-completed"
+              ? "Completed"
+              : "No completion"}
+          </span>
+        </div>
+      </div>
+
+      <div className="group relative flex min-h-[190px] flex-col overflow-hidden rounded-lg border border-[#323631] bg-[#191D18] p-5 transition-colors hover:border-[#626348] hover:bg-[#1C211C]">
+        <div className="absolute right-0 top-0 h-20 w-20 rounded-bl-full bg-[#F5B942]/[0.04]" />
+        <div className="relative flex items-center justify-between gap-2">
+          <p className="text-[10px] uppercase tracking-[0.12em] text-[#929278]">
+            Pending / failed recoveries
+          </p>
+          <span className="flex h-8 w-8 items-center justify-center rounded-md border border-[#F5B942]/20 bg-[#F5B942]/[0.06] text-[#F5B942]">
+            <TriangleAlert size={15} />
+          </span>
+        </div>
+
+        <p className="mt-5 font-code-xs text-3xl font-semibold tracking-tight text-[#F5B942]">
+          {checkoutRecoveryEvidence?.status === "failure-detected" ||
+          checkoutRecoveryEvidence?.status === "failure-injected" ||
+          checkoutRecoveryEvidence?.status === "data-restored"
+            ? 1
+            : 0}
+        </p>
+        <p className="mt-2 text-[11px] leading-5 text-[#929278]">
+          Recoveries not yet resolved or discarded
+        </p>
+
+        <div className="mt-auto flex items-center justify-between gap-2 border-t border-[#323631] pt-4">
+          <span className="text-[10px] text-[#777B6B]">
+            Latest recorded evidence
+          </span>
+          <span className="font-code-xs text-[9px] uppercase text-[#F5B942]">
+            {checkoutRecoveryEvidence?.status === "failure-injected" ||
+            checkoutRecoveryEvidence?.status === "failure-detected" ||
+            checkoutRecoveryEvidence?.status === "data-restored"
+              ? "Attention"
+              : "No pending event"}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-[#323631] pt-4">
+      <span className="font-code-xs text-[10px] uppercase tracking-wide text-[#777B6B]">
+        Metric source: checkout recovery evidence
+      </span>
+
+      <span className="flex items-center gap-2 font-code-xs text-[10px] text-[#929278]">
+        <Activity size={13} className="text-[#DEED00]" />
+        Evidence-based recovery status
+      </span>
+    </div>
+  </section>
+
+
+
+
           <div className="dashboard-incidents-only">
             <IncidentTimeline
               events={Array.isArray(recoveryInfo?.events) ? recoveryInfo.events : []}
@@ -2161,80 +2511,80 @@ function Dashboard({ page = "overview" }) {
                   </span>
                 </div>
                 <CheckoutRecoveryChart
-                    evidence={checkoutRecoveryEvidence}
-                    draftMeta={checkoutDraftMeta}
-                    showSections={injectRecoveryClicked}
+                  evidence={checkoutRecoveryEvidence}
+                  draftMeta={checkoutDraftMeta}
+                  showSections={injectRecoveryClicked}
                 />
                 <div className="mt-auto flex flex-col gap-3 border-t border-[#292D24] pt-5">
-                    <p className="mb-0 text-[10px] leading-5 text-[#85897B]">
-                        Open Checkout in another tab and enter test details before starting
-                        the experiment. This test temporarily affects internet connectivity
-                        for the laptop.
-                    </p>
-                    <button
-                        type="button"
-                        disabled={wifiFailureRunning}
-                        onClick={async () => {
-                            setWifiFailureRunning(true);
-                            try {
-                                const response = await fetch("http://127.0.0.1:5004/inject", {
-                                    method: "POST",
-                                    headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify({ durationSeconds: 5 }),
-                                });
-                                const result = await response.json();
-                                if (!response.ok || !result.success) {
-                                    throw new Error(
-                                        result.message || "Could not inject the Wi-Fi failure."
-                                    );
-                                }
-                                setInjectRecoveryClicked(true);
-                                localStorage.setItem("shcomCheckoutTestArmed", "on");
-                                const current = (() => {
-                                    try {
-                                        return JSON.parse(
-                                            localStorage.getItem("shcomCheckoutRecoveryEvidence") || "{}"
-                                        );
-                                    } catch {
-                                        return {};
-                                    }
-                                })();
-                                localStorage.setItem(
-                                    "shcomCheckoutRecoveryEvidence",
-                                    JSON.stringify({
-                                        ...current,
-                                        status: "failure-injected",
-                                        failureInjectedAt: new Date().toISOString(),
-                                        updatedAt: new Date().toISOString(),
-                                        completedAt: null,
-                                        restoredAt: null,
-                                        connectionRestoredAt: null,
-                                        fieldsRestored: null,
-                                        cartLinesRestored: null,
-                                        discardedAt: null,
-                                    })
-                                );
-                                setOfflineCheckoutFault(true);
-                                setCheckoutRecoveryEvidence(
-                                    JSON.parse(
-                                        localStorage.getItem("shcomCheckoutRecoveryEvidence") ||
-                                        "null"
-                                    )
-                                );
-                            } catch {
-                            } finally {
-                                setWifiFailureRunning(false);
-                            }
-                        }}
-                        className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[#DEED00]/30 bg-[#DEED00] px-4 py-3 text-xs font-semibold text-[#242700] shadow-[0_0_14px_rgba(222,237,0,0.08)] transition-colors hover:bg-[#EFFA38] disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                        {wifiFailureRunning ? (
-                            <RefreshCw size={17} className="animate-spin" />
-                        ) : (
-                            <WifiOff size={17} />
-                        )}
-                        {wifiFailureRunning ? "Injecting Wi-Fi Failure..." : "Inject Offline Failure"}
-                    </button>
+                  <p className="mb-0 text-[10px] leading-5 text-[#85897B]">
+                    Open Checkout in another tab and enter test details before starting
+                    the experiment. This test temporarily affects internet connectivity
+                    for the laptop.
+                  </p>
+                  <button
+                    type="button"
+                    disabled={wifiFailureRunning}
+                    onClick={async () => {
+                      setWifiFailureRunning(true);
+                      try {
+                        const response = await fetch("http://127.0.0.1:5004/inject", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ durationSeconds: 5 }),
+                        });
+                        const result = await response.json();
+                        if (!response.ok || !result.success) {
+                          throw new Error(
+                            result.message || "Could not inject the Wi-Fi failure."
+                          );
+                        }
+                        setInjectRecoveryClicked(true);
+                        localStorage.setItem("shcomCheckoutTestArmed", "on");
+                        const current = (() => {
+                          try {
+                            return JSON.parse(
+                              localStorage.getItem("shcomCheckoutRecoveryEvidence") || "{}"
+                            );
+                          } catch {
+                            return {};
+                          }
+                        })();
+                        localStorage.setItem(
+                          "shcomCheckoutRecoveryEvidence",
+                          JSON.stringify({
+                            ...current,
+                            status: "failure-injected",
+                            failureInjectedAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString(),
+                            completedAt: null,
+                            restoredAt: null,
+                            connectionRestoredAt: null,
+                            fieldsRestored: null,
+                            cartLinesRestored: null,
+                            discardedAt: null,
+                          })
+                        );
+                        setOfflineCheckoutFault(true);
+                        setCheckoutRecoveryEvidence(
+                          JSON.parse(
+                            localStorage.getItem("shcomCheckoutRecoveryEvidence") ||
+                            "null"
+                          )
+                        );
+                      } catch {
+                      } finally {
+                        setWifiFailureRunning(false);
+                      }
+                    }}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-[#DEED00]/30 bg-[#DEED00] px-4 py-3 text-xs font-semibold text-[#242700] shadow-[0_0_14px_rgba(222,237,0,0.08)] transition-colors hover:bg-[#EFFA38] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {wifiFailureRunning ? (
+                      <RefreshCw size={17} className="animate-spin" />
+                    ) : (
+                      <WifiOff size={17} />
+                    )}
+                    {wifiFailureRunning ? "Injecting Wi-Fi Failure..." : "Inject Offline Failure"}
+                  </button>
                 </div>
               </div>
             </div>
