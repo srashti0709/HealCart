@@ -77,7 +77,7 @@ export default function LiveApiTrafficChart() {
 
             if (cancelled) return;
 
-            const backendAvailable = metricsResult.status === "fulfilled";
+            const backendAvailable = metricsResult.status === 200;
             setBackendOnline(backendAvailable);
 
             const now = Date.now();
