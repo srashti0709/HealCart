@@ -110,6 +110,63 @@ export default function Checkout() {
     const checkoutAttemptRef = useRef(null);
     const pollerRef = useRef(null);
 
+    const syncRecoveryEvidenceToBackend = async (evidence) => {
+        try {
+            const statusMap = {
+                "failure-injected": {
+                    incidentType: "offline_checkout_recovery",
+                    status: "detected",
+                    message: "Connectivity interruption detected. Checkout draft saved locally.",
+                },
+                "failure-detected": {
+                    incidentType: "offline_checkout_recovery",
+                    status: "detected",
+                    message: "Connectivity interruption detected. Checkout draft saved locally.",
+                },
+                "data-restored": {
+                    incidentType: "offline_checkout_recovery",
+                    status: "recovering",
+                    message: "Checkout draft recovered from IndexedDB storage.",
+                },
+                "connection-restored": {
+                    incidentType: "offline_checkout_recovery",
+                    status: "recovering",
+                    message: "Network connectivity restored. Synchronization can resume.",
+                },
+                "checkout-completed": {
+                    incidentType: "offline_checkout_recovery",
+                    status: "resolved",
+                    message: "Checkout completed successfully after recovery.",
+                },
+                "draft-discarded": {
+                    incidentType: "offline_checkout_recovery",
+                    status: "failed",
+                    message: "The saved checkout draft was discarded.",
+                },
+            };
+
+            const mapping = statusMap[evidence.status];
+            if (!mapping) return;
+
+            await axios.post(API_ENDPOINTS.incidents, {
+                incidentType: mapping.incidentType,
+                service: "checkout-service",
+                severity: evidence.status === "checkout-completed" ? "low" : "medium",
+                status: mapping.status,
+                message: mapping.message,
+                recoveryAction: "Verified the existing checkout draft from IndexedDB",
+                recoveryResult:
+                    evidence.status === "checkout-completed"
+                        ? "Payment confirmed; order was finalized after recovery."
+                        : evidence.status === "draft-discarded"
+                          ? "Checkout draft was discarded."
+                          : "Recovery in progress.",
+            });
+        } catch {
+            // Silent fallback: backend may be unavailable during offline testing.
+        }
+    };
+
     const updateRecoveryEvidence = (patch) => {
         try {
             const current = JSON.parse(
@@ -124,6 +181,7 @@ export default function Checkout() {
                 "shcomCheckoutRecoveryEvidence",
                 JSON.stringify(next)
             );
+            void syncRecoveryEvidenceToBackend(next);
             return next;
         } catch {
             return null;
