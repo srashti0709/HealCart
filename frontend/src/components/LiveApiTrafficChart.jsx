@@ -1,11 +1,11 @@
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import {
     Activity,
     AlertTriangle,
     CheckCircle2,
-    Radio,
+    Clock3,
     ServerCrash,
     ShieldCheck,
 } from "lucide-react";
@@ -13,524 +13,546 @@ import {
     CartesianGrid,
     Line,
     LineChart,
+    ReferenceLine,
     ResponsiveContainer,
     Tooltip,
     XAxis,
     YAxis,
 } from "recharts";
-import {
-    API_BASE_URL,
-    API_ENDPOINTS,
-    CHAOS_CONTROLLER_URL,
-} from "../config/api";
+import { API_BASE_URL } from "../config/api";
 
-const WINDOW_SECONDS = 30;
-const POLL_INTERVAL = 1000;
+const POLL_INTERVAL = 1500;
+const FAILURE_THRESHOLD = 2;
+const MIN_RECOVERY_MS = 4000;
+const REQUIRED_SUCCESS_CHECKS = 2;
+const MAX_POINTS = 60;
 
-const secondOf = (time) => Math.floor(time / 1000) * 1000;
+const STATES = {
+    CRASH: "crash",
+    RECOVERING: "recovering",
+    RECOVERED: "recovered",
+};
 
-function emptyTimeline() {
-    const now = secondOf(Date.now());
+const STATE_CONFIG = {
+    [STATES.CRASH]: {
+        label: "Backend Crash",
+        description: "The backend is not responding to health checks.",
+        color: "#ef4444",
+        level: 0,
+        icon: ServerCrash,
+    },
+    [STATES.RECOVERING]: {
+        label: "Recovering",
+        description: "The backend is responding. Recovery is being verified.",
+        color: "#f59e0b",
+        level: 1,
+        icon: Activity,
+    },
+    [STATES.RECOVERED]: {
+        label: "Recovered",
+        description: "Backend, database, and storefront checks have passed.",
+        color: "#22c55e",
+        level: 2,
+        icon: ShieldCheck,
+    },
+};
 
-    return Array.from({ length: WINDOW_SECONDS }, (_, index) => {
-        const timestamp =
-            now - (WINDOW_SECONDS - 1 - index) * 1000;
+const BASE_URL = API_BASE_URL.replace(/\/+$/, "");
+const HEALTH_URL = `${BASE_URL}/api/health`;
+const PRODUCTS_URL = `${BASE_URL}/api/products`;
 
-        return {
-            timestamp,
-            time: new Date(timestamp).toLocaleTimeString([], {
-                minute: "2-digit",
-                second: "2-digit",
-            }),
-            attempted: 0,
-            successful: 0,
-            failed: 0,
-            backendReceived: 0,
-        };
+function formatTime(timestamp) {
+    return new Date(timestamp).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
     });
 }
 
-function readRecords(response) {
-    const data = response?.data;
+function createInitialPoints() {
+    const now = Date.now();
 
-    if (Array.isArray(data?.requests)) return data.requests;
-    if (Array.isArray(data?.records)) return data.records;
-    if (Array.isArray(data)) return data;
-
-    return [];
-}
-
-function readTimestamp(record) {
-    const value =
-        record?.timestamp ??
-        record?.startedAt ??
-        record?.createdAt;
-
-    if (typeof value === "number") {
-        return value < 1e12 ? value * 1000 : value;
-    }
-
-    if (typeof value === "string") {
-        const parsed = Date.parse(value);
-        return Number.isNaN(parsed) ? null : parsed;
-    }
-
-    return null;
-}
-
-function Metric({ label, value, detail, icon: Icon, color }) {
-    return (
-        <div className="rounded-xl border border-[#292D24] bg-[#141813] p-4">
-            <div className="flex items-center justify-between gap-2">
-                <span className="text-xs uppercase tracking-wider text-[#92968F]">
-                    {label}
-                </span>
-                <Icon size={17} style={{ color }} />
-            </div>
-            <div className="mt-3 text-2xl font-semibold text-[#F3F4EE]">
-                {value}
-            </div>
-            <p className="mt-1 text-xs text-[#92968F]">{detail}</p>
-        </div>
-    );
+    return Array.from({ length: 20 }, (_, index) => ({
+        timestamp: now - (19 - index) * 1000,
+        time: formatTime(now - (19 - index) * 1000),
+        level: 2,
+        state: STATES.RECOVERED,
+        label: STATE_CONFIG[STATES.RECOVERED].label,
+    }));
 }
 
 export default function LiveApiTrafficChart() {
-    const [points, setPoints] = useState(emptyTimeline);
-    const [backendOnline, setBackendOnline] = useState(null);
-    const [controllerOnline, setControllerOnline] = useState(null);
-    const [trafficRunActive, setTrafficRunActive] = useState(false);
-    const [updatedAt, setUpdatedAt] = useState(null);
-    const [hasTrafficData, setHasTrafficData] = useState(false);
+    const [currentState, setCurrentState] = useState(STATES.RECOVERED);
+    const [timeline, setTimeline] = useState([]);
+    const [chartData, setChartData] = useState(createInitialPoints);
+    const [lastChecked, setLastChecked] = useState(null);
 
-    useEffect(() => {
-        let cancelled = false;
-        let timer;
+    const mountedRef = useRef(false);
+    const inFlightRef = useRef(false);
+    const currentStateRef = useRef(STATES.RECOVERED);
+    const failureCountRef = useRef(0);
+    const recoveryStartedAtRef = useRef(null);
+    const successfulChecksRef = useRef(0);
+    const lastStateChangeRef = useRef(null);
 
-        async function refresh() {
-            const [metricsResult, requestsResult, statusResult] =
-                await Promise.allSettled([
-                    axios.get(`${API_BASE_URL}/api/metrics/traffic`, {
-                        timeout: 1800,
-                    }),
-                    axios.get(API_ENDPOINTS.trafficRequests, {
-                        timeout: 4000,
-                        params: { limit: 200 },
-                    }),
-                    axios.get(API_ENDPOINTS.trafficStatus, {
-                        timeout: 4000,
-                    }),
-                ]);
+    const recordState = useCallback((nextState) => {
+        if (currentStateRef.current === nextState) return;
 
-            if (cancelled) return;
+        currentStateRef.current = nextState;
+        setCurrentState(nextState);
 
-            const backendAvailable = metricsResult.status === "fulfilled";
-            const controllerAvailable = requestsResult.status === "fulfilled";
+        const timestamp = Date.now();
+        lastStateChangeRef.current = timestamp;
 
-            setBackendOnline(backendAvailable);
-            setControllerOnline(controllerAvailable);
-
-            if (statusResult.status === "fulfilled") {
-                const status = statusResult.value.data;
-                setTrafficRunActive(status.running === true);
-            }
-
-            const records = controllerAvailable
-                ? readRecords(requestsResult.value)
-                : [];
-
-            const now = Date.now();
-            const currentSecond = secondOf(now);
-            const oldestSecond =
-                currentSecond - (WINDOW_SECONDS - 1) * 1000;
-
-            const buckets = new Map();
-
-            for (let i = 0; i < WINDOW_SECONDS; i += 1) {
-                const timestamp = oldestSecond + i * 1000;
-
-                buckets.set(timestamp, {
+        setTimeline((previous) =>
+            [
+                ...previous,
+                {
                     timestamp,
-                    time: new Date(timestamp).toLocaleTimeString([], {
-                        minute: "2-digit",
-                        second: "2-digit",
-                    }),
-                    attempted: 0,
-                    successful: 0,
-                    failed: 0,
-                    backendReceived: 0,
-                });
-            }
-
-            // Count each synthetic request by its recorded start time.
-            // Do not depend on the backend being alive to count attempts.
-            for (const record of records) {
-                const timestamp = readTimestamp(record);
-
-                if (
-                    timestamp === null ||
-                    timestamp < oldestSecond ||
-                    timestamp > now
-                ) {
-                    continue;
-                }
-
-                if (record.outcome === "aborted") continue;
-
-                const bucket = buckets.get(secondOf(timestamp));
-                if (!bucket) continue;
-
-                bucket.attempted += 1;
-
-                if (
-                    record.success === true ||
-                    record.outcome === "success"
-                ) {
-                    bucket.successful += 1;
-                } else {
-                    bucket.failed += 1;
-                }
-            }
-
-            // Actual requests that reached the Express backend.
-            // This series can fall to zero during a backend crash.
-            if (backendAvailable) {
-                const backendPoints =
-                    metricsResult.value.data?.points ?? [];
-
-                for (const item of backendPoints) {
-                    const parsed = Date.parse(item.timestamp);
-                    if (Number.isNaN(parsed)) continue;
-
-                    const bucket = buckets.get(secondOf(parsed));
-                    if (bucket) {
-                        bucket.backendReceived =
-                            Number(item.requests) || 0;
-                    }
-                }
-            }
-
-            const nextPoints = Array.from(buckets.values());
-
-            setPoints(nextPoints);
-            setHasTrafficData(records.length > 0);
-            setUpdatedAt(new Date());
-            timer = setTimeout(refresh, POLL_INTERVAL);
-        }
-
-        refresh();
-
-        return () => {
-            cancelled = true;
-            clearTimeout(timer);
-        };
+                    time: formatTime(timestamp),
+                    state: nextState,
+                    label: STATE_CONFIG[nextState].label,
+                },
+            ].slice(-MAX_POINTS)
+        );
     }, []);
 
-    const totals = points.reduce(
-        (result, point) => ({
-            attempted: result.attempted + point.attempted,
-            successful: result.successful + point.successful,
-            failed: result.failed + point.failed,
-            backendReceived:
-                result.backendReceived + point.backendReceived,
-        }),
-        {
-            attempted: 0,
-            successful: 0,
-            failed: 0,
-            backendReceived: 0,
+    const beginRecovery = useCallback(() => {
+        if (currentStateRef.current !== STATES.RECOVERING) {
+            recoveryStartedAtRef.current = Date.now();
+            successfulChecksRef.current = 0;
         }
-    );
 
-    const peak = Math.max(
-        0,
-        ...points.map((point) => point.attempted)
-    );
+        recordState(STATES.RECOVERING);
+    }, [recordState]);
 
-    const incidentDetected =
-        totals.failed > 0 || backendOnline === false;
+    const checkServices = useCallback(async () => {
+        if (inFlightRef.current || !mountedRef.current) return;
 
-    const incidentStatus = incidentDetected
-        ? backendOnline === false
-            ? "BACKEND UNAVAILABLE"
-            : "REQUEST FAILURES DETECTED"
-        : trafficRunActive
-            ? "TRAFFIC RUNNING"
-            : hasTrafficData
-                ? "TRAFFIC RECORDED"
-                : "WAITING FOR TRAFFIC";
+        inFlightRef.current = true;
 
-    const incidentColor = incidentDetected
-        ? "#FF5C5C"
-        : trafficRunActive
-            ? "#F5B942"
-            : "#35D07F";
+        try {
+            const response = await axios.get(HEALTH_URL, {
+                timeout: 2500,
+            });
 
-    const explanation = incidentDetected
-        ? "SHCom is detecting failed requests or an unavailable backend. Watch the failed-request line and confirm recovery using the service health indicators."
-        : trafficRunActive
-            ? "Synthetic requests are being sent to the backend. A failure will appear here when the controller records an unsuccessful request."
-            : hasTrafficData
-                ? "Previous synthetic traffic is available. Start a traffic run to observe live request counts."
-                : "No synthetic request records are available yet. Start a synthetic traffic run from the Chaos Center.";
+            if (!mountedRef.current) return;
 
-    const formatTime = (value) =>
-        new Date(value).toLocaleTimeString([], {
-            minute: "2-digit",
-            second: "2-digit",
-        });
+            failureCountRef.current = 0;
+
+            const health = response.data;
+            const backendHealthy =
+                health?.success === true &&
+                health?.status === "healthy";
+
+            const databaseConnected = health?.database === "connected";
+
+            if (!backendHealthy || !databaseConnected) {
+                successfulChecksRef.current = 0;
+                beginRecovery();
+                return;
+            }
+
+            if (currentStateRef.current === STATES.CRASH) {
+                beginRecovery();
+            }
+
+            try {
+                await axios.get(PRODUCTS_URL, { timeout: 2500 });
+
+                if (!mountedRef.current) return;
+
+                if (currentStateRef.current === STATES.RECOVERED) return;
+
+                if (recoveryStartedAtRef.current === null) {
+                    recoveryStartedAtRef.current = Date.now();
+                }
+
+                successfulChecksRef.current += 1;
+
+                const elapsed =
+                    Date.now() - recoveryStartedAtRef.current;
+
+                if (
+                    elapsed >= MIN_RECOVERY_MS &&
+                    successfulChecksRef.current >= REQUIRED_SUCCESS_CHECKS
+                ) {
+                    recordState(STATES.RECOVERED);
+                    recoveryStartedAtRef.current = null;
+                    successfulChecksRef.current = 0;
+                } else {
+                    recordState(STATES.RECOVERING);
+                }
+            } catch {
+                if (!mountedRef.current) return;
+
+                successfulChecksRef.current = 0;
+                beginRecovery();
+            }
+        } catch {
+            if (!mountedRef.current) return;
+
+            failureCountRef.current += 1;
+
+            if (failureCountRef.current >= FAILURE_THRESHOLD) {
+                recoveryStartedAtRef.current = null;
+                successfulChecksRef.current = 0;
+                recordState(STATES.CRASH);
+            }
+        } finally {
+            inFlightRef.current = false;
+
+            if (mountedRef.current) {
+                setLastChecked(Date.now());
+            }
+        }
+    }, [beginRecovery, recordState]);
+
+    useEffect(() => {
+        mountedRef.current = true;
+
+        const checkInterval = window.setInterval(
+            checkServices,
+            POLL_INTERVAL
+        );
+
+        const animationInterval = window.setInterval(() => {
+            if (!mountedRef.current) return;
+
+            const now = Date.now();
+            const state = currentStateRef.current;
+            const level = STATE_CONFIG[state].level;
+
+            setChartData((previous) => {
+                const next = [
+                    ...previous,
+                    {
+                        timestamp: now,
+                        time: formatTime(now),
+                        level,
+                        state,
+                        label: STATE_CONFIG[state].label,
+                    },
+                ];
+
+                return next.slice(-MAX_POINTS);
+            });
+        }, 500);
+
+        checkServices();
+
+        return () => {
+            mountedRef.current = false;
+            window.clearInterval(checkInterval);
+            window.clearInterval(animationInterval);
+        };
+    }, [checkServices]);
+
+    const config = STATE_CONFIG[currentState];
+    const StatusIcon = config.icon;
+
+    const chartColor = config.color;
 
     return (
-        <section className="space-y-4 rounded-2xl border border-[#292D24] bg-[#0D0F0D] p-5 text-[#F3F4EE]">
+        <section className="w-full space-y-5 rounded-2xl border border-white/10 bg-[#101014] p-5 text-white sm:p-6">
             <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <div className="flex items-center gap-2">
-                        <Activity size={20} className="text-[#DEED00]" />
-                        <h2 className="text-lg font-semibold">
-                            Storefront Traffic & Recovery
-                        </h2>
+                    <div className="mb-2 flex items-center gap-2 text-xs font-medium tracking-[0.18em] text-white/45">
+                        <Activity size={15} />
+                        SELF-HEALING MONITOR
                     </div>
-                    <p className="mt-1 text-sm text-[#92968F]">
-                        Live request outcomes · rolling 30-second window
+
+                    <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">
+                        Backend Recovery Timeline
+                    </h2>
+
+                    <p className="mt-1 text-sm text-white/45">
+                        Live service health and recovery monitoring
                     </p>
                 </div>
 
                 <div
-                    className="flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold"
+                    className="flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-medium"
                     style={{
-                        color: incidentColor,
-                        borderColor: `${incidentColor}55`,
-                        backgroundColor: `${incidentColor}10`,
+                        color: chartColor,
+                        borderColor: `${chartColor}66`,
+                        backgroundColor: `${chartColor}12`,
                     }}
                 >
-                    <span
-                        className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: incidentColor }}
-                    />
-                    {incidentStatus}
+                    <StatusIcon size={17} />
+                    {config.label}
                 </div>
             </div>
 
             <div
-                className="flex items-start gap-3 rounded-xl border p-4"
+                className="rounded-xl border p-4 sm:p-5"
                 style={{
-                    borderColor: `${incidentColor}55`,
-                    backgroundColor: `${incidentColor}0D`,
+                    borderColor: `${chartColor}55`,
+                    backgroundColor: `${chartColor}0D`,
                 }}
             >
-                {incidentDetected ? (
-                    <ServerCrash
-                        size={21}
-                        style={{ color: incidentColor }}
-                    />
-                ) : trafficRunActive ? (
-                    <Radio
-                        size={21}
-                        style={{ color: incidentColor }}
-                    />
-                ) : (
-                    <ShieldCheck
-                        size={21}
-                        style={{ color: incidentColor }}
-                    />
-                )}
+                <div className="flex items-start gap-3">
+                    <div
+                        className="rounded-lg p-2"
+                        style={{
+                            color: chartColor,
+                            backgroundColor: `${chartColor}20`,
+                        }}
+                    >
+                        <StatusIcon size={22} />
+                    </div>
 
-                <div>
-                    <p className="text-sm font-semibold">
-                        What is happening?
-                    </p>
-                    <p className="mt-1 text-sm leading-6 text-[#C0C4B9]">
-                        {explanation}
-                    </p>
+                    <div className="min-w-0 flex-1">
+                        <h3
+                            className="text-base font-semibold sm:text-lg"
+                            style={{ color: chartColor }}
+                        >
+                            {config.label}
+                        </h3>
+
+                        <p className="mt-1 text-sm leading-6 text-white/60">
+                            {config.description}
+                        </p>
+
+                        {lastChecked && (
+                            <p className="mt-3 flex items-center gap-1.5 text-xs text-white/40">
+                                <Clock3 size={13} />
+                                Last checked: {formatTime(lastChecked)}
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <Metric
-                    label="Requests attempted"
-                    value={totals.attempted}
-                    detail="Synthetic requests in 30 seconds"
-                    icon={Radio}
-                    color="#DEED00"
-                />
-                <Metric
-                    label="Successful requests"
-                    value={totals.successful}
-                    detail="Completed successfully"
-                    icon={CheckCircle2}
-                    color="#35D07F"
-                />
-                <Metric
-                    label="Failed requests"
-                    value={totals.failed}
-                    detail="Unsuccessful synthetic requests"
-                    icon={AlertTriangle}
-                    color="#FF5C5C"
-                />
-                <Metric
-                    label="Backend received"
-                    value={totals.backendReceived}
-                    detail="Requests reaching Express"
-                    icon={Activity}
-                    color="#A78BFA"
-                />
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                {[
+                    {
+                        state: STATES.CRASH,
+                        subtitle: "Backend unavailable",
+                        icon: AlertTriangle,
+                    },
+                    {
+                        state: STATES.RECOVERING,
+                        subtitle: "Verifying services",
+                        icon: Activity,
+                    },
+                    {
+                        state: STATES.RECOVERED,
+                        subtitle: "Health checks passed",
+                        icon: CheckCircle2,
+                    },
+                ].map(({ state, subtitle, icon: Icon }) => {
+                    const item = STATE_CONFIG[state];
+                    const active = currentState === state;
+
+                    return (
+                        <div
+                            key={state}
+                            className="rounded-xl border p-3 transition-colors duration-300 sm:p-4"
+                            style={{
+                                borderColor: active
+                                    ? `${item.color}85`
+                                    : "rgba(255,255,255,0.08)",
+                                backgroundColor: active
+                                    ? `${item.color}12`
+                                    : "rgba(255,255,255,0.02)",
+                            }}
+                        >
+                            <Icon
+                                size={19}
+                                style={{ color: item.color }}
+                            />
+
+                            <p
+                                className="mt-3 text-xs font-semibold sm:text-sm"
+                                style={{
+                                    color: active
+                                        ? item.color
+                                        : "rgba(255,255,255,0.7)",
+                                }}
+                            >
+                                {item.label}
+                            </p>
+
+                            <p className="mt-1 text-[10px] text-white/35 sm:text-xs">
+                                {subtitle}
+                            </p>
+                        </div>
+                    );
+                })}
             </div>
 
-            <div className="rounded-xl border border-[#292D24] bg-[#11140F] p-3 sm:p-4">
-                <div className="mb-4">
-                    <h3 className="text-sm font-semibold">
-                        Every request tells the story
-                    </h3>
-                    <p className="mt-1 text-xs text-[#92968F]">
-                        Vertical axis: number of API requests per second.
-                        Horizontal axis: time.
-                    </p>
+            <div className="rounded-xl border border-white/[0.08] bg-black/20 p-3 sm:p-4">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h3 className="text-sm font-semibold">
+                            Live Recovery Curve
+                        </h3>
+
+                        <p className="mt-1 text-xs text-white/40">
+                            The green curve moves continuously until a failure is detected.
+                        </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3 text-[11px] text-white/60">
+                        {[
+                            [STATES.CRASH, "Crash"],
+                            [STATES.RECOVERING, "Recovering"],
+                            [STATES.RECOVERED, "Recovered"],
+                        ].map(([state, label]) => (
+                            <span
+                                key={state}
+                                className="flex items-center gap-1.5"
+                            >
+                                <span
+                                    className="h-2 w-2 rounded-full"
+                                    style={{
+                                        backgroundColor:
+                                            STATE_CONFIG[state].color,
+                                    }}
+                                />
+                                {label}
+                            </span>
+                        ))}
+                    </div>
                 </div>
 
-                <div className="mb-4 flex flex-wrap gap-x-4 gap-y-2 text-xs">
-                    <span className="flex items-center gap-2">
-                        <span className="h-0.5 w-4 bg-[#DEED00]" />
-                        Attempted
-                    </span>
-                    <span className="flex items-center gap-2">
-                        <span className="h-0.5 w-4 bg-[#35D07F]" />
-                        Successful
-                    </span>
-                    <span className="flex items-center gap-2">
-                        <span className="h-0.5 w-4 bg-[#FF5C5C]" />
-                        Failed
-                    </span>
-                    <span className="flex items-center gap-2">
-                        <span className="h-0.5 w-4 bg-[#A78BFA]" />
-                        Reached backend
-                    </span>
-                </div>
-
-                <div className="h-[300px] w-full">
+                <div className="h-56 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart
-                            data={points}
+                            data={chartData}
                             margin={{
-                                top: 8,
-                                right: 12,
-                                left: -12,
+                                top: 12,
+                                right: 14,
+                                left: 0,
                                 bottom: 4,
                             }}
                         >
                             <CartesianGrid
-                                stroke="#292D24"
-                                strokeDasharray="3 4"
+                                stroke="rgba(255,255,255,0.07)"
                                 vertical={false}
                             />
 
                             <XAxis
-                                dataKey="timestamp"
-                                type="number"
-                                scale="time"
-                                domain={["dataMin", "dataMax"]}
-                                tickFormatter={formatTime}
-                                tick={{ fill: "#92968F", fontSize: 10 }}
-                                axisLine={{ stroke: "#292D24" }}
+                                dataKey="time"
+                                tick={{
+                                    fill: "#85858f",
+                                    fontSize: 10,
+                                }}
+                                axisLine={false}
                                 tickLine={false}
                                 minTickGap={24}
                             />
 
                             <YAxis
-                                allowDecimals={false}
-                                domain={[0, (max) => Math.max(5, max)]}
-                                tick={{ fill: "#92968F", fontSize: 11 }}
+                                domain={[-0.15, 2.15]}
+                                ticks={[0, 1, 2]}
+                                tickFormatter={(value) => {
+                                    if (value === 0) return "Crash";
+                                    if (value === 1) return "Recovering";
+                                    return "Recovered";
+                                }}
+                                tick={{
+                                    fill: "#85858f",
+                                    fontSize: 10,
+                                }}
                                 axisLine={false}
                                 tickLine={false}
-                                width={36}
+                                width={76}
                             />
 
                             <Tooltip
-                                labelFormatter={(value) =>
-                                    `Time: ${formatTime(value)}`
-                                }
-                                formatter={(value, name) => [
-                                    value,
-                                    {
-                                        attempted: "Requests attempted",
-                                        successful: "Successful requests",
-                                        failed: "Failed requests",
-                                        backendReceived: "Reached backend",
-                                    }[name] ?? name,
-                                ]}
                                 contentStyle={{
-                                    backgroundColor: "#141813",
-                                    border: "1px solid #292D24",
-                                    borderRadius: "10px",
-                                    color: "#F3F4EE",
-                                    fontSize: "12px",
+                                    background: "#19191f",
+                                    border: "1px solid #34343d",
+                                    borderRadius: 10,
+                                    color: "#fff",
+                                    fontSize: 12,
                                 }}
+                                labelStyle={{ color: "#a1a1aa" }}
+                                formatter={(value, _, item) => [
+                                    item?.payload?.label ??
+                                        STATE_CONFIG[currentState].label,
+                                    "State",
+                                ]}
+                                labelFormatter={(label) => `Time: ${label}`}
+                            />
+
+                            <ReferenceLine
+                                y={2}
+                                stroke="rgba(34,197,94,0.15)"
+                                strokeDasharray="4 4"
                             />
 
                             <Line
                                 type="monotone"
-                                dataKey="attempted"
-                                name="attempted"
-                                stroke="#DEED00"
-                                strokeWidth={2.5}
+                                dataKey="level"
+                                name="Recovery state"
+                                stroke={chartColor}
+                                strokeWidth={3}
                                 dot={false}
-                                isAnimationActive={false}
-                            />
-
-                            <Line
-                                type="monotone"
-                                dataKey="successful"
-                                name="successful"
-                                stroke="#35D07F"
-                                strokeWidth={2}
-                                dot={false}
-                                isAnimationActive={false}
-                            />
-
-                            <Line
-                                type="monotone"
-                                dataKey="failed"
-                                name="failed"
-                                stroke="#FF5C5C"
-                                strokeWidth={2.5}
-                                dot={false}
-                                activeDot={{ r: 4 }}
-                                isAnimationActive={false}
-                            />
-
-                            <Line
-                                type="monotone"
-                                dataKey="backendReceived"
-                                name="backendReceived"
-                                stroke="#A78BFA"
-                                strokeWidth={2}
-                                strokeDasharray="5 4"
-                                dot={false}
+                                activeDot={{
+                                    r: 5,
+                                    fill: chartColor,
+                                    stroke: "#101014",
+                                    strokeWidth: 2,
+                                }}
                                 isAnimationActive={false}
                             />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
+            </div>
 
-                <div className="mt-3 flex flex-wrap justify-between gap-2 border-t border-[#292D24] pt-3 text-xs text-[#92968F]">
-                    <span>
-                        {updatedAt
-                            ? `Last updated ${updatedAt.toLocaleTimeString()}`
-                            : "Connecting to traffic sources…"}
-                    </span>
-                    <span>
-                        {controllerOnline === false
-                            ? "Traffic controller disconnected"
-                            : controllerOnline === true
-                                ? "Traffic controller connected"
-                                : "Checking controller"}
+            <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-sm font-semibold">
+                        Recent State Changes
+                    </h3>
+
+                    <span className="text-xs text-white/40">
+                        Latest first
                     </span>
                 </div>
 
-                {controllerOnline === false && (
-                    <p className="mt-3 text-sm text-[#FF5C5C]">
-                        The controller is unreachable. Failed requests cannot be
-                        displayed until the controller endpoint is available.
+                {timeline.length === 0 ? (
+                    <p className="rounded-lg border border-white/[0.08] p-4 text-sm text-white/40">
+                        No state changes recorded yet.
                     </p>
+                ) : (
+                    <div className="max-h-52 space-y-2 overflow-y-auto pr-1">
+                        {[...timeline].reverse().map((event) => {
+                            const eventConfig = STATE_CONFIG[event.state];
+                            const EventIcon = eventConfig.icon;
+
+                            return (
+                                <div
+                                    key={event.timestamp}
+                                    className="flex items-center gap-3 rounded-lg border border-white/[0.08] bg-white/[0.02] px-3 py-2.5"
+                                >
+                                    <EventIcon
+                                        size={17}
+                                        style={{
+                                            color: eventConfig.color,
+                                        }}
+                                    />
+
+                                    <span
+                                        className="flex-1 text-sm font-medium"
+                                        style={{
+                                            color: eventConfig.color,
+                                        }}
+                                    >
+                                        {event.label}
+                                    </span>
+
+                                    <span className="text-xs text-white/40">
+                                        {event.time}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
                 )}
             </div>
         </section>
