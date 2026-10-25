@@ -17,6 +17,10 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/proxy-recovery/, ""),
       },
+      "/api/metrics/traffic": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+      },
     },
   },
 });

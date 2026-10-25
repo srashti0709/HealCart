@@ -8,6 +8,9 @@ export const PAYMENT_SERVICE_URL =
 export const RECOVERY_MONITOR_URL =
   import.meta.env.VITE_RECOVERY_MONITOR_URL || "http://localhost:5173/proxy-recovery";
 
+export const TRAFFIC_METRICS_URL =
+  import.meta.env.VITE_TRAFFIC_METRICS_URL || "http://localhost:5173/api/metrics/traffic";
+
 export const CHAOS_CONTROLLER_URL =
   import.meta.env.VITE_CHAOS_CONTROLLER_URL || "http://localhost:5003";
 

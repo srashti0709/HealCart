@@ -16,7 +16,7 @@ import {
     XAxis,
     YAxis,
 } from "recharts";
-import { API_BASE_URL } from "../config/api";
+import { TRAFFIC_METRICS_URL } from "../config/api";
 
 const WINDOW_SECONDS = 30;
 const POLL_INTERVAL = 1000;
@@ -71,7 +71,7 @@ export default function LiveApiTrafficChart() {
 
         async function refresh() {
             const metricsResult = await axios.get(
-                `${API_BASE_URL}/api/metrics/traffic`,
+                TRAFFIC_METRICS_URL,
                 { timeout: 4000 }
             );
 
