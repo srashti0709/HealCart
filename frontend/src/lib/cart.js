@@ -8,9 +8,9 @@
  * page reload.
  */
 
-export const CART_STORAGE_KEY = "shcomCart";
+export const CART_STORAGE_KEY = "healcartCart";
 
-export const CART_CHANGED_EVENT = "shcom-cart-changed";
+export const CART_CHANGED_EVENT = "healcart-cart-changed";
 
 /**
  * Reads the persisted cart. Always returns an array.

@@ -32,8 +32,8 @@ export default function StorefrontCartProvider({ children }) {
       writeCart(cart);
     };
 
-    window.addEventListener("shcom-cart-add", handler);
-    return () => window.removeEventListener("shcom-cart-add", handler);
+    window.addEventListener("healcart-cart-add", handler);
+    return () => window.removeEventListener("healcart-cart-add", handler);
   }, []);
 
   return children;

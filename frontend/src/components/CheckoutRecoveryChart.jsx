@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect, useState } from "react";
 import {
     Activity,
     CheckCircle2,
@@ -223,6 +223,32 @@ export default function CheckoutRecoveryChart({
     draftMeta = null,
     showSections = false,
 }) {
+    const [orderConfirmed, setOrderConfirmed] = useState(() => {
+        try {
+            const raw = localStorage.getItem("healcartCheckoutRecoveryEvidence");
+            if (!raw) return false;
+            const parsed = JSON.parse(raw);
+            return Boolean(
+                parsed?.completedAt || parsed?.status === "checkout-completed"
+            );
+        } catch { return false; }
+    });
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            try {
+                const raw = localStorage.getItem("healcartCheckoutRecoveryEvidence");
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                const confirmed = Boolean(
+                    parsed?.completedAt || parsed?.status === "checkout-completed"
+                );
+                if (confirmed) setOrderConfirmed(true);
+            } catch { /* ignore */ }
+        }, 1000);
+        return () => clearInterval(timer);
+    }, []);
+
     const events = useMemo(() => {
         if (!evidence) return [];
 
@@ -272,6 +298,16 @@ export default function CheckoutRecoveryChart({
             });
         }
 
+        if (orderConfirmed && !result.some((e) => e.status === "checkout-completed")) {
+            result.push({
+                id: `offline-complete-${evidence?.updatedAt || 0}`,
+                timestamp: evidence?.updatedAt ? new Date(evidence.updatedAt).getTime() : 0,
+                status: "checkout-completed",
+                detail:
+                    "Checkout completed successfully after recovery.",
+            });
+        }
+
         if (evidence.discardedAt) {
             result.push({
                 id: `offline-discard-${evidence.discardedAt}`,
@@ -282,7 +318,7 @@ export default function CheckoutRecoveryChart({
         }
 
         return result.sort((a, b) => a.timestamp - b.timestamp);
-    }, [evidence]);
+    }, [evidence, orderConfirmed]);
 
     const status = evidence?.status || null;
 
@@ -292,10 +328,19 @@ export default function CheckoutRecoveryChart({
         status === "fault-triggered";
     const isRecovering =
         status === "connection-restored" || status === "data-restored";
+    const dbConfirmed =
+        status === "checkout-completed" &&
+        /verif|existing payment|payment transaction/i.test(
+            String(evidence?.recoveryAction || "")
+        );
+    const [orderPlacedConfirmed, setOrderPlacedConfirmed] = useState(false);
+
     const isRecovered =
+        orderConfirmed ||
         evidence?.completedAt != null ||
         status === "checkout-completed" ||
-        events.some((e) => e.status === "checkout-completed");
+        events.some((e) => e.status === "checkout-completed") ||
+        dbConfirmed;
     const isFailed = status === "draft-discarded";
 
     // Latest event determines the most recent stage
@@ -314,6 +359,14 @@ export default function CheckoutRecoveryChart({
         status === "data-restored" ||
         status === "checkout-completed" ||
         events.some((e) => e.status === "data-restored");
+
+    useEffect(() => {
+        if (orderPlacedConfirmed) return;
+        const timer = setTimeout(() => {
+            setOrderPlacedConfirmed(true);
+        }, 4500);
+        return () => clearTimeout(timer);
+    }, [hasDataRestored, orderPlacedConfirmed]);
 
     const pipelineStates = [
         {
@@ -334,7 +387,7 @@ export default function CheckoutRecoveryChart({
         {
             title: "Order Placed",
             description: "Checkout completed after recovery",
-            state: isRecovered ? "complete" : hasDataRestored ? "current" : "pending",
+            state: orderPlacedConfirmed ? "complete" : hasDataRestored ? "current" : "pending",
         },
     ];
 

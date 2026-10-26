@@ -210,7 +210,7 @@ export default function Storefront() {
 
   const addToCart = (product) => {
     window.dispatchEvent(
-      new CustomEvent("shcom-cart-add", {
+      new CustomEvent("healcart-cart-add", {
         detail: {
           productId: product._id,
           name: product.name,

@@ -329,25 +329,50 @@ export default function PaymentChaosRecoveryChart({
 
     const errorEvents = events.filter((event) => event.status === "error");
 
+    // Database-level confirmation: a resolved incident with an order id and a
+    // verification recovery action is authoritative over event-derived state.
+    const dbConfirmedIncident = incidents.find(
+        (incident) =>
+            String(incident.incidentType || "").toLowerCase() ===
+                "payment_timeout_recovery" &&
+            incident.status === "resolved" &&
+            /verif|existing payment|payment transaction/i.test(
+                String(incident.recoveryAction || "")
+            ) &&
+            incident.resolvedAt
+    );
+
     const latestTimeout = timeoutEvents[timeoutEvents.length - 1];
     const latestRecovery = recoveryEvents[recoveryEvents.length - 1];
-    const latestIncident = latestTimeout?.incident || null;
+    const latestIncident = dbConfirmedIncident || latestTimeout?.incident || null;
 
     const active = Boolean(recovery?.running);
     const hasExperiment = Boolean(recovery?.startedAt);
 
     const resolved = Boolean(
-        latestTimeout &&
+        (latestTimeout &&
             latestRecovery &&
-            latestRecovery.timestamp >= latestTimeout.timestamp
+            latestRecovery.timestamp >= latestTimeout.timestamp) ||
+            dbConfirmedIncident
     );
 
+    const recoveryStartTime = (() => {
+        if (latestTimeout) return latestTimeout.timestamp;
+        if (dbConfirmedIncident)
+            return new Date(dbConfirmedIncident.detectedAt).getTime();
+        return null;
+    })();
+
+    const recoveryEndTime = (() => {
+        if (latestRecovery) return latestRecovery.timestamp;
+        if (dbConfirmedIncident)
+            return new Date(dbConfirmedIncident.resolvedAt).getTime();
+        return null;
+    })();
+
     const totalRecoveryTime =
-        resolved && latestTimeout && latestRecovery
-            ? formatDuration(
-                  latestTimeout.timestamp,
-                  latestRecovery.timestamp
-              )
+        resolved && recoveryStartTime && recoveryEndTime
+            ? formatDuration(recoveryStartTime, recoveryEndTime)
             : null;
 
     const pipelineStates = [

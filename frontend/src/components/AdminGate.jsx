@@ -13,7 +13,7 @@ import {
 import axios from "axios";
 import { API_BASE_URL } from "../config/api";
 
-const TOKEN_KEY = "shcomAdminToken";
+const TOKEN_KEY = "healcartAdminToken";
 
 export default function AdminGate({ children }) {
   const [status, setStatus] = useState("checking");

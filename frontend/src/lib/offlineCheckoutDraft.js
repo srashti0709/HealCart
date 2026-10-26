@@ -1,4 +1,4 @@
-const DB_NAME = "shcom-offline-recovery";
+const DB_NAME = "healcart-offline-recovery";
 const STORE_NAME = "checkoutDrafts";
 const DRAFT_KEY = "active-checkout";
 
@@ -30,7 +30,7 @@ export async function saveCheckoutDraft(customer, cart) {
     tx.onerror = () => reject(tx.error);
   });
   db.close();
-  try { localStorage.setItem("shcomCheckoutDraftMeta", JSON.stringify({ savedAt: draft.savedAt, fields: Object.values(safeCustomer).filter(Boolean).length, items: safeCart.length })); } catch {}
+  try { localStorage.setItem("healcartCheckoutDraftMeta", JSON.stringify({ savedAt: draft.savedAt, fields: Object.values(safeCustomer).filter(Boolean).length, items: safeCart.length })); } catch {}
   return draft;
 }
 
@@ -55,5 +55,5 @@ export async function deleteCheckoutDraft() {
     tx.onerror = () => reject(tx.error);
   });
   db.close();
-  localStorage.removeItem("shcomCheckoutDraftMeta");
+  localStorage.removeItem("healcartCheckoutDraftMeta");
 }

@@ -1,4 +1,4 @@
-const CACHE_NAME = "shcom-app-shell-v1";
+const CACHE_NAME = "healcart-app-shell-v1";
 const APP_SHELL = ["/", "/index.html"];
 
 self.addEventListener("install", (event) => {

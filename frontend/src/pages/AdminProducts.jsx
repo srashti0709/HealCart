@@ -219,7 +219,7 @@ export default function AdminProducts() {
 
             <button
               onClick={() => {
-                localStorage.removeItem("shcomAdminToken");
+                localStorage.removeItem("healcartAdminToken");
                 window.location.reload();
               }}
               className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700"

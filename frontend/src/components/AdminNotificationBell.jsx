@@ -22,7 +22,7 @@ export default function AdminNotificationBell() {
 
   const loadNotifications = async () => {
     try {
-      const token = localStorage.getItem("shcomAdminToken");
+      const token = localStorage.getItem("healcartAdminToken");
       if (!token) return;
 
       const response = await axios.get(
@@ -65,7 +65,7 @@ export default function AdminNotificationBell() {
     if (notification.readAt) return;
 
     try {
-      const token = localStorage.getItem("shcomAdminToken");
+      const token = localStorage.getItem("healcartAdminToken");
 
       await axios.patch(
         `${API_BASE_URL}/api/notifications/${notification._id}/read`,

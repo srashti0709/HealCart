@@ -152,23 +152,24 @@ function Dashboard({ page = "overview" }) {
   const recoveryLoadedRef = useRef(false);
   const [paymentChaosLoading, setPaymentChaosLoading] = useState(false);
   const [paymentChaosMessage, setPaymentChaosMessage] = useState("");
-  const [offlineCheckoutFault, setOfflineCheckoutFault] = useState(() => localStorage.getItem("shcomCheckoutTestArmed") === "on");
+  const [offlineCheckoutFault, setOfflineCheckoutFault] = useState(() => localStorage.getItem("healcartCheckoutTestArmed") === "on");
   const [wifiFailureRunning, setWifiFailureRunning] = useState(false);
   const [injectRecoveryClicked, setInjectRecoveryClicked] = useState(false);
   const [showRaceSections, setShowRaceSections] = useState(false);
   const [checkoutRecoveryEvidence, setCheckoutRecoveryEvidence] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("shcomCheckoutRecoveryEvidence") || "null"); }
+    try { return JSON.parse(localStorage.getItem("healcartCheckoutRecoveryEvidence") || "null"); }
     catch { return null; }
   });
   const [checkoutDraftMeta, setCheckoutDraftMeta] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"); }
+    try { return JSON.parse(localStorage.getItem("healcartCheckoutDraftMeta") || "null"); }
     catch { return null; }
   });
   useEffect(() => {
     const refreshCheckoutEvidence = () => {
       try {
-        setCheckoutDraftMeta(JSON.parse(localStorage.getItem("shcomCheckoutDraftMeta") || "null"));
-        setOfflineCheckoutFault(localStorage.getItem("shcomCheckoutTestArmed") === "on");
+        setCheckoutDraftMeta(JSON.parse(localStorage.getItem("healcartCheckoutDraftMeta") || "null"));
+        setOfflineCheckoutFault(localStorage.getItem("healcartCheckoutTestArmed") === "on");
+        setCheckoutRecoveryEvidence(JSON.parse(localStorage.getItem("healcartCheckoutRecoveryEvidence") || "null"));
       } catch { /* ignore */ }
     };
     refreshCheckoutEvidence();
@@ -462,58 +463,129 @@ function Dashboard({ page = "overview" }) {
         )[0];
 
       if (recoveryIncident) {
-        const statusMap = {
-          detected: "failure-injected",
-          recovering: "data-restored",
-          resolved: "checkout-completed",
-          failed: "draft-discarded",
-        };
+        // Read localStorage directly as backup — Checkout.js may have written
+        // "checkout-completed" before the 1s poll synced it into React state.
+        const lsEvidence = (() => {
+          try {
+            return JSON.parse(
+              localStorage.getItem("healcartCheckoutRecoveryEvidence") || "null"
+            );
+          } catch {
+            return null;
+          }
+        })();
 
-        const evidenceStatus = statusMap[recoveryIncident.status] || recoveryIncident.status;
+        const existingCompletedAt =
+          lsEvidence?.completedAt || checkoutRecoveryEvidence?.completedAt;
 
-        setCheckoutRecoveryEvidence({
-          status: evidenceStatus,
-          failureDetectedAt:
+        // Once the checkout page / backend has confirmed "checkout-completed",
+        // never let a non-resolved backend incident overwrite it.
+        const isAlreadyConfirmed =
+          lsEvidence?.status === "checkout-completed" ||
+          checkoutRecoveryEvidence?.status === "checkout-completed";
+
+        // Database-level confirmation: a resolved incident with an order id and
+        // a verification recovery action is authoritative.
+        const dbConfirmed =
+          recoveryIncident.status === "resolved" &&
+          Boolean(recoveryIncident.order) &&
+          /verif|existing payment|payment transaction/i.test(
+            String(recoveryIncident.recoveryAction || "")
+          );
+
+        // Never overwrite a confirmed checkout unless the backend has resolved
+        // it. Always preserve an existing completedAt so the recovery duration
+        // never flickers to 0s.
+        if (!dbConfirmed && isAlreadyConfirmed) {
+          // Skip — checkout already confirmed, keep the stable state.
+        } else {
+          const statusMap = {
+            detected: "failure-injected",
+            recovering: "data-restored",
+            resolved: "checkout-completed",
+            failed: "draft-discarded",
+          };
+
+          const evidenceStatus = statusMap[recoveryIncident.status] || recoveryIncident.status;
+
+          const finalCompletedAt = existingCompletedAt ||
+              (evidenceStatus === "checkout-completed"
+                ? recoveryIncident.resolvedAt || recoveryIncident.detectedAt
+                : null);
+
+          const failureDetectedAt =
             evidenceStatus === "failure-injected"
               ? recoveryIncident.detectedAt
-              : recoveryIncident.failureDetectedAt,
-          failureInjectedAt:
+              : recoveryIncident.failureDetectedAt;
+          const failureInjectedAt =
             evidenceStatus === "failure-injected"
               ? recoveryIncident.detectedAt
-              : recoveryIncident.failureInjectedAt,
-          connectionRestoredAt:
+              : recoveryIncident.failureInjectedAt;
+          const connectionRestoredAt =
             evidenceStatus === "data-restored" ||
-              evidenceStatus === "checkout-completed"
-              ? recoveryIncident.detectedAt
-              : recoveryIncident.connectionRestoredAt,
-          restoredAt:
-            evidenceStatus === "data-restored" ||
-              evidenceStatus === "checkout-completed"
-              ? recoveryIncident.detectedAt
-              : recoveryIncident.restoredAt,
-          completedAt:
             evidenceStatus === "checkout-completed"
-              ? recoveryIncident.resolvedAt ||
-              recoveryIncident.detectedAt
-              : recoveryIncident.completedAt,
-          discardedAt:
+              ? recoveryIncident.detectedAt
+              : recoveryIncident.connectionRestoredAt;
+          const restoredAt =
+            evidenceStatus === "data-restored" ||
+            evidenceStatus === "checkout-completed"
+              ? recoveryIncident.detectedAt
+              : recoveryIncident.restoredAt;
+          const discardedAt =
             evidenceStatus === "draft-discarded"
               ? recoveryIncident.resolvedAt ||
-              recoveryIncident.detectedAt
-              : recoveryIncident.discardedAt,
-          message: recoveryIncident.message,
-          recoveryAction: recoveryIncident.recoveryAction,
-          recoveryResult: recoveryIncident.recoveryResult,
-          updatedAt: recoveryIncident.updatedAt || recoveryIncident.detectedAt,
-        });
+                recoveryIncident.detectedAt
+              : recoveryIncident.discardedAt;
 
-        localStorage.setItem(
-          "shcomCheckoutRecoveryEvidence",
-          JSON.stringify({
+          setCheckoutRecoveryEvidence({
             status: evidenceStatus,
+            failureDetectedAt,
+            failureInjectedAt,
+            connectionRestoredAt,
+            restoredAt,
+            completedAt: finalCompletedAt,
+            discardedAt,
+            message: recoveryIncident.message,
+            recoveryAction: recoveryIncident.recoveryAction,
+            recoveryResult: recoveryIncident.recoveryResult,
             updatedAt: recoveryIncident.updatedAt || recoveryIncident.detectedAt,
-          })
-        );
+          });
+
+          // Re-read freshest localStorage before writing to avoid clobbering a
+          // checkout-completed write that Checkout.jsx may have committed
+          // between the initial read above and this write.
+          const freshLS = (() => {
+            try {
+              return JSON.parse(
+                localStorage.getItem("healcartCheckoutRecoveryEvidence") ||
+                  "null"
+              );
+            } catch {
+              return null;
+            }
+          })();
+
+          if (!dbConfirmed && freshLS?.status === "checkout-completed") {
+            // Checkout already confirmed; do not clobber localStorage.
+          } else {
+            localStorage.setItem(
+              "healcartCheckoutRecoveryEvidence",
+              JSON.stringify({
+                status: evidenceStatus,
+                failureDetectedAt,
+                failureInjectedAt,
+                connectionRestoredAt,
+                restoredAt,
+                completedAt: finalCompletedAt,
+                discardedAt,
+                message: recoveryIncident.message,
+                recoveryAction: recoveryIncident.recoveryAction,
+                recoveryResult: recoveryIncident.recoveryResult,
+                updatedAt: recoveryIncident.updatedAt || recoveryIncident.detectedAt,
+              })
+            );
+          }
+        }
       }
     } catch {
       setIncidentsError(
@@ -2525,12 +2597,12 @@ function Dashboard({ page = "overview" }) {
             }
 
             setInjectRecoveryClicked(true);
-            localStorage.setItem("shcomCheckoutTestArmed", "on");
+            localStorage.setItem("healcartCheckoutTestArmed", "on");
 
             const current = (() => {
               try {
                 return JSON.parse(
-                  localStorage.getItem("shcomCheckoutRecoveryEvidence") || "{}"
+                  localStorage.getItem("healcartCheckoutRecoveryEvidence") || "{}"
                 );
               } catch {
                 return {};
@@ -2538,7 +2610,7 @@ function Dashboard({ page = "overview" }) {
             })();
 
             localStorage.setItem(
-              "shcomCheckoutRecoveryEvidence",
+              "healcartCheckoutRecoveryEvidence",
               JSON.stringify({
                 ...current,
                 status: "failure-injected",
@@ -2556,7 +2628,7 @@ function Dashboard({ page = "overview" }) {
             setOfflineCheckoutFault(true);
             setCheckoutRecoveryEvidence(
               JSON.parse(
-                localStorage.getItem("shcomCheckoutRecoveryEvidence") ||
+                localStorage.getItem("healcartCheckoutRecoveryEvidence") ||
                   "null"
               )
             );

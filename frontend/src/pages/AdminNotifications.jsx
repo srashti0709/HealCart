@@ -31,7 +31,7 @@ export default function AdminNotifications() {
     if (manualRefresh) setRefreshing(true);
 
     try {
-      const token = localStorage.getItem("shcomAdminToken");
+      const token = localStorage.getItem("healcartAdminToken");
 
       if (!token) {
         setError("Admin login required. Please sign in again.");
@@ -59,7 +59,7 @@ export default function AdminNotifications() {
         error.response?.status === 401 ||
         error.response?.status === 403
       ) {
-        localStorage.removeItem("shcomAdminToken");
+        localStorage.removeItem("healcartAdminToken");
         window.location.href = "/admin";
         return;
       }
@@ -92,7 +92,7 @@ export default function AdminNotifications() {
     setNotice("");
 
     try {
-      const token = localStorage.getItem("shcomAdminToken");
+      const token = localStorage.getItem("healcartAdminToken");
 
       if (!token) {
         setError("Admin login required. Please sign in again.");
@@ -122,7 +122,7 @@ export default function AdminNotifications() {
     setNotice("");
 
     try {
-      const token = localStorage.getItem("shcomAdminToken");
+      const token = localStorage.getItem("healcartAdminToken");
 
       if (!token) {
         setError("Admin login required. Please sign in again.");
@@ -219,7 +219,7 @@ export default function AdminNotifications() {
             <button
               type="button"
               onClick={() => {
-                localStorage.removeItem("shcomAdminToken");
+                localStorage.removeItem("healcartAdminToken");
                 window.location.reload();
               }}
               className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700"

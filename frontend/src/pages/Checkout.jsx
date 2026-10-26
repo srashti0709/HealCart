@@ -113,7 +113,7 @@ export default function Checkout() {
     const updateRecoveryEvidence = (patch) => {
         try {
             const current = JSON.parse(
-                localStorage.getItem("shcomCheckoutRecoveryEvidence") || "{}"
+                localStorage.getItem("healcartCheckoutRecoveryEvidence") || "{}"
             );
             const next = {
                 ...current,
@@ -121,7 +121,7 @@ export default function Checkout() {
                 updatedAt: new Date().toISOString(),
             };
             localStorage.setItem(
-                "shcomCheckoutRecoveryEvidence",
+                "healcartCheckoutRecoveryEvidence",
                 JSON.stringify(next)
             );
             return next;
@@ -141,12 +141,12 @@ export default function Checkout() {
         saveTimerRef.current = setTimeout(async () => {
             try {
                 const cart = JSON.parse(
-                    localStorage.getItem("shcomCart") || "[]"
+                    localStorage.getItem("healcartCart") || "[]"
                 );
                 await saveCheckoutDraft(next, cart);
                 setDraftMeta(
                     JSON.parse(
-                        localStorage.getItem("shcomCheckoutDraftMeta") ||
+                        localStorage.getItem("healcartCheckoutDraftMeta") ||
                             "null"
                     )
                 );
@@ -194,7 +194,7 @@ export default function Checkout() {
                     try {
                         const existingDraft = await readCheckoutDraft();
                         const currentCart = JSON.parse(
-                            localStorage.getItem("shcomCart") || "[]"
+                            localStorage.getItem("healcartCart") || "[]"
                         );
 
                         const hasCurrentProgress =
@@ -220,7 +220,7 @@ export default function Checkout() {
                         setDraftMeta(
                             JSON.parse(
                                 localStorage.getItem(
-                                    "shcomCheckoutDraftMeta"
+                                    "healcartCheckoutDraftMeta"
                                 ) || "null"
                             )
                         );
@@ -243,7 +243,7 @@ export default function Checkout() {
                             try {
                                 return JSON.parse(
                                     localStorage.getItem(
-                                        "shcomCheckoutRecoveryEvidence"
+                                        "healcartCheckoutRecoveryEvidence"
                                     ) || "{}"
                                 ).status;
                             } catch {
@@ -276,7 +276,7 @@ export default function Checkout() {
                         setDraftMeta(
                             JSON.parse(
                                 localStorage.getItem(
-                                    "shcomCheckoutDraftMeta"
+                                    "healcartCheckoutDraftMeta"
                                 ) || "null"
                             )
                         );
@@ -288,7 +288,7 @@ export default function Checkout() {
 
         const onConnectivity = () => checkConnectivity();
         const onStorage = (event) => {
-            if (event.key === "shcomCheckoutFault") checkConnectivity();
+            if (event.key === "healcartCheckoutFault") checkConnectivity();
         };
 
         checkConnectivity();
@@ -423,7 +423,7 @@ export default function Checkout() {
         let cart;
 
         try {
-            cart = JSON.parse(localStorage.getItem("shcomCart") || "[]");
+            cart = JSON.parse(localStorage.getItem("healcartCart") || "[]");
         } catch {
             setError(
                 "Your cart data is invalid. Please return to your cart."
@@ -467,7 +467,7 @@ export default function Checkout() {
                 await saveCheckoutDraft(customer, cart);
                 setDraftMeta(
                     JSON.parse(
-                        localStorage.getItem("shcomCheckoutDraftMeta") ||
+                        localStorage.getItem("healcartCheckoutDraftMeta") ||
                             "null"
                     )
                 );
@@ -610,7 +610,7 @@ export default function Checkout() {
                     setDraftMeta(
                         JSON.parse(
                             localStorage.getItem(
-                                "shcomCheckoutDraftMeta"
+                                "healcartCheckoutDraftMeta"
                             ) || "null"
                         )
                     );
@@ -660,7 +660,7 @@ export default function Checkout() {
             setConnectionLost(false);
             setDraftMeta(
                 JSON.parse(
-                    localStorage.getItem("shcomCheckoutDraftMeta") ||
+                    localStorage.getItem("healcartCheckoutDraftMeta") ||
                         "null"
                 )
             );

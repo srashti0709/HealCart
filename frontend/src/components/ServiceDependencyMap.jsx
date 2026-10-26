@@ -729,7 +729,7 @@ export default function ServiceDependencyMap({
                 zoomOnPinch={false}
                 zoomOnDoubleClick={false}
                 preventScrolling={false}
-                className="shcom-service-flow"
+                className="healcart-service-flow"
               >
                 <Background color="#34392D" gap={24} size={1} />
                 <Controls
