@@ -2499,15 +2499,11 @@ function Dashboard({ page = "overview" }) {
         {getOfflineStatusText(checkoutRecoveryEvidence?.status, offlineCheckoutFault)}
       </span>
     </div>
-
-    <div className="mt-6 min-w-0 rounded-xl border border-[#30352A] bg-[#10120E]/80 p-3 shadow-[inset_0_2px_7px_rgba(0,0,0,0.28),0_1px_0_rgba(255,255,255,0.025)] sm:p-4">
       <CheckoutRecoveryChart
         evidence={checkoutRecoveryEvidence}
         draftMeta={checkoutDraftMeta}
         showSections={injectRecoveryClicked}
       />
-    </div>
-
     <div className="mt-auto flex flex-col gap-5 border-t border-[#30352A] pt-5">
       <button
         type="button"

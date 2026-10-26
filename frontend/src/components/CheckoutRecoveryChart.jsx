@@ -124,7 +124,7 @@ function PipelineStep({ title, description, state, last }) {
         <div className="relative flex min-w-0 flex-1 flex-col items-center text-center">
             {!last && (
                 <div
-                    className="absolute left-[calc(50%+16px)] right-[calc(-50%+16px)] top-[18px] h-px"
+                    className="absolute left-[calc(50%+18px)] right-[calc(-50%+18px)] top-5 h-px"
                     style={{
                         backgroundColor: completed
                             ? `${COLORS.recovered}70`
@@ -134,27 +134,29 @@ function PipelineStep({ title, description, state, last }) {
             )}
 
             <div
-                className="relative z-10 flex h-9 w-9 items-center justify-center rounded-full border"
+                className="relative z-10 flex h-10 w-10 items-center justify-center rounded-xl border shadow-[0_5px_14px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.07)]"
                 style={{
                     color,
                     borderColor: `${color}66`,
                     backgroundColor: `${color}12`,
                 }}
             >
-                <Icon size={16} />
+                <Icon size={17} strokeWidth={1.8} />
             </div>
 
-            <p className="mt-3 text-[11px] font-semibold"
-                style={{ color: current || completed ? color : "#D0D2CA" }}>
+            <p
+                className="mt-3 text-[11px] font-semibold leading-4 sm:text-xs"
+                style={{ color: current || completed ? color : "#D0D2CA" }}
+            >
                 {title}
             </p>
 
-            <p className="mt-1 max-w-[140px] text-[10px] leading-4 text-[#85897B]">
+            <p className="mt-1 max-w-[140px] text-[10px] leading-[1.7] text-[#92968F]">
                 {description}
             </p>
 
             <span
-                className="mt-2 rounded border px-1.5 py-0.5 text-[9px] uppercase tracking-wide"
+                className="mt-2 rounded-md border px-2 py-1 text-[9px] font-semibold uppercase tracking-[0.12em]"
                 style={{
                     color,
                     borderColor: `${color}35`,
@@ -169,20 +171,31 @@ function PipelineStep({ title, description, state, last }) {
 
 function MetricCard({ label, value, detail, color, Icon }) {
     return (
-        <div className="min-w-0 rounded-lg border border-white/[0.08] bg-white/[0.02] p-3 sm:p-3.5">
+        <div className="group relative min-w-0 overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.035] p-4 shadow-[0_10px_24px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.045)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.13] hover:bg-white/[0.05] hover:shadow-[0_15px_30px_rgba(0,0,0,0.22)] sm:p-4">
             <div className="flex items-center justify-between gap-2">
-                <p className="text-[10px] uppercase tracking-wide text-[#92968F]">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#92968F]">
                     {label}
                 </p>
-                <Icon size={14} style={{ color }} />
+                <span
+                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border"
+                    style={{
+                        color,
+                        borderColor: `${color}30`,
+                        backgroundColor: `${color}0D`,
+                    }}
+                >
+                    <Icon size={16} strokeWidth={1.8} />
+                </span>
             </div>
+
             <p
-                className="mt-2 break-words text-lg font-semibold tracking-tight"
+                className="mt-3 break-words text-xl font-semibold tracking-[-0.04em] sm:text-2xl"
                 style={{ color }}
             >
                 {value}
             </p>
-            <p className="mt-1 text-[10px] leading-4 text-[#85897B]">
+
+            <p className="mt-1.5 text-[11px] leading-[1.7] text-[#92968F]">
                 {detail}
             </p>
         </div>
@@ -191,10 +204,12 @@ function MetricCard({ label, value, detail, color, Icon }) {
 
 function DetailRow({ label, value, mono = false }) {
     return (
-        <div className="flex flex-wrap items-start justify-between gap-2 border-b border-white/[0.06] py-2.5 last:border-b-0">
-            <span className="text-[11px] text-[#92968F]">{label}</span>
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/[0.07] py-3 last:border-b-0">
+            <span className="text-[11px] leading-5 text-[#92968F]">
+                {label}
+            </span>
             <span
-                className={`max-w-[65%] break-words text-right text-[11px] text-[#E1E3DA] ${mono ? "font-mono" : ""
+                className={`max-w-[65%] break-words text-right text-[11px] leading-5 text-[#E1E3DA] ${mono ? "font-mono" : ""
                     }`}
             >
                 {value || "Not recorded"}
@@ -346,24 +361,37 @@ export default function CheckoutRecoveryChart({
             : null;
 
     return (
-        <section className="mt-4 space-y-5 rounded-xl border border-[#292D24] bg-[#0D0F0D] p-4 text-[#F3F4EE] sm:p-5">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                    <div className="flex items-center gap-2">
-                        <Activity
-                            size={17}
-                            style={{ color: COLORS.recovering }}
-                        />
-                        <h3 className="text-sm font-semibold">
+        <section className="relative mt-4 space-y-5 overflow-hidden rounded-2xl border border-white/[0.09] bg-[#0D0F0D] p-4 text-[#F3F4EE] shadow-[0_18px_42px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.055)] sm:p-6">
+            <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-44 opacity-80"
+                style={{
+                    background:
+                        "radial-gradient(ellipse at 8% 0%, rgba(222,237,0,0.075), transparent 65%), radial-gradient(ellipse at 100% 0%, rgba(53,208,127,0.035), transparent 55%)",
+                }}
+            />
+
+            <div className="relative flex flex-wrap items-start justify-between gap-4">
+                <div className="min-w-0">
+                    <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[var(--cc-lime)]/20 bg-[var(--cc-lime)]/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.07)]">
+                            <Activity
+                                size={19}
+                                className="text-[var(--cc-lime)]"
+                                strokeWidth={1.8}
+                            />
+                        </span>
+                        <h3 className="text-[15px] font-semibold tracking-[-0.025em] sm:text-base">
                             Offline Recovery Lifecycle
                         </h3>
                     </div>
-                    <p className="mt-1 text-xs leading-5 text-[#92968F]">
+                    <p className="mt-2 max-w-xl pl-0 text-[12px] leading-[1.8] text-[#92968F] sm:text-[13px]">
                         Recorded offline checkout recovery events and status
                     </p>
                 </div>
+
                 <span
-                    className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 font-mono text-[10px] uppercase"
+                    className="inline-flex items-center gap-2 rounded-full border px-3 py-2 font-mono text-[9px] font-semibold uppercase tracking-[0.12em]"
                     style={{
                         color: isRecovered
                             ? COLORS.recovered
@@ -376,26 +404,10 @@ export default function CheckoutRecoveryChart({
                         backgroundColor: `${isRecovered ? COLORS.recovered : isFailed ? COLORS.failed : isOffline || isRecovering ? COLORS.offline : COLORS.neutral}12`,
                     }}
                 >
-                    {isRecovered ? (
-                        <CheckCircle2 size={12} />
-                    ) : isFailed ? (
-                        <XCircle size={12} />
-                    ) : isOffline || isRecovering ? (
-                        <Activity size={12} />
-                    ) : (
-                        <Clock3 size={12} />
-                    )}
-                    {isRecovered
-                        ? "Recovery verified"
-                        : isFailed
-                            ? "Recovery failed"
-                            : isOffline || isRecovering
-                                ? "Offline · Recovering"
-                                : "Standby"}
                 </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="relative grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <MetricCard
                     label="Successfully recovered"
                     value={String(successfullyRecovered)}
@@ -417,6 +429,7 @@ export default function CheckoutRecoveryChart({
                     }
                     Icon={TriangleAlert}
                 />
+
                 {recoveryDuration && (
                     <MetricCard
                         label="Recovery duration"
@@ -429,20 +442,21 @@ export default function CheckoutRecoveryChart({
             </div>
 
             {showSections && (
-                <div className="rounded-xl border border-white/[0.08] bg-white/[0.015] p-4 sm:p-5">
-                    <div className="mb-5 flex flex-wrap items-center justify-between gap-2">
+                <div className="relative rounded-2xl border border-white/[0.08] bg-white/[0.025] p-4 shadow-[0_12px_28px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-xl sm:p-5">
+                    <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
                         <div>
-                            <h4 className="text-xs font-semibold text-[#F3F4EE]">
+                            <h4 className="text-[13px] font-semibold tracking-[-0.015em] text-[#F3F4EE]">
                                 Recovery pipeline
                             </h4>
-                            <p className="mt-1 text-[10px] text-[#85897B]">
+                            <p className="mt-1.5 text-[11px] leading-5 text-[#92968F]">
                                 Progress of the offline recovery sequence
                             </p>
                         </div>
-                        <span className="rounded border border-white/[0.08] px-2 py-1 font-mono text-[9px] text-[#92968F]">
+                        <span className="rounded-lg border border-white/[0.09] bg-black/[0.12] px-3 py-2 font-mono text-[10px] text-[#92968F]">
                             {completedCount} /4 STAGES
                         </span>
                     </div>
+
                     <div className="flex gap-1">
                         {pipelineStates.map((step, index) => (
                             <PipelineStep
@@ -458,23 +472,24 @@ export default function CheckoutRecoveryChart({
             )}
 
             {showSections && (
-                <div className="space-y-4">
-                    <div className="min-w-0 rounded-xl border border-white/[0.08] p-4">
-                        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="relative space-y-4">
+                    <div className="min-w-0 rounded-2xl border border-white/[0.08] bg-white/[0.025] p-4 shadow-[0_12px_28px_rgba(0,0,0,0.13),inset_0_1px_0_rgba(255,255,255,0.035)] backdrop-blur-xl sm:p-5">
+                        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                             <div>
-                                <h4 className="text-xs font-semibold text-[#F3F4EE]">
+                                <h4 className="text-[13px] font-semibold tracking-[-0.015em] text-[#F3F4EE]">
                                     Event Sequence
                                 </h4>
-                                <p className="mt-1 text-[10px] text-[#85897B]">
+                                <p className="mt-1.5 text-[11px] leading-5 text-[#92968F]">
                                     Chronological recovery history
                                 </p>
                             </div>
-                            <span className="rounded border border-white/[0.08] px-2 py-1 text-[10px] text-[#92968F]">
+                            <span className="rounded-lg border border-white/[0.08] bg-black/[0.12] px-3 py-2 text-[10px] text-[#92968F]">
                                 {events.length} recorded
                             </span>
                         </div>
+
                         {events.length === 0 ? (
-                            <p className="text-xs text-[#92968F]">
+                            <p className="rounded-xl border border-white/[0.06] bg-black/[0.10] p-4 text-[12px] leading-6 text-[#92968F]">
                                 No valid recovery events are available.
                             </p>
                         ) : (
@@ -485,47 +500,48 @@ export default function CheckoutRecoveryChart({
                                     const Icon = presentation.Icon;
                                     const isLast =
                                         index === events.length - 1;
+
                                     return (
                                         <div key={event.id} className="flex gap-3">
-                                            <div className="flex w-7 shrink-0 flex-col items-center">
+                                            <div className="flex w-8 shrink-0 flex-col items-center">
                                                 <div
-                                                    className="flex h-7 w-7 items-center justify-center rounded-full border"
+                                                    className="flex h-8 w-8 items-center justify-center rounded-xl border shadow-[0_4px_12px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.05)]"
                                                     style={{
                                                         color: presentation.color,
                                                         borderColor: `${presentation.color}66`,
                                                         backgroundColor: `${presentation.color}12`,
                                                     }}
                                                 >
-                                                    <Icon size={14} />
+                                                    <Icon size={15} strokeWidth={1.8} />
                                                 </div>
+
                                                 {!isLast && (
                                                     <div className="my-1 min-h-8 w-px flex-1 bg-white/[0.12]" />
                                                 )}
                                             </div>
+
                                             <div
-                                                className={`mb-3 min-w-0 flex-1 rounded-lg border p-3 ${isLast
-                                                        ? "border-white/[0.13] bg-white/[0.035]"
-                                                        : "border-white/[0.07] bg-white/[0.015]"
+                                                className={`mb-4 min-w-0 flex-1 rounded-xl border p-4 transition-colors duration-200 ${isLast
+                                                    ? "border-white/[0.13] bg-white/[0.045] shadow-[0_8px_20px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.035)]"
+                                                    : "border-white/[0.07] bg-black/[0.10] hover:border-white/[0.11]"
                                                     }`}
                                             >
                                                 <div className="flex flex-wrap items-start justify-between gap-2">
                                                     <p
-                                                        className="text-xs font-medium"
+                                                        className="text-[12px] font-semibold tracking-[-0.01em] sm:text-[13px]"
                                                         style={{
                                                             color: presentation.color,
                                                         }}
                                                     >
                                                         {presentation.label}
                                                     </p>
-                                                    <span
-                                                        className="shrink-0 font-mono text-[10px] text-[#85897B]"
-                                                    >
-                                                        {formatTime(
-                                                            event.timestamp
-                                                        )}
+
+                                                    <span className="shrink-0 rounded-md border border-white/[0.06] bg-black/[0.12] px-2 py-1 font-mono text-[10px] text-[#92968F]">
+                                                        {formatTime(event.timestamp)}
                                                     </span>
                                                 </div>
-                                                <p className="mt-1.5 text-xs leading-5 text-[#92968F]">
+
+                                                <p className="mt-2 text-[12px] leading-[1.8] text-[#92968F]">
                                                     {event.detail ||
                                                         presentation.description}
                                                 </p>
@@ -537,13 +553,25 @@ export default function CheckoutRecoveryChart({
                         )}
                     </div>
 
-                    <div className="min-w-0 rounded-xl border border-white/[0.08] p-4">
-                        <div className="mb-3 flex items-center gap-2">
-                            <Fingerprint size={15} className="text-[#92968F]" />
-                            <h4 className="text-xs font-semibold">
-                                Latest Recovery Evidence
-                            </h4>
+                    <div className="min-w-0 rounded-2xl border border-white/[0.08] bg-white/[0.025] p-4 shadow-[0_12px_28px_rgba(0,0,0,0.13),inset_0_1px_0_rgba(255,255,255,0.035)] backdrop-blur-xl sm:p-5">
+                        <div className="mb-4 flex items-center gap-3">
+                            <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.035]">
+                                <Fingerprint
+                                    size={17}
+                                    className="text-[var(--cc-lime)]"
+                                    strokeWidth={1.8}
+                                />
+                            </span>
+                            <div>
+                                <h4 className="text-[13px] font-semibold tracking-[-0.015em] text-[#F3F4EE]">
+                                    Latest Recovery Evidence
+                                </h4>
+                                <p className="mt-1 text-[10px] text-[#92968F]">
+                                    Recorded recovery details
+                                </p>
+                            </div>
                         </div>
+
                         <DetailRow
                             label="Current status"
                             value={
@@ -554,8 +582,10 @@ export default function CheckoutRecoveryChart({
                                         : "Standby"
                             }
                         />
+
                         {(() => {
                             const rows = [];
+
                             if (draftMeta?.fields != null) {
                                 rows.push({
                                     label: "Draft fields",
@@ -563,6 +593,7 @@ export default function CheckoutRecoveryChart({
                                     mono: false,
                                 });
                             }
+
                             if (draftMeta?.items != null) {
                                 rows.push({
                                     label: "Cart lines",
@@ -570,6 +601,7 @@ export default function CheckoutRecoveryChart({
                                     mono: false,
                                 });
                             }
+
                             if (draftMeta?.savedAt) {
                                 rows.push({
                                     label: "Draft saved at",
@@ -577,6 +609,7 @@ export default function CheckoutRecoveryChart({
                                     mono: false,
                                 });
                             }
+
                             if (evidence.failureDetectedAt || evidence.failureInjectedAt) {
                                 rows.push({
                                     label: "Failure detected at",
@@ -586,6 +619,7 @@ export default function CheckoutRecoveryChart({
                                     mono: false,
                                 });
                             }
+
                             if (evidence.connectionRestoredAt) {
                                 rows.push({
                                     label: "Connection restored at",
@@ -593,6 +627,7 @@ export default function CheckoutRecoveryChart({
                                     mono: false,
                                 });
                             }
+
                             if (evidence.restoredAt) {
                                 rows.push({
                                     label: "Data restored at",
@@ -600,6 +635,7 @@ export default function CheckoutRecoveryChart({
                                     mono: false,
                                 });
                             }
+
                             if (evidence.completedAt) {
                                 rows.push({
                                     label: "Checkout completed at",
@@ -607,6 +643,7 @@ export default function CheckoutRecoveryChart({
                                     mono: false,
                                 });
                             }
+
                             if (evidence.fieldsRestored != null) {
                                 rows.push({
                                     label: "Fields restored",
@@ -614,6 +651,7 @@ export default function CheckoutRecoveryChart({
                                     mono: false,
                                 });
                             }
+
                             if (evidence.cartLinesRestored != null) {
                                 rows.push({
                                     label: "Cart lines restored",
@@ -621,6 +659,7 @@ export default function CheckoutRecoveryChart({
                                     mono: false,
                                 });
                             }
+
                             if (evidence.discardedAt) {
                                 rows.push({
                                     label: "Draft discarded at",
@@ -628,6 +667,7 @@ export default function CheckoutRecoveryChart({
                                     mono: false,
                                 });
                             }
+
                             return rows.map((row) => (
                                 <DetailRow
                                     key={row.label}
@@ -642,4 +682,4 @@ export default function CheckoutRecoveryChart({
             )}
         </section>
     );
-} 
+}
