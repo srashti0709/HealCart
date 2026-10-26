@@ -1,5 +1,233 @@
 [
   {
+    "id": "evt-traffic-stopped-1792988893882-fabc07",
+    "type": "traffic-stopped",
+    "description": "Synthetic traffic run traffic-mvoraeqn-2-jhlcm4 ended (Backend crash experiment finished) after 7.8s. 23 requests recorded, 14 successful.",
+    "message": "Synthetic traffic run traffic-mvoraeqn-2-jhlcm4 ended (Backend crash experiment finished) after 7.8s. 23 requests recorded, 14 successful.",
+    "timestamp": "2026-10-26T04:28:13.882Z",
+    "source": "Synthetic traffic",
+    "outcome": "unverified",
+    "experimentId": "traffic-mvoraeqn-2-jhlcm4",
+    "details": {
+      "experimentId": "traffic-mvoraeqn-2-jhlcm4",
+      "runStatus": "stopped",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "totalRequests": 23,
+      "successfulRequests": 14,
+      "failedRequests": 9,
+      "timeoutRequests": 0,
+      "networkErrorRequests": 9,
+      "averageLatencyMs": 85.5
+    }
+  },
+  {
+    "id": "evt-recovered-1792988890683-09be4f",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-26T04:28:10.683Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792988887980-42030d",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-26T04:28:07.000Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "start",
+      "state": "running"
+    }
+  },
+  {
+    "id": "evt-crash-1792988887454-8f6444",
+    "type": "crash",
+    "description": "Backend container stopped unexpectedly.",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-26T04:28:07.000Z",
+    "source": "Docker observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "die",
+      "state": "stopped"
+    }
+  },
+  {
+    "id": "evt-traffic-started-1792988886078-7f3db4",
+    "type": "traffic-started",
+    "description": "Synthetic traffic run traffic-mvoraeqn-2-jhlcm4 started to observe the backend crash (correlation crash-mvoraeqm-o0uizm).",
+    "message": "Synthetic traffic run traffic-mvoraeqn-2-jhlcm4 started to observe the backend crash (correlation crash-mvoraeqm-o0uizm).",
+    "timestamp": "2026-10-26T04:28:06.078Z",
+    "source": "Synthetic traffic",
+    "outcome": "in_progress",
+    "experimentId": "traffic-mvoraeqn-2-jhlcm4",
+    "details": {
+      "correlationId": "crash-mvoraeqm-o0uizm",
+      "scenario": "backend-crash",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      }
+    }
+  },
+  {
+    "id": "evt-traffic-stopped-1792987956737-fca202",
+    "type": "traffic-stopped",
+    "description": "Synthetic traffic run traffic-mvoqqatv-1-95wpde ended (Backend crash experiment finished) after 8.9s. 27 requests recorded, 16 successful.",
+    "message": "Synthetic traffic run traffic-mvoqqatv-1-95wpde ended (Backend crash experiment finished) after 8.9s. 27 requests recorded, 16 successful.",
+    "timestamp": "2026-10-26T04:12:36.737Z",
+    "source": "Synthetic traffic",
+    "outcome": "unverified",
+    "experimentId": "traffic-mvoqqatv-1-95wpde",
+    "details": {
+      "experimentId": "traffic-mvoqqatv-1-95wpde",
+      "runStatus": "stopped",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "totalRequests": 27,
+      "successfulRequests": 16,
+      "failedRequests": 11,
+      "timeoutRequests": 0,
+      "networkErrorRequests": 11,
+      "averageLatencyMs": 136.5
+    }
+  },
+  {
+    "id": "evt-recovered-1792987953295-fb4c72",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-26T04:12:33.295Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "recovered": true,
+      "status": "running"
+    }
+  },
+  {
+    "id": "evt-recovered-1792987950052-6d30c4",
+    "type": "recovered",
+    "description": "Backend container restarted automatically.",
+    "message": "Backend container restarted automatically.",
+    "timestamp": "2026-10-26T04:12:29.000Z",
+    "source": "Docker observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "start",
+      "state": "running"
+    }
+  },
+  {
+    "id": "evt-crash-1792987949470-ff47f4",
+    "type": "crash",
+    "description": "Backend container stopped unexpectedly.",
+    "message": "Backend container stopped unexpectedly.",
+    "timestamp": "2026-10-26T04:12:29.000Z",
+    "source": "Docker observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "container": "shcom-backend",
+      "action": "die",
+      "state": "stopped"
+    }
+  },
+  {
+    "id": "evt-traffic-started-1792987947874-b2d0c8",
+    "type": "traffic-started",
+    "description": "Synthetic traffic run traffic-mvoqqatv-1-95wpde started to observe the backend crash (correlation crash-mvoqqatu-zuhkht).",
+    "message": "Synthetic traffic run traffic-mvoqqatv-1-95wpde started to observe the backend crash (correlation crash-mvoqqatu-zuhkht).",
+    "timestamp": "2026-10-26T04:12:27.873Z",
+    "source": "Synthetic traffic",
+    "outcome": "in_progress",
+    "experimentId": "traffic-mvoqqatv-1-95wpde",
+    "details": {
+      "correlationId": "crash-mvoqqatu-zuhkht",
+      "scenario": "backend-crash",
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      }
+    }
+  },
+  {
+    "id": "evt-database-recovered-1792986574642-7e5396",
+    "type": "database-recovered",
+    "description": "MongoDB connection restored successfully.",
+    "message": "MongoDB connection restored successfully.",
+    "timestamp": "2026-10-26T03:44:50.890Z",
+    "source": "Docker log observation",
+    "outcome": "success",
+    "experimentId": null,
+    "details": {
+      "database": "mongodb",
+      "message": "[Database Recovery] MongoDB connected successfully."
+    }
+  },
+  {
+    "id": "evt-database-disconnected-1792986574641-b3524f",
+    "type": "database-disconnected",
+    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
+    "timestamp": "2026-10-26T03:44:50.842Z",
+    "source": "Docker log observation",
+    "outcome": "failure",
+    "experimentId": null,
+    "details": {
+      "database": "mongodb",
+      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
+    }
+  },
+  {
     "id": "evt-traffic-stopped-1792959493122-2627b3",
     "type": "traffic-stopped",
     "description": "Synthetic traffic run traffic-mvo9s6ab-9-l6p4v8 ended (Backend crash experiment finished) after 11.3s. 29 requests recorded, 13 successful.",
@@ -933,234 +1161,6 @@
       "config": {
         "ratePerSecond": 3,
         "concurrency": 2,
-        "durationSeconds": 120,
-        "requestTimeoutMs": 3000,
-        "endpoints": [
-          "products-list",
-          "health"
-        ],
-        "maxRequests": 360
-      }
-    }
-  },
-  {
-    "id": "evt-database-recovered-1792899688789-a89785",
-    "type": "database-recovered",
-    "description": "MongoDB connection restored successfully.",
-    "message": "MongoDB connection restored successfully.",
-    "timestamp": "2026-10-25T03:41:28.775Z",
-    "source": "Docker log observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB connected successfully."
-    }
-  },
-  {
-    "id": "evt-database-disconnected-1792899686407-3295ad",
-    "type": "database-disconnected",
-    "description": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "message": "MongoDB connection dropped. Automatic reconnection is being attempted.",
-    "timestamp": "2026-10-25T03:35:59.211Z",
-    "source": "Docker log observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "database": "mongodb",
-      "message": "[Database Recovery] MongoDB disconnected. Mongoose will attempt to reconnect."
-    }
-  },
-  {
-    "id": "evt-traffic-stopped-1792877029413-552016",
-    "type": "traffic-stopped",
-    "description": "Synthetic traffic run traffic-mvmwop5o-8-5th6ya ended (Backend crash experiment finished) after 10.9s. 30 requests recorded, 14 successful.",
-    "message": "Synthetic traffic run traffic-mvmwop5o-8-5th6ya ended (Backend crash experiment finished) after 10.9s. 30 requests recorded, 14 successful.",
-    "timestamp": "2026-10-24T21:23:49.413Z",
-    "source": "Synthetic traffic",
-    "outcome": "unverified",
-    "experimentId": "traffic-mvmwop5o-8-5th6ya",
-    "details": {
-      "experimentId": "traffic-mvmwop5o-8-5th6ya",
-      "runStatus": "stopped",
-      "config": {
-        "ratePerSecond": 3,
-        "concurrency": 2,
-        "durationSeconds": 120,
-        "requestTimeoutMs": 3000,
-        "endpoints": [
-          "products-list",
-          "health"
-        ],
-        "maxRequests": 360
-      },
-      "totalRequests": 30,
-      "successfulRequests": 14,
-      "failedRequests": 16,
-      "timeoutRequests": 0,
-      "networkErrorRequests": 16,
-      "averageLatencyMs": 123.86
-    }
-  },
-  {
-    "id": "evt-recovered-1792877026698-3bd5b3",
-    "type": "recovered",
-    "description": "Backend container restarted automatically.",
-    "message": "Backend container restarted automatically.",
-    "timestamp": "2026-10-24T21:23:46.698Z",
-    "source": "Docker observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "recovered": true,
-      "status": "running"
-    }
-  },
-  {
-    "id": "evt-recovered-1792877021830-4918dd",
-    "type": "recovered",
-    "description": "Backend container restarted automatically.",
-    "message": "Backend container restarted automatically.",
-    "timestamp": "2026-10-24T21:23:41.000Z",
-    "source": "Docker observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "container": "shcom-backend",
-      "action": "start",
-      "state": "running"
-    }
-  },
-  {
-    "id": "evt-crash-1792877020706-b4f896",
-    "type": "crash",
-    "description": "Backend container stopped unexpectedly.",
-    "message": "Backend container stopped unexpectedly.",
-    "timestamp": "2026-10-24T21:23:40.000Z",
-    "source": "Docker observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "container": "shcom-backend",
-      "action": "die",
-      "state": "stopped"
-    }
-  },
-  {
-    "id": "evt-traffic-started-1792877018505-3b50e7",
-    "type": "traffic-started",
-    "description": "Synthetic traffic run traffic-mvmwop5o-8-5th6ya started to observe the backend crash (correlation crash-mvmwop5n-cvv4zg).",
-    "message": "Synthetic traffic run traffic-mvmwop5o-8-5th6ya started to observe the backend crash (correlation crash-mvmwop5n-cvv4zg).",
-    "timestamp": "2026-10-24T21:23:38.502Z",
-    "source": "Synthetic traffic",
-    "outcome": "in_progress",
-    "experimentId": "traffic-mvmwop5o-8-5th6ya",
-    "details": {
-      "correlationId": "crash-mvmwop5n-cvv4zg",
-      "scenario": "backend-crash",
-      "config": {
-        "ratePerSecond": 3,
-        "concurrency": 2,
-        "durationSeconds": 120,
-        "requestTimeoutMs": 3000,
-        "endpoints": [
-          "products-list",
-          "health"
-        ],
-        "maxRequests": 360
-      }
-    }
-  },
-  {
-    "id": "evt-traffic-stopped-1792876549836-878106",
-    "type": "traffic-stopped",
-    "description": "Synthetic traffic run traffic-mvmweg19-7-owovvj ended (Backend crash experiment finished) after 9.7s. 29 requests recorded, 15 successful.",
-    "message": "Synthetic traffic run traffic-mvmweg19-7-owovvj ended (Backend crash experiment finished) after 9.7s. 29 requests recorded, 15 successful.",
-    "timestamp": "2026-10-24T21:15:49.836Z",
-    "source": "Synthetic traffic",
-    "outcome": "unverified",
-    "experimentId": "traffic-mvmweg19-7-owovvj",
-    "details": {
-      "experimentId": "traffic-mvmweg19-7-owovvj",
-      "runStatus": "stopped",
-      "config": {
-        "ratePerSecond": 3,
-        "concurrency": 7,
-        "durationSeconds": 120,
-        "requestTimeoutMs": 3000,
-        "endpoints": [
-          "products-list",
-          "health"
-        ],
-        "maxRequests": 360
-      },
-      "totalRequests": 29,
-      "successfulRequests": 15,
-      "failedRequests": 14,
-      "timeoutRequests": 0,
-      "networkErrorRequests": 14,
-      "averageLatencyMs": 103.93
-    }
-  },
-  {
-    "id": "evt-recovered-1792876545750-765956",
-    "type": "recovered",
-    "description": "Backend container restarted automatically.",
-    "message": "Backend container restarted automatically.",
-    "timestamp": "2026-10-24T21:15:45.750Z",
-    "source": "Docker observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "recovered": true,
-      "status": "running"
-    }
-  },
-  {
-    "id": "evt-recovered-1792876542349-b44a15",
-    "type": "recovered",
-    "description": "Backend container restarted automatically.",
-    "message": "Backend container restarted automatically.",
-    "timestamp": "2026-10-24T21:15:42.000Z",
-    "source": "Docker observation",
-    "outcome": "success",
-    "experimentId": null,
-    "details": {
-      "container": "shcom-backend",
-      "action": "start",
-      "state": "running"
-    }
-  },
-  {
-    "id": "evt-crash-1792876541621-8a99e2",
-    "type": "crash",
-    "description": "Backend container stopped unexpectedly.",
-    "message": "Backend container stopped unexpectedly.",
-    "timestamp": "2026-10-24T21:15:41.000Z",
-    "source": "Docker observation",
-    "outcome": "failure",
-    "experimentId": null,
-    "details": {
-      "container": "shcom-backend",
-      "action": "die",
-      "state": "stopped"
-    }
-  },
-  {
-    "id": "evt-traffic-started-1792876540080-d20ffc",
-    "type": "traffic-started",
-    "description": "Synthetic traffic run traffic-mvmweg19-7-owovvj started to observe the backend crash (correlation crash-mvmweg19-ciw4y2).",
-    "message": "Synthetic traffic run traffic-mvmweg19-7-owovvj started to observe the backend crash (correlation crash-mvmweg19-ciw4y2).",
-    "timestamp": "2026-10-24T21:15:40.080Z",
-    "source": "Synthetic traffic",
-    "outcome": "in_progress",
-    "experimentId": "traffic-mvmweg19-7-owovvj",
-    "details": {
-      "correlationId": "crash-mvmweg19-ciw4y2",
-      "scenario": "backend-crash",
-      "config": {
-        "ratePerSecond": 3,
-        "concurrency": 7,
         "durationSeconds": 120,
         "requestTimeoutMs": 3000,
         "endpoints": [

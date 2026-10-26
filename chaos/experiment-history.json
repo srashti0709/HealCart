@@ -1,164 +1,5 @@
 [
   {
-    "id": "exp-1792559870714",
-    "scenario": "backend-crash",
-    "status": "passed",
-    "message": "Backend container restarted successfully and health checks passed.",
-    "recovery": {
-      "recovered": true,
-      "restartCount": 1,
-      "startedAt": "2026-10-21T05:17:44.832243955Z",
-      "status": "running",
-      "database": "connected"
-    },
-    "completedAt": "2026-10-21T05:17:50.714Z"
-  },
-  {
-    "id": "exp-1792559881895",
-    "scenario": "database-recovery",
-    "status": "passed",
-    "message": "Database recovered successfully and a database-backed read succeeded.",
-    "recovery": {
-      "success": true,
-      "scenario": "database-recovery",
-      "message": "Database recovered successfully and a database-backed read succeeded.",
-      "recovered": true,
-      "database": "connected",
-      "status": "healthy",
-      "durationMs": 5291,
-      "stages": [
-        {
-          "stage": "started",
-          "status": "pending",
-          "timestamp": "2026-10-21T05:17:56.551Z",
-          "message": "Database recovery experiment started."
-        },
-        {
-          "stage": "disconnect-simulated",
-          "status": "passed",
-          "timestamp": "2026-10-21T05:17:56.602Z",
-          "message": "Database disconnect simulated without deleting or modifying data."
-        },
-        {
-          "stage": "waiting",
-          "status": "pending",
-          "timestamp": "2026-10-21T05:17:56.614Z",
-          "message": "Waiting for database reconnect."
-        },
-        {
-          "stage": "waiting",
-          "status": "pending",
-          "timestamp": "2026-10-21T05:17:57.647Z",
-          "message": "Waiting for database reconnect."
-        },
-        {
-          "stage": "waiting",
-          "status": "pending",
-          "timestamp": "2026-10-21T05:17:58.677Z",
-          "message": "Waiting for database reconnect."
-        },
-        {
-          "stage": "waiting",
-          "status": "pending",
-          "timestamp": "2026-10-21T05:17:59.704Z",
-          "message": "Waiting for database reconnect."
-        },
-        {
-          "stage": "waiting",
-          "status": "pending",
-          "timestamp": "2026-10-21T05:18:00.738Z",
-          "message": "Waiting for database reconnect."
-        },
-        {
-          "stage": "verified",
-          "status": "passed",
-          "timestamp": "2026-10-21T05:18:01.893Z",
-          "message": "Database probe succeeded after reconnect."
-        }
-      ],
-      "timestamp": "2026-10-21T05:18:01.893Z"
-    },
-    "stages": [
-      {
-        "stage": "started",
-        "status": "pending",
-        "timestamp": "2026-10-21T05:17:56.551Z",
-        "message": "Database recovery experiment started."
-      },
-      {
-        "stage": "disconnect-simulated",
-        "status": "passed",
-        "timestamp": "2026-10-21T05:17:56.602Z",
-        "message": "Database disconnect simulated without deleting or modifying data."
-      },
-      {
-        "stage": "waiting",
-        "status": "pending",
-        "timestamp": "2026-10-21T05:17:56.614Z",
-        "message": "Waiting for database reconnect."
-      },
-      {
-        "stage": "waiting",
-        "status": "pending",
-        "timestamp": "2026-10-21T05:17:57.647Z",
-        "message": "Waiting for database reconnect."
-      },
-      {
-        "stage": "waiting",
-        "status": "pending",
-        "timestamp": "2026-10-21T05:17:58.677Z",
-        "message": "Waiting for database reconnect."
-      },
-      {
-        "stage": "waiting",
-        "status": "pending",
-        "timestamp": "2026-10-21T05:17:59.704Z",
-        "message": "Waiting for database reconnect."
-      },
-      {
-        "stage": "waiting",
-        "status": "pending",
-        "timestamp": "2026-10-21T05:18:00.738Z",
-        "message": "Waiting for database reconnect."
-      },
-      {
-        "stage": "verified",
-        "status": "passed",
-        "timestamp": "2026-10-21T05:18:01.893Z",
-        "message": "Database probe succeeded after reconnect."
-      }
-    ],
-    "completedAt": "2026-10-21T05:18:01.895Z"
-  },
-  {
-    "id": "exp-1792560589273",
-    "scenario": "backend-crash",
-    "status": "passed",
-    "message": "Backend container restarted successfully and health checks passed.",
-    "recovery": {
-      "recovered": true,
-      "restartCount": 2,
-      "startedAt": "2026-10-21T05:29:43.389056178Z",
-      "status": "running",
-      "database": "connected"
-    },
-    "completedAt": "2026-10-21T05:29:49.273Z"
-  },
-  {
-    "id": "exp-1792560961949",
-    "scenario": "backend-crash",
-    "status": "passed",
-    "message": "Backend container restarted successfully and health checks passed.",
-    "recovery": {
-      "recovered": true,
-      "restartCount": 3,
-      "startedAt": "2026-10-21T05:35:55.911777392Z",
-      "status": "running",
-      "database": "connected"
-    },
-    "completedAt": "2026-10-21T05:36:01.949Z"
-  },
-  {
     "id": "exp-1792560984446",
     "scenario": "backend-crash",
     "status": "passed",
@@ -7127,5 +6968,327 @@
       }
     },
     "completedAt": "2026-10-25T20:18:13.168Z"
+  },
+  {
+    "id": "exp-1792987956729",
+    "scenario": "synthetic-traffic",
+    "status": "stopped",
+    "message": "Synthetic traffic run traffic-mvoqqatv-1-95wpde ended (Backend crash experiment finished) after 8.9s. 27 requests recorded, 16 successful.",
+    "recovery": {
+      "experimentId": "traffic-mvoqqatv-1-95wpde",
+      "runStatus": "stopped",
+      "label": "Backend Crash Coordination",
+      "correlation": {
+        "scenario": "backend-crash",
+        "correlationId": "crash-mvoqqatu-zuhkht"
+      },
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "summary": {
+        "totalRequests": 27,
+        "successfulRequests": 16,
+        "failedRequests": 11,
+        "httpErrorRequests": 0,
+        "timeoutRequests": 0,
+        "networkErrorRequests": 11,
+        "abortedRequests": 0,
+        "statusDistribution": {
+          "200": 16
+        },
+        "latency": {
+          "samples": 16,
+          "averageMs": 136.5,
+          "minMs": 6,
+          "maxMs": 1066,
+          "p50Ms": 72,
+          "p95Ms": 1066
+        },
+        "perEndpoint": [
+          {
+            "endpointId": "products-list",
+            "endpoint": "/api/products",
+            "method": "GET",
+            "totalRequests": 14,
+            "successfulRequests": 9,
+            "failedRequests": 5,
+            "averageLatencyMs": 234.67
+          },
+          {
+            "endpointId": "health",
+            "endpoint": "/api/health",
+            "method": "GET",
+            "totalRequests": 13,
+            "successfulRequests": 7,
+            "failedRequests": 6,
+            "averageLatencyMs": 10.29
+          }
+        ],
+        "elapsedMs": 8855,
+        "achievedRatePerSecond": 3.05
+      }
+    },
+    "completedAt": "2026-10-26T04:12:36.729Z"
+  },
+  {
+    "id": "exp-1792987956779",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully and health checks passed.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 2,
+      "startedAt": "2026-10-26T04:12:29.542351354Z",
+      "status": "running",
+      "database": "connected"
+    },
+    "correlationId": "crash-mvoqqatu-zuhkht",
+    "traffic": {
+      "experimentId": "traffic-mvoqqatv-1-95wpde",
+      "status": "stopped",
+      "summaryAvailable": true,
+      "summary": {
+        "totalRequests": 27,
+        "successfulRequests": 16,
+        "failedRequests": 11,
+        "httpErrorRequests": 0,
+        "timeoutRequests": 0,
+        "networkErrorRequests": 11,
+        "abortedRequests": 0,
+        "statusDistribution": {
+          "200": 16
+        },
+        "latency": {
+          "samples": 16,
+          "averageMs": 136.5,
+          "minMs": 6,
+          "maxMs": 1066,
+          "p50Ms": 72,
+          "p95Ms": 1066
+        },
+        "perEndpoint": [
+          {
+            "endpointId": "products-list",
+            "endpoint": "/api/products",
+            "method": "GET",
+            "totalRequests": 14,
+            "successfulRequests": 9,
+            "failedRequests": 5,
+            "averageLatencyMs": 234.67
+          },
+          {
+            "endpointId": "health",
+            "endpoint": "/api/health",
+            "method": "GET",
+            "totalRequests": 13,
+            "successfulRequests": 7,
+            "failedRequests": 6,
+            "averageLatencyMs": 10.29
+          }
+        ],
+        "elapsedMs": 8855,
+        "achievedRatePerSecond": 3.05
+      },
+      "summaryError": null,
+      "endpoints": [
+        {
+          "id": "products-list",
+          "label": "Product catalog",
+          "path": "/api/products"
+        },
+        {
+          "id": "health",
+          "label": "Backend health",
+          "path": "/api/health"
+        }
+      ],
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "correlationId": "crash-mvoqqatu-zuhkht",
+      "cleanup": {
+        "stopped": true,
+        "error": null,
+        "reason": null
+      }
+    },
+    "completedAt": "2026-10-26T04:12:36.779Z"
+  },
+  {
+    "id": "exp-1792988893873",
+    "scenario": "synthetic-traffic",
+    "status": "stopped",
+    "message": "Synthetic traffic run traffic-mvoraeqn-2-jhlcm4 ended (Backend crash experiment finished) after 7.8s. 23 requests recorded, 14 successful.",
+    "recovery": {
+      "experimentId": "traffic-mvoraeqn-2-jhlcm4",
+      "runStatus": "stopped",
+      "label": "Backend Crash Coordination",
+      "correlation": {
+        "scenario": "backend-crash",
+        "correlationId": "crash-mvoraeqm-o0uizm"
+      },
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "summary": {
+        "totalRequests": 23,
+        "successfulRequests": 14,
+        "failedRequests": 9,
+        "httpErrorRequests": 0,
+        "timeoutRequests": 0,
+        "networkErrorRequests": 9,
+        "abortedRequests": 0,
+        "statusDistribution": {
+          "200": 14
+        },
+        "latency": {
+          "samples": 14,
+          "averageMs": 85.5,
+          "minMs": 3,
+          "maxMs": 428,
+          "p50Ms": 78,
+          "p95Ms": 428
+        },
+        "perEndpoint": [
+          {
+            "endpointId": "products-list",
+            "endpoint": "/api/products",
+            "method": "GET",
+            "totalRequests": 12,
+            "successfulRequests": 8,
+            "failedRequests": 4,
+            "averageLatencyMs": 137.13
+          },
+          {
+            "endpointId": "health",
+            "endpoint": "/api/health",
+            "method": "GET",
+            "totalRequests": 11,
+            "successfulRequests": 6,
+            "failedRequests": 5,
+            "averageLatencyMs": 16.67
+          }
+        ],
+        "elapsedMs": 7817,
+        "achievedRatePerSecond": 2.94
+      }
+    },
+    "completedAt": "2026-10-26T04:28:13.873Z"
+  },
+  {
+    "id": "exp-1792988893926",
+    "scenario": "backend-crash",
+    "status": "passed",
+    "message": "Backend container restarted successfully and health checks passed.",
+    "recovery": {
+      "recovered": true,
+      "restartCount": 3,
+      "startedAt": "2026-10-26T04:28:07.533632994Z",
+      "status": "running",
+      "database": "connected"
+    },
+    "correlationId": "crash-mvoraeqm-o0uizm",
+    "traffic": {
+      "experimentId": "traffic-mvoraeqn-2-jhlcm4",
+      "status": "stopped",
+      "summaryAvailable": true,
+      "summary": {
+        "totalRequests": 23,
+        "successfulRequests": 14,
+        "failedRequests": 9,
+        "httpErrorRequests": 0,
+        "timeoutRequests": 0,
+        "networkErrorRequests": 9,
+        "abortedRequests": 0,
+        "statusDistribution": {
+          "200": 14
+        },
+        "latency": {
+          "samples": 14,
+          "averageMs": 85.5,
+          "minMs": 3,
+          "maxMs": 428,
+          "p50Ms": 78,
+          "p95Ms": 428
+        },
+        "perEndpoint": [
+          {
+            "endpointId": "products-list",
+            "endpoint": "/api/products",
+            "method": "GET",
+            "totalRequests": 12,
+            "successfulRequests": 8,
+            "failedRequests": 4,
+            "averageLatencyMs": 137.13
+          },
+          {
+            "endpointId": "health",
+            "endpoint": "/api/health",
+            "method": "GET",
+            "totalRequests": 11,
+            "successfulRequests": 6,
+            "failedRequests": 5,
+            "averageLatencyMs": 16.67
+          }
+        ],
+        "elapsedMs": 7817,
+        "achievedRatePerSecond": 2.94
+      },
+      "summaryError": null,
+      "endpoints": [
+        {
+          "id": "products-list",
+          "label": "Product catalog",
+          "path": "/api/products"
+        },
+        {
+          "id": "health",
+          "label": "Backend health",
+          "path": "/api/health"
+        }
+      ],
+      "config": {
+        "ratePerSecond": 3,
+        "concurrency": 2,
+        "durationSeconds": 120,
+        "requestTimeoutMs": 3000,
+        "endpoints": [
+          "products-list",
+          "health"
+        ],
+        "maxRequests": 360
+      },
+      "correlationId": "crash-mvoraeqm-o0uizm",
+      "cleanup": {
+        "stopped": true,
+        "error": null,
+        "reason": null
+      }
+    },
+    "completedAt": "2026-10-26T04:28:13.927Z"
   }
 ]
