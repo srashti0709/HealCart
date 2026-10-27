@@ -1,14 +1,15 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import {
   ArrowLeft,
+  ArrowRight,
   ShoppingCart,
   Package,
   LoaderCircle,
   ShieldCheck,
   Truck,
-  RefreshCw,
   Minus,
   Plus,
   CheckCircle2,
@@ -16,6 +17,17 @@ import {
 } from "lucide-react";
 import { API_ENDPOINTS } from "../config/api";
 import { readCart, writeCart } from "../lib/cart";
+
+const formatPrice = (price) =>
+  `₹${Number(price || 0).toLocaleString("en-IN")}`;
+
+const getCategoryName = (category) => {
+  if (!category) return "Electronics";
+
+  return String(category)
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+};
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -26,12 +38,16 @@ export default function ProductDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
         setError("");
+        setImageFailed(false);
+        setMessage("");
+        setQuantity(1);
 
         const response = await axios.get(
           `${API_ENDPOINTS.products}/${id}`
@@ -40,14 +56,17 @@ export default function ProductDetails() {
         setProduct(response.data.product);
       } catch (err) {
         setError(
-          err.response?.data?.message || "Unable to load product details."
+          err.response?.data?.message ||
+          "Unable to load product details."
         );
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) fetchProduct();
+    if (id) {
+      fetchProduct();
+    }
   }, [id]);
 
   const addToCart = () => {
@@ -84,17 +103,18 @@ export default function ProductDetails() {
 
   if (loading) {
     return (
-      <main className="lavender-commerce flex min-h-screen items-center justify-center bg-[#fdf8ff] px-6 text-[#1d1737]">
-        <div className="flex flex-col items-center gap-5 rounded-3xl border border-violet-100 bg-white px-10 py-12 text-center shadow-xl shadow-violet-100/60">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-100 text-violet-700">
-            <LoaderCircle size={32} className="animate-spin" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold">Loading product details</h1>
-            <p className="mt-2 text-base text-[#69647d]">
-              Getting the latest product information.
-            </p>
-          </div>
+      <main className="hc-page flex min-h-screen items-center justify-center px-5">
+        <div className="hc-card w-full max-w-sm rounded-3xl border border-white bg-white/90 p-8 text-center shadow-xl shadow-violet-200/50">
+          <LoaderCircle
+            size={38}
+            className="mx-auto animate-spin text-violet-600"
+          />
+          <h1 className="mt-5 text-xl font-bold text-[#24183e]">
+            Loading product...
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Please wait while we fetch the details.
+          </p>
         </div>
       </main>
     );
@@ -102,25 +122,24 @@ export default function ProductDetails() {
 
   if (error || !product) {
     return (
-      <main className="lavender-commerce min-h-screen bg-[#fdf8ff] px-5 py-16 text-[#1d1737] sm:px-8">
-        <div className="mx-auto max-w-2xl rounded-3xl border border-violet-100 bg-white p-8 text-center shadow-lg shadow-violet-100/50 sm:p-12">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-            <AlertCircle size={32} />
-          </div>
-
-          <h1 className="mt-6 text-2xl font-bold">
-            Unable to load this product
+      <main className="hc-page flex min-h-screen items-center justify-center px-5 py-12">
+        <div className="hc-card w-full max-w-md rounded-3xl border border-white bg-white/90 p-8 text-center shadow-xl shadow-violet-200/50">
+          <AlertCircle
+            size={40}
+            className="mx-auto text-red-500"
+          />
+          <h1 className="mt-5 text-2xl font-bold text-[#24183e]">
+            Unable to load product
           </h1>
-
-          <p className="mt-3 text-base leading-7 text-[#69647d]">
+          <p className="mt-3 text-sm text-slate-500">
             {error || "Product not found."}
           </p>
-
           <button
+            type="button"
             onClick={() => navigate("/user")}
-            className="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[#5441db] px-6 py-3 text-base font-semibold text-white transition hover:bg-[#3d23c5] focus:outline-none focus:ring-4 focus:ring-violet-200"
+            className="hc-button mt-6 inline-flex items-center gap-2 rounded-xl bg-violet-700 px-5 py-3 font-semibold text-white hover:bg-violet-800"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
             Back to products
           </button>
         </div>
@@ -129,173 +148,159 @@ export default function ProductDetails() {
   }
 
   const inStock = Number(product.stock) > 0;
+  const isLowStock = inStock && Number(product.stock) <= 3;
   const totalPrice = Number(product.price) * quantity;
 
   return (
-    <main className="lavender-commerce min-h-screen bg-[#fdf8ff] px-4 py-8 text-[#1d1737] sm:px-8 sm:py-12">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+    <main className="hc-page min-h-screen px-4 py-6 text-[#24183e] sm:px-6 sm:py-8 lg:px-10">
+      <style>{`
+        .hc-page {
+          background:
+            radial-gradient(ellipse at top left, #ede5ff 0%, transparent 38%),
+            radial-gradient(ellipse at top right, #fce7ff 0%, transparent 30%),
+            #fcfaff;
+        }
+
+        .hc-card {
+          animation: hc-appear 450ms ease-out both;
+        }
+
+        .hc-product-image {
+          max-height: 340px;
+          width: 100%;
+          object-fit: contain;
+          filter: drop-shadow(0 16px 18px rgba(91, 55, 160, .14));
+          transition: transform 300ms ease, filter 300ms ease;
+        }
+
+        .hc-product-image:hover {
+          transform: scale(1.04) translateY(-3px);
+          filter: drop-shadow(0 20px 22px rgba(91, 55, 160, .2));
+        }
+
+        .hc-button {
+          transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease;
+        }
+
+        .hc-button:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 10px 22px rgba(109, 40, 217, .18);
+        }
+
+        .hc-button:active:not(:disabled) {
+          transform: scale(.98);
+        }
+
+        .hc-feature {
+          transition: transform 200ms ease, border-color 200ms ease;
+        }
+
+        .hc-feature:hover {
+          transform: translateY(-3px);
+          border-color: #c4b5fd;
+        }
+
+        @keyframes hc-appear {
+          from {
+            opacity: 0;
+            transform: translateY(12px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .hc-card {
+            animation: none;
+          }
+
+          .hc-product-image,
+          .hc-button,
+          .hc-feature {
+            transition: none;
+          }
+        }
+      `}</style>
+
+      <div className="mx-auto max-w-6xl">
+        <header className="mb-7 flex items-center justify-between gap-4">
           <button
+            type="button"
             onClick={() => navigate(-1)}
-            className="inline-flex min-h-12 items-center gap-2 rounded-full border border-violet-100 bg-white px-5 py-3 text-base font-semibold text-[#474555] shadow-sm transition hover:border-violet-300 hover:bg-violet-50 hover:text-[#5441db]"
+            className="inline-flex items-center gap-2 rounded-xl border border-violet-100 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-violet-300 hover:text-violet-700"
           >
-            <ArrowLeft size={20} />
-            Back to products
+            <ArrowLeft size={18} />
+            Back
           </button>
 
-          <div className="inline-flex items-center gap-2 rounded-full border border-violet-100 bg-white px-4 py-3 text-base font-medium text-[#474555]">
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-            Product details
+          <div>
+            <p className="text-lg font-extrabold text-[#24183e]">
+              HealCart
+            </p>
+            <p className="text-xs text-violet-600">
+              Self-Healing Commerce
+            </p>
           </div>
-        </div>
+        </header>
 
-        <div className="relative overflow-hidden rounded-[2rem] border border-violet-100 bg-white shadow-xl shadow-violet-100/50">
-          <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-violet-100/70 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-32 left-1/4 h-72 w-72 rounded-full bg-purple-100/60 blur-3xl" />
-
-          <div className="relative grid gap-8 p-5 sm:p-8 lg:grid-cols-2 lg:gap-12 lg:p-12">
-            <div className="flex min-w-0 flex-col gap-5">
-              <div className="relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-3xl border border-violet-100 bg-gradient-to-br from-[#f7f1ff] via-[#fdfaff] to-[#ece4ff] p-8 sm:min-h-[480px] sm:p-12">
-                <div className="absolute left-5 top-5 flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/80 bg-white/90 px-4 py-2 text-base font-semibold text-[#474555] shadow-sm backdrop-blur">
-                    <ShieldCheck size={19} className="text-[#5441db]" />
-                    Product details
-                  </span>
+        <section className="hc-card overflow-hidden rounded-3xl border border-white bg-white/85 shadow-xl shadow-violet-200/40 backdrop-blur-xl">
+          <div className="grid lg:grid-cols-2">
+            <div className="flex min-h-[300px] items-center justify-center bg-gradient-to-br from-violet-100 via-purple-50 to-fuchsia-50 p-6 sm:min-h-[420px] sm:p-10">
+              {product.image && !imageFailed ? (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  onError={() => setImageFailed(true)}
+                  className="hc-product-image"
+                />
+              ) : (
+                <div className="flex flex-col items-center text-center">
+                  <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white text-violet-600 shadow-md">
+                    <Package size={38} />
+                  </div>
+                  <p className="mt-4 max-w-xs break-words font-semibold text-slate-600">
+                    {product.name}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Product image unavailable
+                  </p>
                 </div>
-
-                {inStock && (
-                  <span className="absolute right-5 top-5 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-base font-semibold text-emerald-800 ring-1 ring-emerald-100">
-                    <CheckCircle2 size={18} />
-                    In stock
-                  </span>
-                )}
-
-                {product.image ? (
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="relative z-10 max-h-[400px] w-full object-contain drop-shadow-xl transition duration-500 hover:scale-105"
-                    onError={(event) => {
-                      event.currentTarget.style.display = "none";
-                    }}
-                  />
-                ) : (
-                  <div className="tech-image-placeholder relative z-10 flex min-h-72 w-full flex-col items-center justify-center rounded-2xl border border-violet-100 bg-white/70 p-8 text-center">
-                    <Package size={52} className="text-[#5441db]" />
-                    <strong className="mt-5 text-xl font-bold text-[#1d1737]">
-                      {product.name}
-                    </strong>
-                    <span className="mt-3 text-base text-[#69647d]">
-                      Product image unavailable
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="flex items-center gap-3 rounded-2xl border border-violet-100 bg-[#f7f1ff] p-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-[#5441db]">
-                    <ShieldCheck size={23} />
-                  </div>
-                  <div>
-                    <p className="text-base font-bold text-[#1d1737]">
-                      Secure
-                    </p>
-                    <p className="mt-1 text-base text-[#69647d]">
-                      Order processing
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 rounded-2xl border border-violet-100 bg-[#f7f1ff] p-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-[#5441db]">
-                    <Truck size={23} />
-                  </div>
-                  <div>
-                    <p className="text-base font-bold text-[#1d1737]">
-                      Delivery
-                    </p>
-                    <p className="mt-1 text-base text-[#69647d]">
-                      Order updates
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 rounded-2xl border border-violet-100 bg-[#f7f1ff] p-4">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-[#5441db]">
-                    <RefreshCw size={22} />
-                  </div>
-                  <div>
-                    <p className="text-base font-bold text-[#1d1737]">
-                      HealCart
-                    </p>
-                    <p className="mt-1 text-base text-[#69647d]">
-                      Resilient store
-                    </p>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
 
-            <div className="flex min-w-0 flex-col py-1 lg:py-3">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="inline-flex rounded-full bg-[#e4dfff] px-4 py-2 text-base font-semibold text-[#3d23c5]">
-                  {product.category || "Electronics"}
-                </span>
+            <div className="p-5 sm:p-8 lg:p-10">
+              <span className="inline-flex rounded-full bg-violet-100 px-3 py-1.5 text-xs font-bold text-violet-700">
+                {getCategoryName(product.category)}
+              </span>
 
-                <span className="inline-flex items-center gap-2 text-base font-medium text-[#69647d]">
-                  <Package size={19} />
-                  Product information
-                </span>
-              </div>
-
-              <h1 className="mt-6 text-3xl font-bold leading-tight tracking-tight text-[#1d1737] sm:text-4xl lg:text-5xl">
+              <h1 className="mt-5 break-words text-3xl font-extrabold tracking-tight sm:text-4xl">
                 {product.name}
               </h1>
 
-              <p className="mt-5 text-base leading-8 text-[#69647d]">
+              <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
                 {product.description || "No description available."}
               </p>
 
-              <div className="mt-8 rounded-2xl border border-violet-100 bg-gradient-to-r from-[#f7f1ff] to-[#fdfaff] p-5 sm:p-6">
-                <p className="text-base font-semibold text-[#69647d]">
-                  Price
+              <div className="mt-6">
+                <p className="text-sm font-medium text-slate-500">
+                  Price per item
                 </p>
-
-                <div className="mt-2 flex flex-wrap items-baseline gap-3">
-                  <span className="text-3xl font-extrabold tracking-tight text-[#4f30e6] sm:text-4xl">
-                    ₹{Number(product.price).toLocaleString("en-IN")}
-                  </span>
-
-                  <span className="text-base text-[#69647d]">
-                    INR
-                  </span>
-                </div>
-
-                {quantity > 1 && (
-                  <div className="mt-4 flex items-center justify-between border-t border-violet-100 pt-4">
-                    <span className="text-base text-[#69647d]">
-                      {quantity} items
-                    </span>
-                    <span className="text-xl font-bold text-[#1d1737]">
-                      ₹{totalPrice.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                )}
+                <p className="mt-1 text-4xl font-extrabold text-violet-700">
+                  {formatPrice(product.price)}
+                </p>
               </div>
 
-              <div className="mt-7 rounded-2xl border border-violet-100 bg-white p-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="mt-6 rounded-2xl border border-violet-100 bg-violet-50/70 p-4">
+                <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-[#5441db]">
-                      <Package size={23} />
-                    </div>
-
+                    <Package size={22} className="text-violet-700" />
                     <div>
-                      <p className="text-base font-bold text-[#1d1737]">
-                        Inventory availability
+                      <p className="text-sm font-bold">
+                        Availability
                       </p>
-                      <p className="mt-1 text-base text-[#69647d]">
+                      <p className="mt-1 text-xs text-slate-500">
                         {inStock
                           ? `${product.stock} units available`
                           : "Currently out of stock"}
@@ -304,39 +309,52 @@ export default function ProductDetails() {
                   </div>
 
                   <span
-                    className={`rounded-full px-4 py-2 text-base font-semibold ${
-                      inStock
-                        ? "bg-emerald-50 text-emerald-800"
-                        : "bg-red-50 text-red-700"
-                    }`}
+                    className={`rounded-full px-3 py-1.5 text-xs font-bold ${!inStock
+                        ? "bg-red-100 text-red-700"
+                        : isLowStock
+                          ? "bg-amber-100 text-amber-800"
+                          : "bg-emerald-100 text-emerald-700"
+                      }`}
                   >
-                    {inStock ? "Available" : "Sold out"}
+                    {!inStock
+                      ? "Sold out"
+                      : isLowStock
+                        ? "Limited stock"
+                        : "In stock"}
                   </span>
                 </div>
 
-                
+                {isLowStock && (
+                  <p className="mt-3 flex items-center gap-2 text-xs text-amber-800">
+                    <AlertCircle size={15} />
+                    Only {product.stock}{" "}
+                    {Number(product.stock) === 1 ? "unit" : "units"} left.
+                  </p>
+                )}
               </div>
 
-              <div className="mt-7">
-                <div className="flex flex-wrap items-center justify-between gap-4">
-                  <label
-                    htmlFor="quantity"
-                    className="text-base font-bold text-[#1d1737]"
-                  >
-                    Select quantity
-                  </label>
+              <div className="mt-6">
+                <label
+                  htmlFor="quantity"
+                  className="text-sm font-bold"
+                >
+                  Choose quantity
+                </label>
 
-                  <div className="inline-flex items-center rounded-xl border border-violet-100 bg-[#f7f1ff] p-1.5">
+                <div className="mt-3 flex items-center gap-4">
+                  <div className="flex items-center rounded-xl border border-violet-200 bg-white p-1">
                     <button
                       type="button"
                       aria-label="Decrease quantity"
                       onClick={() =>
-                        setQuantity((current) => Math.max(1, current - 1))
+                        setQuantity((current) =>
+                          Math.max(1, current - 1)
+                        )
                       }
                       disabled={!inStock || quantity <= 1}
-                      className="flex h-11 w-11 items-center justify-center rounded-lg bg-white text-[#5441db] transition hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="rounded-lg p-2.5 text-violet-700 transition hover:bg-violet-100 disabled:opacity-40"
                     >
-                      <Minus size={20} />
+                      <Minus size={17} />
                     </button>
 
                     <input
@@ -345,20 +363,22 @@ export default function ProductDetails() {
                       min="1"
                       max={product.stock}
                       value={quantity}
+                      disabled={!inStock}
                       onChange={(event) => {
                         const value = Number(event.target.value);
+
                         setQuantity(
                           Number.isFinite(value) && value >= 1
                             ? Math.min(
-                                Math.floor(value),
-                                product.stock || 1
-                              )
+                              Math.floor(value),
+                              product.stock || 1
+                            )
                             : 1
                         );
+
                         setMessage("");
                       }}
-                      disabled={!inStock}
-                      className="w-16 border-0 bg-transparent text-center text-lg font-bold text-[#1d1737] outline-none disabled:opacity-50"
+                      className="w-14 border-0 bg-transparent text-center font-bold outline-none"
                     />
 
                     <button
@@ -370,75 +390,116 @@ export default function ProductDetails() {
                         )
                       }
                       disabled={!inStock || quantity >= product.stock}
-                      className="flex h-11 w-11 items-center justify-center rounded-lg bg-white text-[#5441db] transition hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="rounded-lg p-2.5 text-violet-700 transition hover:bg-violet-100 disabled:opacity-40"
                     >
-                      <Plus size={20} />
+                      <Plus size={17} />
                     </button>
                   </div>
-                </div>
 
-                <p className="mt-3 text-base text-[#69647d]">
-                  {inStock
-                    ? `Choose between 1 and ${product.stock} available units.`
-                    : "This item cannot be added to your cart right now."}
-                </p>
+                  <div className="min-w-0 flex-1 text-right">
+                    <p className="text-xs text-slate-500">
+                      Total price
+                    </p>
+                    <p className="text-xl font-extrabold text-[#24183e]">
+                      {formatPrice(totalPrice)}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <button
+                type="button"
                 onClick={addToCart}
                 disabled={!inStock}
-                className="mt-7 inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-[#5441db] to-[#6851ff] px-6 py-4 text-lg font-bold text-white shadow-lg shadow-violet-200 transition duration-200 hover:-translate-y-0.5 hover:from-[#3d23c5] hover:to-[#5441db] hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-violet-200 disabled:cursor-not-allowed disabled:from-slate-400 disabled:to-slate-400 disabled:shadow-none"
+                className="hc-button mt-6 flex min-h-14 w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-violet-700 to-fuchsia-600 px-5 py-4 font-bold text-white shadow-lg shadow-violet-200 focus:outline-none focus:ring-4 focus:ring-violet-200 disabled:cursor-not-allowed disabled:from-slate-400 disabled:to-slate-400 disabled:shadow-none"
               >
-                <ShoppingCart size={22} />
-                {inStock ? "Add to Cart" : "Out of Stock"}
-                {inStock && (
-                  <span className="ml-1">
-                    · ₹{totalPrice.toLocaleString("en-IN")}
-                  </span>
-                )}
+                <ShoppingCart size={20} />
+                {inStock ? "Add to cart" : "Out of stock"}
+                {inStock && <ArrowRight size={18} />}
               </button>
 
               {message && (
                 <div
+                  key={message}
                   role="status"
                   aria-live="polite"
-                  className={`mt-5 flex items-start gap-3 rounded-xl border p-4 text-base font-medium ${
-                    message.includes("successfully")
+                  className={`mt-4 flex items-start gap-3 rounded-xl border p-4 text-sm font-medium ${message.includes("successfully")
                       ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                      : "border-red-200 bg-red-50 text-red-800"
-                  }`}
+                      : "border-red-200 bg-red-50 text-red-700"
+                    }`}
                 >
                   {message.includes("successfully") ? (
-                    <CheckCircle2 className="mt-0.5 shrink-0" size={22} />
+                    <CheckCircle2 size={20} className="shrink-0" />
                   ) : (
-                    <AlertCircle className="mt-0.5 shrink-0" size={22} />
+                    <AlertCircle size={20} className="shrink-0" />
                   )}
-                  <div className="flex-1">{message}</div>
 
-                  {message.includes("successfully") && (
-                    <button
-                      onClick={() => navigate("/user/cart")}
-                      className="shrink-0 font-bold underline underline-offset-4"
-                    >
-                      View cart
-                    </button>
-                  )}
+                  <div>
+                    <p>{message}</p>
+
+                    {message.includes("successfully") && (
+                      <button
+                        type="button"
+                        onClick={() => navigate("/user/cart")}
+                        className="mt-2 inline-flex items-center gap-1 font-bold underline underline-offset-4"
+                      >
+                        View cart
+                        <ArrowRight size={15} />
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
 
-              <div className="mt-6 flex items-start gap-3 rounded-xl bg-[#f7f1ff] p-4 text-base leading-7 text-[#474555]">
+              <div className="mt-6 flex items-start gap-3 border-t border-violet-100 pt-5">
                 <ShieldCheck
                   size={22}
-                  className="mt-0.5 shrink-0 text-[#5441db]"
+                  className="mt-0.5 shrink-0 text-violet-600"
                 />
-                <p>
-                  HealCart checks available stock before adding items and keeps
-                  your cart synchronized with the store.
+                <p className="text-xs leading-6 text-slate-500">
+                  HealCart checks available stock before adding products
+                  and keeps your cart connected to the existing shopping
+                  flow.
                 </p>
               </div>
             </div>
           </div>
-        </div>
+        </section>
+
+        <section className="mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="hc-feature flex items-center gap-3 rounded-2xl border border-white bg-white/80 p-4 shadow-sm">
+            <ShieldCheck className="shrink-0 text-violet-600" size={22} />
+            <span className="text-sm font-semibold">Secure shopping</span>
+          </div>
+
+          <div className="hc-feature flex items-center gap-3 rounded-2xl border border-white bg-white/80 p-4 shadow-sm">
+            <Truck className="shrink-0 text-violet-600" size={22} />
+            <span className="text-sm font-semibold">Order updates</span>
+          </div>
+
+          <div className="hc-feature flex items-center gap-3 rounded-2xl border border-white bg-white/80 p-4 shadow-sm">
+            <Package className="shrink-0 text-violet-600" size={22} />
+            <span className="text-sm font-semibold">Stock visibility</span>
+          </div>
+        </section>
+
+        <footer className="mt-8 flex items-center justify-between border-t border-violet-200/70 py-5">
+          <div>
+            <p className="font-bold text-[#24183e]">HealCart</p>
+            <p className="mt-1 text-xs text-slate-500">
+              Self-Healing Commerce
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => navigate("/user/cart")}
+            className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-violet-700 transition hover:bg-violet-100"
+          >
+            <ShoppingCart size={17} />
+            View cart
+          </button>
+        </footer>
       </div>
     </main>
   );

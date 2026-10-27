@@ -192,7 +192,7 @@ function StorefrontShell({ children }) {
 
               <div className="min-w-0">
                 <h1 className="font-bold tracking-tight text-[#211a3b] sm:text-xl">
-                  TechNest
+                  HealCart
                 </h1>
                 <p className="hidden text-base text-slate-600 sm:block">
                   Premium electronics &amp; everyday tech

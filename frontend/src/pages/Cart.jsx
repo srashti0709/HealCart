@@ -132,72 +132,61 @@ export default function Cart() {
         `₹${Number(price).toLocaleString("en-IN")}`;
 
     return (
-        <div className="lavender-commerce min-h-screen bg-[#f7f5ff] text-[#211a3b]">
-            <header className="sticky top-0 z-40 border-b border-violet-100 bg-white/95 shadow-[0_2px_12px_rgba(48,35,91,0.04)] backdrop-blur-md">
-                <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-5 lg:px-8">
-                    <Link
-                        to="/user"
-                        className="flex shrink-0 items-center gap-3"
-                    >
-                        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-600 text-lg font-extrabold text-white shadow-md shadow-violet-200">
-                            S
+        <div className="lavender-commerce min-h-screen bg-[#faf9ff] text-[#241b3b]">
+            <header className="sticky top-0 z-40 border-b border-[#ece6fa] bg-white/95 backdrop-blur-xl">
+                <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
+                    <Link to="/user" className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-lg font-extrabold text-white">
+                            H
                         </span>
-                        <span className="text-2xl font-extrabold tracking-tight text-violet-800">
+                        <span className="text-xl font-extrabold tracking-tight text-[#33215f] sm:text-2xl">
                             HealCart
                         </span>
                     </Link>
 
-                    <div className="flex items-center gap-2 rounded-full border border-violet-100 bg-violet-50 px-4 py-2.5 text-base font-semibold text-violet-800">
-                        <ShieldCheck size={19} />
-                        <span className="hidden sm:inline">
-                            Secure shopping
-                        </span>
-                        <span className="sm:hidden">Secure</span>
+                    <div className="flex items-center gap-2 rounded-full border border-[#e8e0fa] bg-[#f8f5ff] px-3 py-2 text-sm font-semibold text-violet-800 sm:px-4">
+                        <ShieldCheck size={18} />
+                        <span>Secure shopping</span>
                     </div>
                 </div>
             </header>
 
-            <main className="mx-auto max-w-7xl px-5 py-8 sm:py-10 lg:px-8">
+            <main className="mx-auto max-w-7xl px-5 py-7 sm:px-8 sm:py-10">
                 <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
                     <Link
                         to="/user"
-                        className="inline-flex items-center gap-2 rounded-lg text-base font-semibold text-violet-700 transition hover:text-violet-900"
+                        className="inline-flex items-center gap-2 text-sm font-semibold text-[#71638f] transition hover:text-violet-700"
                     >
-                        <ArrowLeft size={19} />
+                        <ArrowLeft size={18} />
                         Continue shopping
                     </Link>
 
-                    <div className="flex items-center gap-2 text-base text-violet-700">
-                        <ShoppingBag size={19} />
-                        <span>
-                            {totalItems} {totalItems === 1 ? "item" : "items"} in your cart
-                        </span>
+                    <div className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-[#71638f] ring-1 ring-[#ece6fa]">
+                        <ShoppingBag size={17} className="text-violet-600" />
+                        {totalItems} {totalItems === 1 ? "item" : "items"} in your cart
                     </div>
                 </div>
 
                 <section className="mb-8">
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-100 bg-white px-4 py-2 text-base font-semibold text-violet-700 shadow-sm">
-                        <span className="h-2.5 w-2.5 rounded-full bg-violet-500" />
+                    <p className="mb-3 text-sm font-bold uppercase tracking-[0.18em] text-violet-600">
                         Your selection
-                    </div>
-
-                    <h1 className="text-3xl font-extrabold tracking-tight text-[#211a3b] sm:text-4xl">
-                        Your shopping cart
+                    </p>
+                    <h1 className="text-3xl font-extrabold tracking-tight text-[#241b3b] sm:text-4xl">
+                        Shopping cart
                     </h1>
-
-                    <p className="mt-3 max-w-2xl text-base leading-7 text-[#625b79] sm:text-lg">
-                        Review your products, confirm quantities, and get
-                        everything ready for checkout.
+                    <p className="mt-3 max-w-2xl text-sm leading-6 text-[#716985] sm:text-base">
+                        Review your items, update quantities, and get your
+                        order ready for checkout.
                     </p>
                 </section>
 
                 {stockNotice && (
                     <div
                         role="alert"
-                        className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-base text-amber-950"
+                        className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950"
                     >
                         <AlertCircle
-                            size={22}
+                            size={20}
                             className="mt-0.5 shrink-0 text-amber-700"
                         />
                         <p className="flex-1 leading-6">{stockNotice}</p>
@@ -205,7 +194,7 @@ export default function Cart() {
                             type="button"
                             onClick={() => setStockNotice("")}
                             aria-label="Dismiss stock notice"
-                            className="rounded-lg p-1 text-amber-800 hover:bg-amber-100"
+                            className="rounded-lg px-2 py-1 text-amber-800 hover:bg-amber-100"
                         >
                             ×
                         </button>
@@ -215,90 +204,88 @@ export default function Cart() {
                 {loading ? (
                     <section
                         aria-live="polite"
-                        className="rounded-3xl border border-violet-100 bg-white p-10 shadow-sm sm:p-14"
+                        className="rounded-2xl border border-[#ece6fa] bg-white px-6 py-16 text-center"
                     >
-                        <div className="flex flex-col items-center justify-center text-center">
-                            <RefreshCw
-                                size={34}
-                                className="animate-spin text-violet-600"
-                            />
-                            <h2 className="mt-5 text-xl font-bold text-[#211a3b]">
-                                Updating your cart
-                            </h2>
-                            <p className="mt-2 text-base text-[#625b79]">
-                                Checking the latest product and stock information.
-                            </p>
-                        </div>
+                        <RefreshCw
+                            size={30}
+                            className="mx-auto animate-spin text-violet-600"
+                        />
+                        <h2 className="mt-5 text-lg font-bold">
+                            Updating your cart
+                        </h2>
+                        <p className="mt-2 text-sm text-[#716985]">
+                            Checking the latest product and stock information.
+                        </p>
                     </section>
                 ) : error ? (
                     <section
                         role="alert"
-                        className="rounded-3xl border border-red-200 bg-white p-7 shadow-sm sm:p-9"
+                        className="rounded-2xl border border-red-200 bg-white p-6 sm:p-8"
                     >
                         <div className="flex items-start gap-4">
-                            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-red-700">
-                                <AlertCircle size={25} />
+                            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-700">
+                                <AlertCircle size={23} />
                             </span>
                             <div className="flex-1">
-                                <h2 className="text-xl font-bold text-[#211a3b]">
+                                <h2 className="text-lg font-bold">
                                     We couldn't refresh your cart
                                 </h2>
-                                <p className="mt-2 text-base leading-7 text-[#625b79]">
+                                <p className="mt-2 text-sm leading-6 text-[#716985]">
                                     {error}
                                 </p>
                                 <button
                                     type="button"
                                     onClick={() => window.location.reload()}
-                                    className="mt-5 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-base font-bold text-white transition hover:bg-violet-700"
+                                    className="mt-5 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-bold text-white transition hover:bg-violet-700"
                                 >
-                                    <RefreshCw size={18} />
+                                    <RefreshCw size={17} />
                                     Try again
                                 </button>
                             </div>
                         </div>
                     </section>
                 ) : cartItems.length === 0 ? (
-                    <section className="rounded-3xl border border-violet-100 bg-white px-6 py-16 text-center shadow-sm sm:px-10">
-                        <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-violet-100 text-violet-700">
-                            <ShoppingBag size={43} />
+                    <section className="rounded-2xl border border-[#ece6fa] bg-white px-6 py-16 text-center sm:px-10">
+                        <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-[#f1ebff] text-violet-700">
+                            <ShoppingBag size={36} />
                         </div>
 
-                        <h2 className="mt-6 text-2xl font-extrabold text-[#211a3b]">
+                        <h2 className="mt-6 text-2xl font-extrabold">
                             Your cart is empty
                         </h2>
 
-                        <p className="mx-auto mt-3 max-w-lg text-base leading-7 text-[#625b79] sm:text-lg">
-                            Your next favourite piece of tech could be waiting
-                            for you. Explore our products and find your match.
+                        <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-[#716985] sm:text-base">
+                            Find something you'll love. Explore our collection
+                            and discover your next favourite piece of tech.
                         </p>
 
                         <Link
                             to="/user"
-                            className="mt-7 inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-6 py-3.5 text-base font-bold text-white shadow-md shadow-violet-200 transition hover:bg-violet-700"
+                            className="mt-7 inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-violet-700"
                         >
                             Explore products
-                            <ArrowRight size={19} />
+                            <ArrowRight size={18} />
                         </Link>
                     </section>
                 ) : (
-                    <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_360px]">
-                        <section className="min-w-0 space-y-5">
-                            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-violet-100 bg-white px-5 py-4 shadow-sm">
+                    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+                        <section className="min-w-0 space-y-4">
+                            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#ece6fa] bg-white px-4 py-4 sm:px-5">
                                 <div className="flex items-center gap-3">
-                                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-700">
-                                        <ShieldCheck size={22} />
+                                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#f1ebff] text-violet-700">
+                                        <ShieldCheck size={21} />
                                     </span>
                                     <div>
-                                        <p className="text-base font-bold text-[#211a3b]">
+                                        <p className="text-sm font-bold text-[#33215f]">
                                             Self-healing checkout
                                         </p>
-                                        <p className="mt-1 text-base text-[#625b79]">
+                                        <p className="mt-1 text-xs leading-5 text-[#716985] sm:text-sm">
                                             Stock is checked again when you order.
                                         </p>
                                     </div>
                                 </div>
 
-                                <span className="rounded-full bg-violet-50 px-3 py-2 text-base font-semibold text-violet-800">
+                                <span className="rounded-full bg-[#f5f0ff] px-3 py-1.5 text-xs font-bold text-violet-800">
                                     {totalItems} {totalItems === 1 ? "item" : "items"}
                                 </span>
                             </div>
@@ -306,10 +293,10 @@ export default function Cart() {
                             {unavailableItems.length > 0 && (
                                 <div
                                     role="alert"
-                                    className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-5 text-base text-red-800"
+                                    className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
                                 >
                                     <AlertCircle
-                                        size={23}
+                                        size={20}
                                         className="mt-0.5 shrink-0"
                                     />
                                     <div>
@@ -319,7 +306,7 @@ export default function Cart() {
                                         <p className="mt-1 leading-6">
                                             Remove unavailable products or reduce
                                             quantities to match current stock before
-                                            continuing to checkout.
+                                            checkout.
                                         </p>
                                     </div>
                                 </div>
@@ -332,80 +319,76 @@ export default function Cart() {
                                 return (
                                     <article
                                         key={item.productId}
-                                        className={`group rounded-2xl border bg-white p-5 shadow-sm transition hover:shadow-md sm:p-6 ${
+                                        className={`rounded-2xl border bg-white p-4 transition-colors sm:p-5 ${
                                             !item.available || stockExceeded
                                                 ? "border-red-200"
-                                                : "border-violet-100"
+                                                : "border-[#ece6fa] hover:border-[#d9cdf8]"
                                         }`}
                                     >
-                                        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                                            <div className="flex h-32 w-full shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-violet-50 bg-[#f7f5ff] sm:h-32 sm:w-32">
+                                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                                            <div className="flex h-36 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#f8f6ff] sm:h-32 sm:w-32">
                                                 {item.image ? (
                                                     <img
                                                         src={item.image}
                                                         alt={item.name}
-                                                        className="h-full w-full object-contain p-3 transition duration-300 group-hover:scale-105"
+                                                        className="h-full w-full object-contain p-3"
                                                     />
                                                 ) : (
                                                     <Package
-                                                        size={42}
+                                                        size={38}
                                                         className="text-violet-300"
                                                     />
                                                 )}
                                             </div>
 
                                             <div className="min-w-0 flex-1">
-                                                <p className="text-base font-semibold text-violet-700">
-                                                    HealCart selection
-                                                </p>
-
-                                                <h2 className="mt-2 break-words text-lg font-bold leading-7 text-[#211a3b] sm:text-xl">
+                                                <h2 className="break-words text-base font-bold leading-6 text-[#30234f] sm:text-lg">
                                                     {item.name}
                                                 </h2>
 
-                                                <p className="mt-2 text-xl font-extrabold text-violet-700">
+                                                <p className="mt-2 text-lg font-extrabold text-violet-700">
                                                     {formatPrice(item.price)}
-                                                    <span className="ml-2 text-base font-medium text-[#625b79]">
+                                                    <span className="ml-1 text-xs font-medium text-[#817794]">
                                                         / unit
                                                     </span>
                                                 </p>
 
                                                 {!item.available ? (
-                                                    <p className="mt-3 flex items-start gap-2 text-base font-semibold leading-6 text-red-700">
+                                                    <p className="mt-3 flex items-start gap-2 text-sm font-semibold leading-5 text-red-700">
                                                         <AlertCircle
-                                                            size={19}
+                                                            size={17}
                                                             className="mt-0.5 shrink-0"
                                                         />
                                                         Product unavailable. Remove it
                                                         to continue.
                                                     </p>
                                                 ) : stockExceeded ? (
-                                                    <p className="mt-3 flex items-start gap-2 text-base font-semibold leading-6 text-red-700">
+                                                    <p className="mt-3 flex items-start gap-2 text-sm font-semibold leading-5 text-red-700">
                                                         <AlertCircle
-                                                            size={19}
+                                                            size={17}
                                                             className="mt-0.5 shrink-0"
                                                         />
                                                         Only {item.stock} available.
                                                         Reduce the quantity.
                                                     </p>
                                                 ) : item.stock === 0 ? (
-                                                    <p className="mt-3 flex items-center gap-2 text-base font-semibold text-red-700">
-                                                        <AlertCircle size={19} />
+                                                    <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-red-700">
+                                                        <AlertCircle size={17} />
                                                         Currently out of stock
                                                     </p>
                                                 ) : (
-                                                    <p className="mt-3 flex items-center gap-2 text-base text-[#625b79]">
+                                                    <p className="mt-3 flex items-center gap-2 text-sm text-emerald-700">
                                                         <CheckCircle2
-                                                            size={19}
-                                                            className="shrink-0 text-emerald-600"
+                                                            size={17}
+                                                            className="shrink-0"
                                                         />
                                                         {item.stock} currently in stock
                                                     </p>
                                                 )}
 
-                                                <div className="mt-5 flex flex-wrap items-center gap-3">
+                                                <div className="mt-4 flex flex-wrap items-center gap-3">
                                                     <div
-                                                        className="flex items-center gap-2 rounded-xl border border-violet-100 bg-[#f7f5ff] p-1"
+                                                        className="flex items-center gap-1 rounded-xl border border-[#e8e0fa] bg-[#faf9ff] p-1"
                                                         aria-label={`Quantity for ${item.name}`}
                                                     >
                                                         <button
@@ -421,12 +404,12 @@ export default function Cart() {
                                                                 !item.available
                                                             }
                                                             aria-label="Decrease quantity"
-                                                            className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-violet-800 shadow-sm transition hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-40"
+                                                            className="flex h-9 w-9 items-center justify-center rounded-lg text-violet-800 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
                                                         >
-                                                            <Minus size={18} />
+                                                            <Minus size={17} />
                                                         </button>
 
-                                                        <span className="min-w-10 text-center text-lg font-bold text-[#211a3b]">
+                                                        <span className="min-w-8 text-center text-sm font-bold">
                                                             {item.quantity}
                                                         </span>
 
@@ -443,9 +426,9 @@ export default function Cart() {
                                                                 item.quantity >= item.stock
                                                             }
                                                             aria-label="Increase quantity"
-                                                            className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-violet-800 shadow-sm transition hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-40"
+                                                            className="flex h-9 w-9 items-center justify-center rounded-lg text-violet-800 transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
                                                         >
-                                                            <Plus size={18} />
+                                                            <Plus size={17} />
                                                         </button>
                                                     </div>
 
@@ -454,19 +437,19 @@ export default function Cart() {
                                                         onClick={() =>
                                                             removeItem(item.productId)
                                                         }
-                                                        className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-base font-semibold text-red-600 transition hover:bg-red-50 hover:text-red-800"
+                                                        className="inline-flex min-h-10 items-center gap-1.5 rounded-lg px-2 text-sm font-semibold text-[#82748e] transition hover:bg-red-50 hover:text-red-600"
                                                     >
-                                                        <Trash2 size={19} />
+                                                        <Trash2 size={16} />
                                                         Remove
                                                     </button>
                                                 </div>
                                             </div>
 
-                                            <div className="border-t border-violet-100 pt-4 sm:min-w-32 sm:border-0 sm:pt-0 sm:text-right">
-                                                <p className="text-base text-[#625b79]">
+                                            <div className="flex items-center justify-between border-t border-[#f0ebfa] pt-3 sm:min-w-28 sm:flex-col sm:items-end sm:justify-center sm:border-0 sm:pt-0">
+                                                <p className="text-xs text-[#817794]">
                                                     Item total
                                                 </p>
-                                                <p className="mt-1 text-xl font-extrabold text-[#211a3b]">
+                                                <p className="text-lg font-extrabold text-[#30234f]">
                                                     {formatPrice(
                                                         item.price * item.quantity
                                                     )}
@@ -477,69 +460,71 @@ export default function Cart() {
                                 );
                             })}
 
-                            <div className="flex flex-wrap items-center justify-between gap-3 px-1 pt-1">
+                            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                                 <Link
                                     to="/user"
-                                    className="inline-flex items-center gap-2 rounded-lg py-2 text-base font-semibold text-violet-700 transition hover:text-violet-900"
+                                    className="inline-flex items-center gap-2 py-2 text-sm font-semibold text-violet-700 transition hover:text-violet-900"
                                 >
-                                    <ArrowLeft size={19} />
+                                    <ArrowLeft size={17} />
                                     Add more products
                                 </Link>
 
                                 <button
                                     type="button"
                                     onClick={clearCart}
-                                    className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-base font-semibold text-red-600 transition hover:bg-red-50"
+                                    className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
                                 >
-                                    <Trash2 size={18} />
+                                    <Trash2 size={16} />
                                     Clear cart
                                 </button>
                             </div>
                         </section>
 
-                        <aside className="lg:sticky lg:top-28">
-                            <div className="overflow-hidden rounded-3xl border border-violet-100 bg-white shadow-[0_12px_40px_rgba(66,46,125,0.07)]">
-                                <div className="border-b border-violet-100 bg-gradient-to-br from-violet-50 to-white p-6">
+                        <aside className="lg:sticky lg:top-24">
+                            <div className="overflow-hidden rounded-2xl border border-[#e8e0fa] bg-white">
+                                <div className="border-b border-[#ece6fa] px-5 py-5">
                                     <div className="flex items-center gap-3">
-                                        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-600 text-white shadow-md shadow-violet-200">
-                                            <ShoppingBag size={23} />
+                                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#f1ebff] text-violet-700">
+                                            <ShoppingBag size={20} />
                                         </span>
                                         <div>
-                                            <h2 className="text-xl font-extrabold text-[#211a3b]">
+                                            <h2 className="text-lg font-extrabold text-[#30234f]">
                                                 Order summary
                                             </h2>
-                                            <p className="mt-1 text-base text-[#625b79]">
-                                                Your cart at a glance
+                                            <p className="mt-1 text-xs text-[#817794]">
+                                                A summary of your selection
                                             </p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="space-y-5 p-6">
-                                    <div className="flex items-center justify-between gap-3 text-base text-[#625b79]">
-                                        <span>
+                                <div className="space-y-5 p-5">
+                                    <div className="flex items-center justify-between gap-3 text-sm">
+                                        <span className="text-[#716985]">
                                             Items ({totalItems})
                                         </span>
-                                        <span className="font-semibold text-[#211a3b]">
+                                        <span className="font-semibold text-[#30234f]">
                                             {formatPrice(subtotal)}
                                         </span>
                                     </div>
 
-                                    <div className="flex items-center justify-between gap-3 text-base text-[#625b79]">
-                                        <span>Shipping</span>
-                                        <span className="font-semibold text-[#211a3b]">
+                                    <div className="flex items-start justify-between gap-3 text-sm">
+                                        <span className="text-[#716985]">
+                                            Shipping
+                                        </span>
+                                        <span className="text-right font-medium text-[#30234f]">
                                             Calculated at checkout
                                         </span>
                                     </div>
 
-                                    <div className="border-t border-dashed border-violet-200 pt-5">
+                                    <div className="border-t border-dashed border-[#e5dcf8] pt-5">
                                         <div className="flex items-end justify-between gap-3">
                                             <div>
-                                                <p className="text-lg font-bold text-[#211a3b]">
+                                                <p className="text-base font-bold text-[#30234f]">
                                                     Subtotal
                                                 </p>
-                                                <p className="mt-1 text-base text-[#625b79]">
-                                                    Before any applicable fees
+                                                <p className="mt-1 text-xs text-[#817794]">
+                                                    Before applicable fees
                                                 </p>
                                             </div>
                                             <p className="text-2xl font-extrabold tracking-tight text-violet-700">
@@ -548,12 +533,12 @@ export default function Cart() {
                                         </div>
                                     </div>
 
-                                    <div className="flex items-start gap-3 rounded-2xl border border-violet-100 bg-[#f7f5ff] p-4">
+                                    <div className="flex items-start gap-3 rounded-xl bg-[#f8f5ff] p-3.5">
                                         <ShieldCheck
-                                            size={22}
+                                            size={20}
                                             className="mt-0.5 shrink-0 text-violet-700"
                                         />
-                                        <p className="text-base leading-6 text-[#51476e]">
+                                        <p className="text-xs leading-5 text-[#625779]">
                                             Stock is validated again when you
                                             place your order. Adding items to
                                             your cart does not reserve stock.
@@ -561,7 +546,7 @@ export default function Cart() {
                                     </div>
 
                                     {unavailableItems.length > 0 && (
-                                        <p className="text-base font-semibold leading-6 text-red-700">
+                                        <p className="text-sm font-semibold leading-5 text-red-700">
                                             Resolve the stock warnings before
                                             proceeding to checkout.
                                         </p>
@@ -578,33 +563,33 @@ export default function Cart() {
                                                 );
                                             }
                                         }}
-                                        className={`flex min-h-14 w-full items-center justify-center gap-2 rounded-xl px-5 py-4 text-center text-base font-bold text-white shadow-md transition ${
+                                        className={`flex min-h-12 w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-center text-sm font-bold text-white transition ${
                                             unavailableItems.length > 0
-                                                ? "cursor-not-allowed bg-violet-300 shadow-none"
-                                                : "bg-violet-600 shadow-violet-200 hover:bg-violet-700 hover:shadow-lg active:scale-[0.99]"
+                                                ? "cursor-not-allowed bg-violet-300"
+                                                : "bg-violet-600 hover:bg-violet-700"
                                         }`}
                                     >
                                         Proceed to checkout
-                                        <ArrowRight size={20} />
+                                        <ArrowRight size={18} />
                                     </Link>
 
                                     <div className="grid grid-cols-2 gap-3">
-                                        <div className="flex flex-col items-center justify-center gap-2 rounded-xl bg-violet-50 px-3 py-4 text-center">
+                                        <div className="flex flex-col items-center gap-2 rounded-xl border border-[#eee8fa] px-2 py-3 text-center">
                                             <ShieldCheck
-                                                size={22}
+                                                size={20}
                                                 className="text-violet-700"
                                             />
-                                            <span className="text-base font-semibold text-[#51476e]">
+                                            <span className="text-xs font-semibold text-[#625779]">
                                                 Secure checkout
                                             </span>
                                         </div>
 
-                                        <div className="flex flex-col items-center justify-center gap-2 rounded-xl bg-violet-50 px-3 py-4 text-center">
+                                        <div className="flex flex-col items-center gap-2 rounded-xl border border-[#eee8fa] px-2 py-3 text-center">
                                             <RefreshCw
-                                                size={22}
+                                                size={20}
                                                 className="text-violet-700"
                                             />
-                                            <span className="text-base font-semibold text-[#51476e]">
+                                            <span className="text-xs font-semibold text-[#625779]">
                                                 Recovery support
                                             </span>
                                         </div>
@@ -612,26 +597,26 @@ export default function Cart() {
                                 </div>
                             </div>
 
-                            <p className="mt-5 text-center text-base leading-6 text-[#625b79]">
-                                Need to make a change? You can update quantities
-                                or remove products before checkout.
+                            <p className="mt-4 text-center text-xs leading-5 text-[#817794]">
+                                You can change quantities or remove products
+                                before checkout.
                             </p>
                         </aside>
                     </div>
                 )}
             </main>
 
-            <footer className="mt-8 border-t border-violet-100 bg-white">
-                <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-5 py-6 text-center sm:flex-row sm:text-left lg:px-8">
+            <footer className="mt-8 border-t border-[#ece6fa] bg-white">
+                <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-3 px-5 py-5 text-center sm:flex-row sm:px-8 sm:text-left">
                     <Link
                         to="/user"
-                        className="text-xl font-extrabold text-violet-800"
+                        className="text-lg font-extrabold tracking-tight text-[#33215f]"
                     >
                         HealCart
                     </Link>
 
-                    <div className="flex flex-wrap items-center justify-center gap-2 text-base text-[#625b79]">
-                        <ShieldCheck size={19} className="text-violet-700" />
+                    <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-[#817794] sm:text-sm">
+                        <ShieldCheck size={17} className="text-violet-700" />
                         <span>
                             Resilient shopping, backed by self-healing recovery.
                         </span>

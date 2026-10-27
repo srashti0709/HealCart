@@ -331,6 +331,13 @@ export default function PaymentChaosRecoveryChart({
 
     // Database-level confirmation: a resolved incident with an order id and a
     // verification recovery action is authoritative over event-derived state.
+    // Only incidents recorded at or after the current experiment's start time
+    // count, so a stale historical recovery can never be shown as the active
+    // experiment's result before its own failure injection/checkout occurs.
+    const experimentStarted = recovery?.startedAt
+        ? new Date(recovery.startedAt).getTime()
+        : null;
+
     const dbConfirmedIncident = incidents.find(
         (incident) =>
             String(incident.incidentType || "").toLowerCase() ===
@@ -339,7 +346,10 @@ export default function PaymentChaosRecoveryChart({
             /verif|existing payment|payment transaction/i.test(
                 String(incident.recoveryAction || "")
             ) &&
-            incident.resolvedAt
+            incident.resolvedAt &&
+            experimentStarted != null &&
+            Number.isFinite(new Date(incident.detectedAt).getTime()) &&
+            new Date(incident.detectedAt).getTime() >= experimentStarted
     );
 
     const latestTimeout = timeoutEvents[timeoutEvents.length - 1];

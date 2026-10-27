@@ -12,6 +12,7 @@ import {
   Clock3,
   AlertCircle,
   Inbox,
+  ArrowUpRight,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -169,40 +170,41 @@ export default function AdminNotifications() {
 
   return (
     <div className="min-h-screen bg-[#f7f6fc] text-slate-900">
-      <header className="sticky top-0 z-30 border-b border-violet-100 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-4 px-5 py-4 lg:px-8">
-          <Link to="/admin" className="flex items-center gap-3">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 text-white shadow-lg shadow-violet-200">
-              <Package size={25} />
+      <header className="sticky top-0 z-30 border-b border-violet-100/80 bg-white/90 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
+          <Link to="/admin" className="flex shrink-0 items-center gap-3">
+            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 text-white shadow-md shadow-violet-200/70">
+              <Package size={23} />
             </span>
 
             <span>
-              <span className="block text-xl font-bold tracking-tight text-slate-900">
-                HealCart Admin
+              <span className="block text-lg font-bold tracking-tight text-slate-950">
+                HealCart
               </span>
-              <span className="mt-0.5 block text-base text-slate-600">
-                Product management
+              <span className="block text-xs font-medium text-slate-500">
+                Administration
               </span>
             </span>
           </Link>
 
-          <nav className="flex flex-wrap items-center gap-2 text-base font-medium">
+          <nav className="flex w-full flex-wrap items-center gap-1.5 sm:w-auto sm:gap-2">
             <Link
               to="/admin"
-              className="flex items-center gap-2 rounded-xl px-4 py-3 text-slate-700 transition hover:bg-violet-50 hover:text-violet-800"
+              className="inline-flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-violet-50 hover:text-violet-800 sm:px-4"
             >
-              <Package size={19} />
+              <Package size={17} />
               Products
             </Link>
 
             <Link
               to="/admin/notifications"
-              className="flex items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-violet-800 transition hover:bg-violet-100"
+              aria-current="page"
+              className="inline-flex items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-3 py-2.5 text-sm font-semibold text-violet-800 shadow-sm sm:px-4"
             >
-              <Bell size={19} />
+              <Bell size={17} />
               Notifications
               {unreadCount > 0 && (
-                <span className="ml-1 inline-flex min-h-6 min-w-6 items-center justify-center rounded-full bg-violet-700 px-1.5 text-base font-bold text-white">
+                <span className="inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-violet-700 px-1.5 text-xs font-bold text-white">
                   {unreadCount}
                 </span>
               )}
@@ -210,10 +212,11 @@ export default function AdminNotifications() {
 
             <Link
               to="/admin/command-center"
-              className="flex items-center gap-2 rounded-xl px-4 py-3 text-slate-700 transition hover:bg-violet-50 hover:text-violet-800"
+              className="inline-flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-violet-50 hover:text-violet-800 sm:px-4"
             >
-              <Activity size={19} />
-              Command Center
+              <Activity size={17} />
+              <span className="hidden md:inline">Command Center</span>
+              <span className="md:hidden">Center</span>
             </Link>
 
             <button
@@ -222,51 +225,65 @@ export default function AdminNotifications() {
                 localStorage.removeItem("healcartAdminToken");
                 window.location.reload();
               }}
-              className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700"
+              className="ml-auto inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 sm:ml-0 sm:px-4"
             >
-              <LogOut size={19} />
+              <LogOut size={17} />
               Logout
             </button>
           </nav>
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1200px] space-y-7 px-5 py-8 sm:px-8 lg:py-10">
-        <section className="relative overflow-hidden rounded-3xl border border-violet-100 bg-white p-6 shadow-sm sm:p-8">
-          <div className="pointer-events-none absolute -right-12 -top-24 h-64 w-64 rounded-full bg-violet-100/80 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-32 right-48 h-56 w-56 rounded-full bg-purple-100/70 blur-3xl" />
+      <main className="mx-auto max-w-[1320px] space-y-6 px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-9">
+        <section className="relative isolate overflow-hidden rounded-[28px] border border-violet-100 bg-white shadow-sm">
+          <div className="pointer-events-none absolute -right-16 -top-24 -z-10 h-72 w-72 rounded-full bg-violet-100/80 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-32 right-1/3 -z-10 h-56 w-56 rounded-full bg-purple-100/70 blur-3xl" />
 
-          <div className="relative flex flex-col justify-between gap-6 md:flex-row md:items-end">
-            <div className="flex items-start gap-4">
-              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-violet-100 text-violet-800">
-                <Bell size={29} />
-              </span>
+          <div className="relative flex flex-col justify-between gap-6 p-5 sm:p-7 lg:flex-row lg:items-center lg:p-9">
+            <div className="flex min-w-0 items-start gap-4 sm:gap-5">
+              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-violet-100 text-violet-700 sm:h-14 sm:w-14">
+                <Bell size={25} />
+              </div>
 
-              <div>
-                <p className="mb-2 text-base font-semibold uppercase tracking-[0.16em] text-violet-800">
-                  Admin inbox
-                </p>
+              <div className="min-w-0">
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-[0.18em] text-violet-700">
+                    Admin workspace
+                  </span>
+                  <span className="h-1 w-1 rounded-full bg-violet-300" />
+                  <span className="text-xs font-medium text-slate-500">
+                    Store activity
+                  </span>
+                </div>
 
-                <h1 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
+                <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl lg:text-[42px]">
                   Notifications
                 </h1>
 
-                <p className="mt-3 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
-                  Keep track of customer purchases and review new orders from
-                  your store.
+                <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600 sm:text-base sm:leading-7">
+                  Stay up to date with customer purchases and keep track of
+                  incoming orders from your store.
                 </p>
+
+                <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                  </span>
+                  Automatic updates enabled
+                </div>
               </div>
             </div>
 
-            <div className="relative flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-center gap-2.5 lg:shrink-0">
               <button
                 type="button"
                 onClick={() => loadNotifications(true)}
                 disabled={refreshing}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-violet-200 bg-white px-5 py-3.5 text-base font-semibold text-slate-700 shadow-sm transition hover:border-violet-400 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-800 focus:outline-none focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <RefreshCw
-                  size={20}
+                  size={17}
                   className={refreshing ? "animate-spin" : ""}
                 />
                 Refresh
@@ -276,74 +293,84 @@ export default function AdminNotifications() {
                 type="button"
                 onClick={markAllRead}
                 disabled={unreadCount === 0 || markingAll || loading}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-700 px-5 py-3.5 text-base font-semibold text-white shadow-lg shadow-violet-200 transition hover:bg-violet-800 focus:outline-none focus:ring-4 focus:ring-violet-200 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-violet-700 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-violet-200/70 transition hover:bg-violet-800 focus:outline-none focus:ring-4 focus:ring-violet-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {markingAll ? (
-                  <RefreshCw size={20} className="animate-spin" />
+                  <RefreshCw size={17} className="animate-spin" />
                 ) : (
-                  <CheckCheck size={20} />
+                  <CheckCheck size={17} />
                 )}
-                {markingAll ? "Updating..." : "Mark all read"}
+                {markingAll ? "Updating..." : "Mark all as read"}
               </button>
             </div>
           </div>
         </section>
 
-        <section className="grid gap-5 md:grid-cols-2">
-          <div className="group rounded-2xl border border-violet-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg hover:shadow-violet-100/70">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-base font-medium text-slate-600">
-                  Unread messages
+        <section className="grid gap-4 sm:grid-cols-2">
+          <div className="rounded-2xl border border-violet-100 bg-white p-5 shadow-sm transition hover:border-violet-200 hover:shadow-md sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-slate-500">
+                  Unread notifications
                 </p>
 
                 <div className="mt-3 flex flex-wrap items-center gap-3">
-                  <p className="text-4xl font-bold tracking-tight text-violet-800">
+                  <p className="text-4xl font-bold tracking-tight text-slate-950 tabular-nums">
                     {unreadCount}
                   </p>
 
                   <span
-                    className={`rounded-full px-3 py-2 text-base font-semibold ${
+                    className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
                       unreadCount > 0
-                        ? "border border-violet-200 bg-violet-50 text-violet-800"
-                        : "border border-emerald-200 bg-emerald-50 text-emerald-800"
+                        ? "border-violet-200 bg-violet-50 text-violet-800"
+                        : "border-emerald-200 bg-emerald-50 text-emerald-800"
                     }`}
                   >
-                    {unreadCount > 0 ? "Needs review" : "All caught up"}
+                    {unreadCount > 0 ? (
+                      <>
+                        <span className="h-1.5 w-1.5 rounded-full bg-violet-600" />
+                        Needs attention
+                      </>
+                    ) : (
+                      <>
+                        <Check size={13} />
+                        All caught up
+                      </>
+                    )}
                   </span>
                 </div>
 
-                <p className="mt-2 text-base text-slate-600">
+                <p className="mt-2 text-sm text-slate-500">
                   {unreadCount > 0
-                    ? "Purchase notifications awaiting review"
-                    : "No unread notifications right now"}
+                    ? "Purchases waiting for your review"
+                    : "You have no unread notifications"}
                 </p>
               </div>
 
-              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-violet-100 text-violet-800 transition group-hover:bg-violet-700 group-hover:text-white">
-                <Bell size={27} />
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-violet-50 text-violet-700">
+                <Bell size={23} />
               </span>
             </div>
           </div>
 
-          <div className="group rounded-2xl border border-violet-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg hover:shadow-violet-100/70">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-base font-medium text-slate-600">
-                  Purchase notifications
+          <div className="rounded-2xl border border-violet-100 bg-white p-5 shadow-sm transition hover:border-violet-200 hover:shadow-md sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-slate-500">
+                  Total notifications
                 </p>
 
-                <p className="mt-3 text-4xl font-bold tracking-tight text-slate-950">
+                <p className="mt-3 text-4xl font-bold tracking-tight text-slate-950 tabular-nums">
                   {notifications.length}
                 </p>
 
-                <p className="mt-2 text-base text-slate-600">
-                  Total notifications received
+                <p className="mt-2 text-sm text-slate-500">
+                  All purchase notifications received
                 </p>
               </div>
 
-              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-purple-100 text-purple-800 transition group-hover:bg-purple-700 group-hover:text-white">
-                <ShoppingBag size={27} />
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-purple-50 text-purple-700">
+                <ShoppingBag size={23} />
               </span>
             </div>
           </div>
@@ -352,9 +379,9 @@ export default function AdminNotifications() {
         {error && (
           <div
             role="alert"
-            className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-5 text-base text-red-800"
+            className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5 text-sm text-red-800"
           >
-            <AlertCircle size={22} className="mt-0.5 shrink-0" />
+            <AlertCircle size={19} className="mt-0.5 shrink-0" />
             <p className="flex-1 leading-6">{error}</p>
           </div>
         )}
@@ -362,9 +389,9 @@ export default function AdminNotifications() {
         {notice && (
           <div
             role="status"
-            className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-base text-emerald-800"
+            className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm text-emerald-800"
           >
-            <Check size={22} className="mt-0.5 shrink-0" />
+            <Check size={19} className="mt-0.5 shrink-0" />
             <p className="flex-1 leading-6">{notice}</p>
 
             <button
@@ -373,60 +400,75 @@ export default function AdminNotifications() {
               aria-label="Dismiss notification message"
               className="rounded-lg p-1 transition hover:bg-emerald-100"
             >
-              <span className="text-xl">×</span>
+              <span className="text-lg leading-none">×</span>
             </button>
           </div>
         )}
 
-        <section className="overflow-hidden rounded-3xl border border-violet-100 bg-white shadow-sm">
-          <div className="flex flex-col justify-between gap-4 border-b border-violet-100 px-6 py-6 sm:flex-row sm:items-center sm:px-8">
+        <section className="overflow-hidden rounded-[24px] border border-violet-100 bg-white shadow-sm">
+          <div className="flex flex-col justify-between gap-4 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:px-7 sm:py-6">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight text-slate-950">
-                All notifications
-              </h2>
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
+                  All notifications
+                </h2>
+                {!loading && notifications.length > 0 && (
+                  <span className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">
+                    {notifications.length}
+                  </span>
+                )}
+              </div>
 
-              <p className="mt-2 text-base text-slate-600">
-                New purchases appear automatically.
+              <p className="mt-1.5 text-sm text-slate-500">
+                Review purchase activity and notification status.
               </p>
             </div>
 
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-4 py-2.5 text-base font-medium text-violet-800">
-              <span className="h-2.5 w-2.5 rounded-full bg-violet-600" />
-              Automatic refresh every 10 seconds
+            <div className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600">
+              <RefreshCw size={14} className="text-violet-600" />
+              Refreshes every 10 seconds
             </div>
           </div>
 
           {loading ? (
-            <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-              <span className="grid h-16 w-16 place-items-center rounded-2xl bg-violet-100 text-violet-800">
-                <RefreshCw size={29} className="animate-spin" />
+            <div className="flex flex-col items-center justify-center px-5 py-20 text-center">
+              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-violet-50 text-violet-700">
+                <RefreshCw size={25} className="animate-spin" />
               </span>
 
-              <p className="mt-5 text-lg font-semibold text-slate-800">
+              <p className="mt-4 text-base font-semibold text-slate-800">
                 Loading notifications
               </p>
 
-              <p className="mt-2 text-base text-slate-600">
-                Retrieving your purchase notifications...
+              <p className="mt-1.5 text-sm text-slate-500">
+                Retrieving your latest purchase activity...
               </p>
             </div>
           ) : notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-              <span className="grid h-20 w-20 place-items-center rounded-3xl bg-violet-100 text-violet-700">
-                <Inbox size={36} />
+            <div className="flex flex-col items-center justify-center px-5 py-20 text-center">
+              <span className="grid h-[72px] w-[72px] place-items-center rounded-3xl border border-violet-100 bg-violet-50 text-violet-600">
+                <Inbox size={32} strokeWidth={1.7} />
               </span>
 
-              <h3 className="mt-5 text-xl font-bold text-slate-900">
+              <h3 className="mt-5 text-lg font-bold text-slate-900">
                 No purchase notifications yet
               </h3>
 
-              <p className="mt-2 max-w-md text-base leading-7 text-slate-600">
-                Notifications will appear here when a purchase is successfully
-                placed.
+              <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
+                When a purchase is successfully placed, its notification will
+                appear here automatically.
               </p>
+
+              <Link
+                to="/admin"
+                className="mt-5 inline-flex items-center gap-2 rounded-xl border border-violet-200 bg-white px-4 py-2.5 text-sm font-semibold text-violet-800 transition hover:bg-violet-50"
+              >
+                View products
+                <ArrowUpRight size={16} />
+              </Link>
             </div>
           ) : (
-            <div className="divide-y divide-violet-100">
+            <div className="divide-y divide-slate-100">
               {notifications.map((notification) => {
                 const isUnread = !notification.readAt;
                 const isUpdating = updatingId === notification._id;
@@ -434,118 +476,125 @@ export default function AdminNotifications() {
                 return (
                   <article
                     key={notification._id}
-                    className={`relative flex flex-col gap-5 px-6 py-6 transition-colors sm:flex-row sm:items-start sm:justify-between sm:px-8 ${
+                    className={`relative px-4 py-5 transition-colors sm:px-6 sm:py-6 lg:px-7 ${
                       isUnread
-                        ? "bg-violet-50/60 hover:bg-violet-50"
+                        ? "bg-violet-50/40 hover:bg-violet-50/80"
                         : "bg-white hover:bg-slate-50/70"
                     }`}
                   >
                     {isUnread && (
-                      <span className="absolute bottom-0 left-0 top-0 w-1 rounded-r-full bg-violet-600" />
+                      <span className="absolute bottom-0 left-0 top-0 w-[3px] bg-violet-600" />
                     )}
 
-                    <div className="flex min-w-0 items-start gap-4">
-                      <span
-                        className={`relative mt-0.5 grid h-12 w-12 shrink-0 place-items-center rounded-2xl ${
-                          isUnread
-                            ? "bg-violet-100 text-violet-800"
-                            : "bg-slate-100 text-slate-600"
-                        }`}
-                      >
-                        <ShoppingBag size={23} />
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+                      <div className="flex min-w-0 items-start gap-3.5 sm:gap-4">
+                        <span
+                          className={`relative grid h-11 w-11 shrink-0 place-items-center rounded-xl sm:h-12 sm:w-12 ${
+                            isUnread
+                              ? "bg-violet-100 text-violet-700"
+                              : "bg-slate-100 text-slate-500"
+                          }`}
+                        >
+                          <ShoppingBag size={21} />
 
-                        {isUnread && (
-                          <span className="absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full border-2 border-white bg-violet-600" />
-                        )}
-                      </span>
-
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="break-words text-lg font-semibold leading-7 text-slate-900">
-                            {notification.title || "Purchase notification"}
-                          </h3>
-
-                          <span
-                            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-base font-semibold ${
-                              isUnread
-                                ? "border-violet-200 bg-violet-100 text-violet-800"
-                                : "border-slate-200 bg-slate-100 text-slate-700"
-                            }`}
-                          >
-                            {isUnread ? (
-                              <>
-                                <span className="h-2 w-2 rounded-full bg-violet-600" />
-                                New
-                              </>
-                            ) : (
-                              <>
-                                <Check size={17} />
-                                Read
-                              </>
-                            )}
-                          </span>
-                        </div>
-
-                        {notification.items?.length > 0 && (
-                          <p className="mt-2 break-words text-base leading-7 text-slate-600">
-                            {notification.items
-                              .map(
-                                (item) =>
-                                  `${item.name} × ${item.quantity}`
-                              )
-                              .join(", ")}
-                          </p>
-                        )}
-
-                        <p className="mt-3 text-lg font-bold text-violet-800">
-                          Total: ₹
-                          {Number(notification.totalAmount || 0).toLocaleString(
-                            "en-IN"
+                          {isUnread && (
+                            <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-violet-600" />
                           )}
-                        </p>
+                        </span>
 
-                        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-3 text-base text-slate-600">
-                          <span className="inline-flex items-center gap-2">
-                            <Package
-                              size={18}
-                              className="shrink-0 text-violet-700"
-                            />
-                            Order reference:{" "}
-                            <span className="font-semibold text-slate-800">
-                              {getOrderReference(notification.orderId)}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="break-words text-base font-semibold leading-6 text-slate-900 sm:text-[17px]">
+                              {notification.title || "Purchase notification"}
+                            </h3>
+
+                            <span
+                              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
+                                isUnread
+                                  ? "border-violet-200 bg-violet-100 text-violet-800"
+                                  : "border-slate-200 bg-white text-slate-500"
+                              }`}
+                            >
+                              {isUnread ? (
+                                <>
+                                  <span className="h-1.5 w-1.5 rounded-full bg-violet-600" />
+                                  Unread
+                                </>
+                              ) : (
+                                <>
+                                  <Check size={13} />
+                                  Read
+                                </>
+                              )}
                             </span>
-                          </span>
+                          </div>
 
-                          <span className="inline-flex items-center gap-2">
-                            <Clock3
-                              size={18}
-                              className="shrink-0 text-violet-700"
-                            />
-                            {formatDate(notification.createdAt)}
-                          </span>
+                          {notification.items?.length > 0 && (
+                            <p className="mt-2 break-words text-sm leading-6 text-slate-600">
+                              {notification.items
+                                .map(
+                                  (item) =>
+                                    `${item.name} × ${item.quantity}`
+                                )
+                                .join(", ")}
+                            </p>
+                          )}
+
+                          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                            <span className="text-xs font-medium text-slate-500">
+                              Order total
+                            </span>
+                            <span className="text-lg font-bold tracking-tight text-violet-800">
+                              ₹
+                              {Number(
+                                notification.totalAmount || 0
+                              ).toLocaleString("en-IN")}
+                            </span>
+                          </div>
+
+                          <div className="mt-3 flex flex-col gap-2.5 text-xs text-slate-500 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5">
+                            <span className="inline-flex min-w-0 items-center gap-2">
+                              <Package
+                                size={15}
+                                className="shrink-0 text-violet-600"
+                              />
+                              <span>Order</span>
+                              <span className="break-all font-semibold text-slate-700">
+                                #{getOrderReference(notification.orderId)}
+                              </span>
+                            </span>
+
+                            <span className="inline-flex items-center gap-2">
+                              <Clock3
+                                size={15}
+                                className="shrink-0 text-violet-600"
+                              />
+                              <span>{formatDate(notification.createdAt)}</span>
+                            </span>
+                          </div>
                         </div>
                       </div>
+
+                      {isUnread && (
+                        <button
+                          type="button"
+                          onClick={() => markRead(notification._id)}
+                          disabled={Boolean(updatingId) || markingAll}
+                          className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-violet-200 bg-white px-3.5 py-2 text-sm font-semibold text-violet-800 shadow-sm transition hover:border-violet-400 hover:bg-violet-50 focus:outline-none focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-60 sm:self-center"
+                        >
+                          {isUpdating ? (
+                            <RefreshCw
+                              size={16}
+                              className="animate-spin"
+                            />
+                          ) : (
+                            <Check size={16} />
+                          )}
+
+                          {isUpdating ? "Updating..." : "Mark as read"}
+                        </button>
+                      )}
                     </div>
-
-                    {isUnread && (
-                      <button
-                        type="button"
-                        onClick={() => markRead(notification._id)}
-                        disabled={Boolean(updatingId) || markingAll}
-                        className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-xl border border-violet-200 bg-white px-4 py-3 text-base font-semibold text-violet-800 shadow-sm transition hover:border-violet-400 hover:bg-violet-50 focus:outline-none focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:opacity-60 sm:self-center"
-                      >
-                        {isUpdating ? (
-                          <RefreshCw
-                            size={19}
-                            className="animate-spin"
-                          />
-                        ) : (
-                          <Check size={19} />
-                        )}
-
-                        {isUpdating ? "Updating..." : "Mark as read"}
-                      </button>
-                    )}
                   </article>
                 );
               })}
@@ -553,21 +602,39 @@ export default function AdminNotifications() {
           )}
 
           {!loading && notifications.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-violet-100 bg-[#faf9fe] px-6 py-4 sm:px-8">
-              <p className="text-base text-slate-600">
-                Showing {notifications.length}{" "}
+            <div className="flex flex-col gap-3 border-t border-slate-100 bg-[#fbfaff] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+              <p className="text-xs font-medium text-slate-500">
+                Showing{" "}
+                <span className="font-semibold text-slate-700">
+                  {notifications.length}
+                </span>{" "}
                 {notifications.length === 1
                   ? "notification"
                   : "notifications"}
               </p>
 
-              <p className="inline-flex items-center gap-2 text-base font-medium text-slate-700">
-                <Activity size={18} className="text-violet-700" />
-                {unreadCount} unread
-              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-600">
+                  <span className="h-2 w-2 rounded-full bg-violet-600" />
+                  {unreadCount} unread
+                </span>
+
+                <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-500">
+                  <Check size={14} className="text-emerald-600" />
+                  {notifications.length - unreadCount} read
+                </span>
+              </div>
             </div>
           )}
         </section>
+
+        <footer className="flex flex-col items-start justify-between gap-2 px-1 pb-2 text-xs text-slate-500 sm:flex-row sm:items-center">
+          <span>HealCart Admin · Notification Center</span>
+          <span className="inline-flex items-center gap-1.5">
+            <Activity size={14} className="text-violet-600" />
+            Live notification polling enabled
+          </span>
+        </footer>
       </main>
     </div>
   );

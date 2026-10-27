@@ -18,6 +18,8 @@ import {
   AlertTriangle,
   Image as ImageIcon,
   ArrowUpRight,
+  ShieldCheck,
+  LayoutGrid,
 } from "lucide-react";
 
 const emptyProduct = {
@@ -169,178 +171,175 @@ export default function AdminProducts() {
   ).length;
 
   const inputClass =
-    "w-full rounded-xl border border-violet-200 bg-white px-4 py-3.5 text-base text-slate-900 outline-none transition placeholder:text-slate-500 hover:border-violet-300 focus:border-violet-500 focus:ring-4 focus:ring-violet-100";
+    "w-full rounded-xl border border-[#e6e0f2] bg-white px-4 py-3 text-sm text-[#28213c] outline-none transition placeholder:text-[#a39bb5] hover:border-violet-300 focus:border-violet-500 focus:ring-4 focus:ring-violet-100/70";
 
-  const labelClass = "block space-y-2 text-base font-medium text-slate-700";
+  const labelClass =
+    "block space-y-2 text-sm font-semibold text-[#443957]";
+
+  const navClass =
+    "inline-flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition";
 
   return (
-    <div className="min-h-screen bg-[#f7f6fc] text-slate-900">
-      <header className="sticky top-0 z-30 border-b border-violet-100 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-4 px-5 py-4 lg:px-8">
+    <div className="min-h-screen bg-[#f8f7fc] text-[#28213c]">
+      <header className="sticky top-0 z-30 border-b border-[#ece7f5] bg-white/95 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-4 px-5 py-3.5 lg:px-8">
           <Link to="/admin" className="flex items-center gap-3">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 text-white shadow-lg shadow-violet-200">
-              <Package size={25} />
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-violet-600 text-white">
+              <Package size={22} />
             </span>
 
             <span>
-              <span className="block text-xl font-bold tracking-tight text-slate-900">
-                HealCart Admin
+              <span className="block text-lg font-extrabold tracking-tight text-[#30234e]">
+                HealCart
               </span>
-              <span className="mt-0.5 block text-base text-slate-600">
-                Product management
+              <span className="block text-xs text-[#817790]">
+                Administration
               </span>
             </span>
           </Link>
 
-          <nav className="flex flex-wrap items-center gap-2 text-base font-medium">
+          <nav className="flex flex-wrap items-center gap-1.5">
             <Link
               to="/admin"
-              className="flex items-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-violet-800 transition hover:bg-violet-100"
+              className={`${navClass} bg-violet-50 text-violet-800`}
             >
-              <Package size={19} />
+              <Package size={17} />
               Products
             </Link>
 
             <Link
               to="/admin/notifications"
-              className="flex items-center gap-2 rounded-xl px-4 py-3 text-slate-700 transition hover:bg-violet-50 hover:text-violet-800"
+              className={`${navClass} text-[#706681] hover:bg-violet-50 hover:text-violet-800`}
             >
-              <Bell size={19} />
-              Notifications
+              <Bell size={17} />
+              <span className="hidden sm:inline">Notifications</span>
             </Link>
 
             <Link
               to="/admin/command-center"
-              className="flex items-center gap-2 rounded-xl px-4 py-3 text-slate-700 transition hover:bg-violet-50 hover:text-violet-800"
+              className={`${navClass} text-[#706681] hover:bg-violet-50 hover:text-violet-800`}
             >
-              <Activity size={19} />
-              Command Center
+              <Activity size={17} />
+              <span className="hidden sm:inline">Command Center</span>
             </Link>
 
             <button
+              type="button"
               onClick={() => {
                 localStorage.removeItem("healcartAdminToken");
                 window.location.reload();
               }}
-              className="flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-slate-700 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700"
+              className={`${navClass} ml-1 border border-[#ece7f5] text-[#706681] hover:border-red-200 hover:bg-red-50 hover:text-red-700`}
             >
-              <LogOut size={19} />
+              <LogOut size={17} />
               Logout
             </button>
           </nav>
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1440px] space-y-8 px-5 py-8 lg:px-8 lg:py-10">
-        <section className="relative overflow-hidden rounded-3xl border border-violet-100 bg-white p-6 shadow-sm sm:p-8">
-          <div className="pointer-events-none absolute -right-12 -top-24 h-64 w-64 rounded-full bg-violet-100/70 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-32 right-48 h-56 w-56 rounded-full bg-purple-100/70 blur-3xl" />
-
-          <div className="relative flex flex-wrap items-center justify-between gap-6">
-            <div className="max-w-2xl">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-4 py-2 text-base font-semibold text-violet-800">
-                <span className="h-2.5 w-2.5 rounded-full bg-violet-600" />
-                Store administration
-              </div>
-
-              <h1 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
-                Products
-              </h1>
-
-              <p className="mt-3 text-base leading-7 text-slate-600 sm:text-lg">
-                Manage your electronics catalog, update inventory, and keep
-                product information organized.
-              </p>
+      <main className="mx-auto max-w-[1500px] space-y-7 px-5 py-7 lg:px-8 lg:py-9">
+        <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-violet-700">
+              <LayoutGrid size={15} />
+              Store management
             </div>
 
-            <div className="relative flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={loadProducts}
-                disabled={loading}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-violet-200 bg-white px-5 py-3.5 text-base font-semibold text-slate-700 shadow-sm transition hover:border-violet-400 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <RefreshCw
-                  size={19}
-                  className={loading ? "animate-spin" : ""}
-                />
-                Refresh
-              </button>
+            <h1 className="text-3xl font-extrabold tracking-tight text-[#28213c] sm:text-4xl">
+              Product inventory
+            </h1>
 
-              <button
-                type="button"
-                onClick={() => {
-                  resetForm();
-                  document
-                    .getElementById("product-form")
-                    ?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-700 px-5 py-3.5 text-base font-semibold text-white shadow-lg shadow-violet-200 transition hover:bg-violet-800 focus:outline-none focus:ring-4 focus:ring-violet-200"
-              >
-                <Plus size={20} />
-                Add product
-              </button>
-            </div>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#817790] sm:text-base">
+              Manage your catalog, monitor stock levels, and keep product
+              information up to date.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={loadProducts}
+              disabled={loading}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#e6e0f2] bg-white px-4 py-3 text-sm font-semibold text-[#514765] transition hover:border-violet-300 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCw
+                size={17}
+                className={loading ? "animate-spin" : ""}
+              />
+              Refresh
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                resetForm();
+                document
+                  .getElementById("product-form")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-700 focus:outline-none focus:ring-4 focus:ring-violet-200"
+            >
+              <Plus size={19} />
+              Add product
+            </button>
           </div>
         </section>
 
-        <section className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          <div className="group rounded-2xl border border-violet-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg hover:shadow-violet-100/70">
-            <div className="flex items-start justify-between gap-4">
+        <section className="grid gap-4 sm:grid-cols-3">
+          <div className="rounded-2xl border border-[#ece7f5] bg-white p-5">
+            <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-base font-medium text-slate-600">
+                <p className="text-sm font-medium text-[#817790]">
                   Total products
                 </p>
-                <p className="mt-4 text-4xl font-bold tracking-tight text-slate-950">
+                <p className="mt-3 text-3xl font-extrabold tracking-tight text-[#30234e]">
                   {products.length}
                 </p>
-                <p className="mt-2 text-base text-slate-600">
+                <p className="mt-1 text-xs text-[#9389a2]">
                   Products in your catalog
                 </p>
               </div>
-
-              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-violet-100 text-violet-700 transition group-hover:bg-violet-700 group-hover:text-white">
-                <Package size={27} />
+              <span className="grid h-12 w-12 place-items-center rounded-xl bg-[#f0eaff] text-violet-700">
+                <Package size={23} />
               </span>
             </div>
           </div>
 
-          <div className="group rounded-2xl border border-violet-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg hover:shadow-violet-100/70">
-            <div className="flex items-start justify-between gap-4">
+          <div className="rounded-2xl border border-[#ece7f5] bg-white p-5">
+            <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-base font-medium text-slate-600">
+                <p className="text-sm font-medium text-[#817790]">
                   Units in stock
                 </p>
-                <p className="mt-4 text-4xl font-bold tracking-tight text-slate-950">
+                <p className="mt-3 text-3xl font-extrabold tracking-tight text-[#30234e]">
                   {totalUnits.toLocaleString("en-IN")}
                 </p>
-                <p className="mt-2 text-base text-slate-600">
-                  Total available inventory
+                <p className="mt-1 text-xs text-[#9389a2]">
+                  Total inventory units
                 </p>
               </div>
-
-              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-purple-100 text-purple-800 transition group-hover:bg-purple-700 group-hover:text-white">
-                <Boxes size={27} />
+              <span className="grid h-12 w-12 place-items-center rounded-xl bg-[#f0eaff] text-violet-700">
+                <Boxes size={23} />
               </span>
             </div>
           </div>
 
-          <div className="group rounded-2xl border border-amber-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-100/70 sm:col-span-2 xl:col-span-1">
-            <div className="flex items-start justify-between gap-4">
+          <div className="rounded-2xl border border-amber-200/80 bg-white p-5">
+            <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-base font-medium text-slate-600">
+                <p className="text-sm font-medium text-[#817790]">
                   Low stock products
                 </p>
-                <p className="mt-4 text-4xl font-bold tracking-tight text-amber-700">
+                <p className="mt-3 text-3xl font-extrabold tracking-tight text-amber-700">
                   {lowStockCount}
                 </p>
-                <p className="mt-2 text-base text-slate-600">
-                  Products with 5 units or fewer
+                <p className="mt-1 text-xs text-[#9389a2]">
+                  Five units or fewer
                 </p>
               </div>
-
-              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-amber-100 text-amber-800 transition group-hover:bg-amber-600 group-hover:text-white">
-                <AlertTriangle size={27} />
+              <span className="grid h-12 w-12 place-items-center rounded-xl bg-amber-50 text-amber-700">
+                <AlertTriangle size={23} />
               </span>
             </div>
           </div>
@@ -349,17 +348,17 @@ export default function AdminProducts() {
         {error && (
           <div
             role="alert"
-            className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-5 text-base text-red-800"
+            className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
           >
-            <AlertTriangle className="mt-0.5 shrink-0" size={21} />
+            <AlertTriangle className="mt-0.5 shrink-0" size={19} />
             <p className="flex-1 leading-6">{error}</p>
             <button
               type="button"
               onClick={() => setError("")}
               aria-label="Dismiss error"
-              className="rounded-lg p-1 text-red-700 transition hover:bg-red-100"
+              className="rounded-lg p-1 transition hover:bg-red-100"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
         )}
@@ -367,41 +366,39 @@ export default function AdminProducts() {
         {notice && (
           <div
             role="status"
-            className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-base text-emerald-800"
+            className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800"
           >
-            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-emerald-100">
-              <span className="text-lg font-bold">✓</span>
-            </span>
+            <ShieldCheck size={19} className="mt-0.5 shrink-0" />
             <p className="flex-1 leading-6">{notice}</p>
             <button
               type="button"
               onClick={() => setNotice("")}
               aria-label="Dismiss notification"
-              className="rounded-lg p-1 text-emerald-800 transition hover:bg-emerald-100"
+              className="rounded-lg p-1 transition hover:bg-emerald-100"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
           </div>
         )}
 
         <section
           id="product-form"
-          className="scroll-mt-28 overflow-hidden rounded-3xl border border-violet-100 bg-white shadow-sm"
+          className="scroll-mt-28 overflow-hidden rounded-2xl border border-[#ece7f5] bg-white"
         >
-          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-violet-100 bg-gradient-to-r from-violet-50 via-white to-purple-50 px-6 py-6 sm:px-8">
-            <div className="flex items-center gap-4">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-violet-700 text-white shadow-md shadow-violet-200">
-                {editingId ? <Pencil size={23} /> : <Plus size={25} />}
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#eee9f6] px-5 py-5 sm:px-7">
+            <div className="flex items-center gap-3">
+              <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#f0eaff] text-violet-700">
+                {editingId ? <Pencil size={20} /> : <Plus size={22} />}
               </span>
 
               <div>
-                <h2 className="text-2xl font-bold tracking-tight text-slate-950">
+                <h2 className="text-lg font-bold text-[#30234e]">
                   {editingId ? "Edit product" : "Add a product"}
                 </h2>
-                <p className="mt-1 text-base text-slate-600">
+                <p className="mt-1 text-sm text-[#817790]">
                   {editingId
-                    ? "Update the selected product's information."
-                    : "Enter the details for a new catalog product."}
+                    ? "Update the selected product details."
+                    : "Add a new item to your product catalog."}
                 </p>
               </div>
             </div>
@@ -410,16 +407,16 @@ export default function AdminProducts() {
               <button
                 type="button"
                 onClick={resetForm}
-                className="inline-flex items-center gap-2 rounded-xl border border-violet-200 bg-white px-4 py-3 text-base font-semibold text-slate-700 transition hover:border-violet-400 hover:bg-violet-50"
+                className="inline-flex items-center gap-2 rounded-lg border border-[#e6e0f2] px-3 py-2 text-sm font-semibold text-[#655a79] transition hover:bg-violet-50"
               >
-                <X size={19} />
+                <X size={16} />
                 Cancel edit
               </button>
             )}
           </div>
 
-          <form onSubmit={saveProduct} className="p-6 sm:p-8">
-            <div className="grid gap-x-6 gap-y-6 sm:grid-cols-2 xl:grid-cols-3">
+          <form onSubmit={saveProduct} className="p-5 sm:p-7">
+            <div className="grid gap-x-5 gap-y-5 md:grid-cols-2">
               <label className={labelClass}>
                 Product name *
                 <input
@@ -471,12 +468,12 @@ export default function AdminProducts() {
                   step="1"
                   value={form.stock}
                   onChange={updateField}
-                  placeholder="Enter available units"
+                  placeholder="Available units"
                   required
                 />
               </label>
 
-              <label className={`${labelClass} sm:col-span-2`}>
+              <label className={`${labelClass} md:col-span-2`}>
                 Image URL
                 <input
                   className={inputClass}
@@ -488,10 +485,10 @@ export default function AdminProducts() {
                 />
               </label>
 
-              <label className={`${labelClass} sm:col-span-2 xl:col-span-3`}>
+              <label className={`${labelClass} md:col-span-2`}>
                 Product description
                 <textarea
-                  className={`${inputClass} min-h-32 resize-y`}
+                  className={`${inputClass} min-h-28 resize-y`}
                   name="description"
                   value={form.description}
                   onChange={updateField}
@@ -502,8 +499,8 @@ export default function AdminProducts() {
               </label>
             </div>
 
-            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-violet-100 pt-6">
-              <p className="text-base text-slate-600">
+            <div className="mt-6 flex flex-col gap-4 border-t border-[#eee9f6] pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-[#9389a2]">
                 Fields marked with * are required.
               </p>
 
@@ -512,7 +509,7 @@ export default function AdminProducts() {
                   type="button"
                   onClick={resetForm}
                   disabled={saving}
-                  className="rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-base font-semibold text-slate-700 transition hover:border-violet-300 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-xl border border-[#e6e0f2] bg-white px-4 py-3 text-sm font-semibold text-[#655a79] transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Reset form
                 </button>
@@ -520,14 +517,14 @@ export default function AdminProducts() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-700 px-6 py-3.5 text-base font-semibold text-white shadow-lg shadow-violet-200 transition hover:bg-violet-800 focus:outline-none focus:ring-4 focus:ring-violet-200 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-700 focus:outline-none focus:ring-4 focus:ring-violet-200 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {saving ? (
-                    <RefreshCw className="animate-spin" size={20} />
+                    <RefreshCw className="animate-spin" size={18} />
                   ) : editingId ? (
-                    <Pencil size={19} />
+                    <Pencil size={17} />
                   ) : (
-                    <Plus size={21} />
+                    <Plus size={19} />
                   )}
 
                   {saving
@@ -541,33 +538,31 @@ export default function AdminProducts() {
           </form>
         </section>
 
-        <section className="overflow-hidden rounded-3xl border border-violet-100 bg-white shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-5 border-b border-violet-100 px-6 py-6 sm:px-8">
+        <section className="overflow-hidden rounded-2xl border border-[#ece7f5] bg-white">
+          <div className="flex flex-col gap-4 border-b border-[#eee9f6] p-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
             <div>
               <div className="flex flex-wrap items-center gap-3">
-                <h2 className="text-2xl font-bold tracking-tight text-slate-950">
+                <h2 className="text-lg font-bold text-[#30234e]">
                   Product catalog
                 </h2>
-
-                <span className="rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-base font-semibold text-violet-800">
-                  {filteredProducts.length} shown
+                <span className="rounded-full bg-[#f1ebff] px-2.5 py-1 text-xs font-bold text-violet-800">
+                  {filteredProducts.length} products
                 </span>
               </div>
-
-              <p className="mt-2 text-base text-slate-600">
-                Review inventory and manage your existing products.
+              <p className="mt-1.5 text-sm text-[#817790]">
+                Manage product details, pricing, and inventory levels.
               </p>
             </div>
 
-            <div className="relative w-full sm:max-w-md">
+            <div className="relative w-full sm:max-w-sm">
               <Search
-                size={21}
-                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
+                size={18}
+                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9389a2]"
               />
 
               <input
-                className={`${inputClass} pl-12 pr-12`}
-                placeholder="Search name or category..."
+                className={`${inputClass} pl-10 pr-10`}
+                placeholder="Search products..."
                 aria-label="Search products by name or category"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
@@ -578,37 +573,38 @@ export default function AdminProducts() {
                   type="button"
                   onClick={() => setSearch("")}
                   aria-label="Clear product search"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-500 transition hover:bg-violet-100 hover:text-violet-800"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-[#817790] hover:bg-violet-100"
                 >
-                  <X size={19} />
+                  <X size={16} />
                 </button>
               )}
             </div>
           </div>
 
           {loading ? (
-            <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-              <span className="grid h-16 w-16 place-items-center rounded-2xl bg-violet-100 text-violet-700">
-                <RefreshCw size={29} className="animate-spin" />
-              </span>
-              <p className="mt-5 text-lg font-semibold text-slate-800">
-                Loading products
+            <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+              <RefreshCw
+                size={28}
+                className="animate-spin text-violet-600"
+              />
+              <p className="mt-4 text-sm font-semibold text-[#30234e]">
+                Loading products...
               </p>
-              <p className="mt-2 text-base text-slate-600">
-                Retrieving your catalog...
+              <p className="mt-1 text-xs text-[#817790]">
+                Retrieving your catalog.
               </p>
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-              <span className="grid h-20 w-20 place-items-center rounded-3xl bg-violet-100 text-violet-700">
-                {search ? <Search size={33} /> : <ImageIcon size={35} />}
+            <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+              <span className="grid h-16 w-16 place-items-center rounded-2xl bg-[#f1ebff] text-violet-700">
+                {search ? <Search size={28} /> : <ImageIcon size={30} />}
               </span>
 
-              <h3 className="mt-5 text-xl font-bold text-slate-900">
+              <h3 className="mt-4 text-lg font-bold text-[#30234e]">
                 {search ? "No matching products" : "Your catalog is empty"}
               </h3>
 
-              <p className="mt-2 max-w-md text-base leading-7 text-slate-600">
+              <p className="mt-2 max-w-md text-sm leading-6 text-[#817790]">
                 {search
                   ? "Try another product name or category."
                   : "Add a product using the form above to get started."}
@@ -618,7 +614,7 @@ export default function AdminProducts() {
                 <button
                   type="button"
                   onClick={() => setSearch("")}
-                  className="mt-5 rounded-xl bg-violet-700 px-5 py-3 text-base font-semibold text-white transition hover:bg-violet-800"
+                  className="mt-4 rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-700"
                 >
                   Clear search
                 </button>
@@ -626,28 +622,28 @@ export default function AdminProducts() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px] text-left">
-                <thead className="border-b border-violet-100 bg-[#faf9fe]">
-                  <tr className="text-base font-semibold text-slate-700">
-                    <th scope="col" className="px-6 py-5">
+              <table className="w-full min-w-[850px] text-left">
+                <thead className="bg-[#faf9fd]">
+                  <tr className="border-b border-[#eee9f6] text-xs font-bold uppercase tracking-wide text-[#817790]">
+                    <th scope="col" className="px-6 py-4">
                       Product
                     </th>
-                    <th scope="col" className="px-5 py-5">
+                    <th scope="col" className="px-5 py-4">
                       Category
                     </th>
-                    <th scope="col" className="px-5 py-5">
+                    <th scope="col" className="px-5 py-4">
                       Price
                     </th>
-                    <th scope="col" className="px-5 py-5">
-                      Stock status
+                    <th scope="col" className="px-5 py-4">
+                      Inventory
                     </th>
-                    <th scope="col" className="px-6 py-5 text-right">
+                    <th scope="col" className="px-6 py-4 text-right">
                       Actions
                     </th>
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-violet-100">
+                <tbody className="divide-y divide-[#f0ecf7]">
                   {filteredProducts.map((product) => {
                     const stock = Number(product.stock) || 0;
                     const isLowStock = stock <= 5;
@@ -655,30 +651,30 @@ export default function AdminProducts() {
                     return (
                       <tr
                         key={product._id}
-                        className="transition-colors hover:bg-violet-50/60"
+                        className="transition-colors hover:bg-[#fbfaff]"
                       >
-                        <td className="px-6 py-5">
-                          <div className="flex min-w-0 items-center gap-4">
+                        <td className="px-6 py-4">
+                          <div className="flex min-w-0 items-center gap-3.5">
                             {product.image ? (
                               <img
                                 src={product.image}
                                 alt={product.name || "Product"}
                                 loading="lazy"
-                                className="h-16 w-16 shrink-0 rounded-2xl border border-violet-100 bg-violet-50 object-cover"
+                                className="h-14 w-14 shrink-0 rounded-xl border border-[#eee9f6] bg-[#faf9fd] object-cover"
                               />
                             ) : (
-                              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl border border-violet-100 bg-violet-50 text-violet-700">
-                                <Package size={27} />
+                              <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl border border-[#eee9f6] bg-[#f5f1ff] text-violet-700">
+                                <Package size={23} />
                               </div>
                             )}
 
                             <div className="min-w-0">
-                              <p className="max-w-sm break-words text-base font-semibold leading-6 text-slate-900">
+                              <p className="max-w-sm break-words text-sm font-semibold leading-5 text-[#30234e]">
                                 {product.name}
                               </p>
 
                               {product.description && (
-                                <p className="mt-1 max-w-sm break-words text-base leading-6 text-slate-600">
+                                <p className="mt-1 max-w-sm break-words text-xs leading-5 text-[#9389a2]">
                                   {product.description}
                                 </p>
                               )}
@@ -686,51 +682,51 @@ export default function AdminProducts() {
                           </div>
                         </td>
 
-                        <td className="px-5 py-5">
-                          <span className="inline-flex rounded-lg border border-violet-100 bg-violet-50 px-3 py-2 text-base font-medium text-violet-800">
+                        <td className="px-5 py-4">
+                          <span className="inline-flex rounded-lg bg-[#f5f1ff] px-2.5 py-1.5 text-xs font-semibold text-violet-800">
                             {product.category}
                           </span>
                         </td>
 
-                        <td className="whitespace-nowrap px-5 py-5 text-base font-semibold text-slate-900">
+                        <td className="whitespace-nowrap px-5 py-4 text-sm font-bold text-[#30234e]">
                           ₹{Number(product.price).toLocaleString("en-IN")}
                         </td>
 
-                        <td className="px-5 py-5">
-                          <div className="flex flex-col items-start gap-2">
+                        <td className="px-5 py-4">
+                          <div className="flex flex-col items-start gap-1.5">
                             <span
-                              className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-base font-semibold ${
+                              className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-semibold ${
                                 isLowStock
-                                  ? "border border-amber-200 bg-amber-50 text-amber-800"
-                                  : "border border-emerald-200 bg-emerald-50 text-emerald-800"
+                                  ? "bg-amber-50 text-amber-800"
+                                  : "bg-emerald-50 text-emerald-800"
                               }`}
                             >
                               <span
-                                className={`h-2.5 w-2.5 rounded-full ${
+                                className={`h-1.5 w-1.5 rounded-full ${
                                   isLowStock
-                                    ? "bg-amber-600"
-                                    : "bg-emerald-600"
+                                    ? "bg-amber-500"
+                                    : "bg-emerald-500"
                                 }`}
                               />
                               {isLowStock ? "Low stock" : "In stock"}
                             </span>
 
-                            <span className="text-base text-slate-600">
+                            <span className="text-xs text-[#817790]">
                               {stock} {stock === 1 ? "unit" : "units"}
                             </span>
                           </div>
                         </td>
 
-                        <td className="px-6 py-5">
+                        <td className="px-6 py-4">
                           <div className="flex items-center justify-end gap-2">
                             <button
                               type="button"
                               onClick={() => startEdit(product)}
                               aria-label={`Edit ${product.name}`}
                               title="Edit product"
-                              className="inline-flex h-11 items-center gap-2 rounded-xl border border-violet-200 bg-white px-3 text-base font-semibold text-violet-800 transition hover:border-violet-500 hover:bg-violet-50 focus:outline-none focus:ring-4 focus:ring-violet-100"
+                              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#e6e0f2] px-2.5 text-xs font-semibold text-violet-800 transition hover:border-violet-300 hover:bg-violet-50 focus:outline-none focus:ring-4 focus:ring-violet-100"
                             >
-                              <Pencil size={18} />
+                              <Pencil size={15} />
                               Edit
                             </button>
 
@@ -739,9 +735,9 @@ export default function AdminProducts() {
                               onClick={() => deleteProduct(product)}
                               aria-label={`Delete ${product.name}`}
                               title="Delete product"
-                              className="inline-flex h-11 items-center gap-2 rounded-xl border border-red-200 bg-white px-3 text-base font-semibold text-red-700 transition hover:border-red-400 hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
+                              className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-red-100 px-2.5 text-xs font-semibold text-red-700 transition hover:border-red-200 hover:bg-red-50 focus:outline-none focus:ring-4 focus:ring-red-100"
                             >
-                              <Trash2 size={18} />
+                              <Trash2 size={15} />
                               Delete
                             </button>
                           </div>
@@ -755,8 +751,8 @@ export default function AdminProducts() {
           )}
 
           {!loading && filteredProducts.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-violet-100 bg-[#faf9fe] px-6 py-4 sm:px-8">
-              <p className="text-base text-slate-600">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#eee9f6] bg-[#faf9fd] px-5 py-4 sm:px-7">
+              <p className="text-xs text-[#817790]">
                 Showing {filteredProducts.length} of {products.length} products
               </p>
 
@@ -767,14 +763,22 @@ export default function AdminProducts() {
                     .getElementById("product-form")
                     ?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-base font-semibold text-violet-800 transition hover:bg-violet-100"
+                className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-violet-800 transition hover:bg-violet-100"
               >
                 Add another product
-                <ArrowUpRight size={19} />
+                <ArrowUpRight size={16} />
               </button>
             </div>
           )}
         </section>
+
+        <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-[#eae5f3] pt-5 text-xs text-[#9389a2]">
+          <span>HealCart Administration</span>
+          <span className="inline-flex items-center gap-1.5">
+            <ShieldCheck size={15} className="text-violet-600" />
+            Inventory management
+          </span>
+        </footer>
       </main>
     </div>
   );

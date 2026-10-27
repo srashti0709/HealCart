@@ -34,6 +34,7 @@ import {
   BackendCrashTrafficResult,
 } from "../components/BackendCrashCoordination";
 import useBackendCrash from "../hooks/useBackendCrash";
+import RecoveryTimeTable from "../components/RecoveryTimeTable";
 import {
   getBackendHealthStatuses,
   getIncidentsFreshness,
@@ -2658,6 +2659,7 @@ function Dashboard({ page = "overview" }) {
 
           </section>
 
+          <RecoveryTimeTable experimentHistory={experimentHistory} incidents={incidents} recoveryEvents={recoveryInfo?.events} />
 
           {/* Experiments */}
           
